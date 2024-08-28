@@ -40,7 +40,7 @@ describe('features/st-namespace', () => {
         expect(underscoreMeta.namespace, '_underscore meta.namespace').to.eql('_underscore');
         expect(multiDashMeta.namespace, '-multi-dash meta.namespace').to.eql('-multi-dash');
         expect(multiUnderscoreMeta.namespace, '_multi_underscore meta.namespace').to.eql(
-            '_multi_underscore'
+            '_multi_underscore',
         );
         expect(emojiMeta.namespace, 'emoji meta.namespace').to.eql('🤡emoji🤷‍♀️why');
         expect(numbersMeta.namespace, 'numbers meta.namespace').to.eql('numbers-not-at-start789');
@@ -84,17 +84,17 @@ describe('features/st-namespace', () => {
                     // that takes the origin sheet path reference into account
                     resolveNamespace: STNamespace.defaultProcessNamespace,
                 },
-            }
+            },
         );
 
         const AMeta = sheets['/dist/a.st.css'].meta;
         const BMeta = sheets['/dist/b.st.css'].meta;
 
         expect(AMeta.namespace, 'a meta.namespace').to.eql(
-            STNamespace.defaultProcessNamespace('a', resolve('/path/to/a.st.css'))
+            STNamespace.defaultProcessNamespace('a', resolve('/path/to/a.st.css')),
         );
         expect(BMeta.namespace, 'b meta.namespace').to.eql(
-            STNamespace.defaultProcessNamespace('xxx', resolve('/path/to/b.st.css'))
+            STNamespace.defaultProcessNamespace('xxx', resolve('/path/to/b.st.css')),
         );
     });
     it('should collect last namespace definition', () => {
@@ -323,9 +323,9 @@ describe('features/st-namespace', () => {
             expect(meta.namespace, 'meta.namespace').to.eql('button');
             expect(
                 meta.targetAst!.toString(),
-                'not removed because @st-namespace exist'
+                'not removed because @st-namespace exist',
             ).to.satisfy((output: string) =>
-                ['@namespace "ns1";', '@namespace "ns2";'].every((def) => output.includes(def))
+                ['@namespace "ns1";', '@namespace "ns2";'].every((def) => output.includes(def)),
             );
         });
         it('should not use @namespace with prefix, url() or invalid namespace', () => {
@@ -353,7 +353,7 @@ describe('features/st-namespace', () => {
                         '@namespace prefix "button"',
                         '@namespace url("button")',
                         '@namespace prefix url("button")',
-                    ].every((def) => output.includes(def))
+                    ].every((def) => output.includes(def)),
             );
 
             // JS exports
@@ -373,7 +373,7 @@ describe('features/st-namespace', () => {
                             return 'test-' + namespace;
                         },
                     },
-                }
+                },
             );
 
             const aMeta = sheets['/a.st.css'].meta;

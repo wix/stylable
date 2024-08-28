@@ -12,7 +12,7 @@ describe('custom property', () => {
                     @property --x;
                 `),
             },
-            filePath
+            filePath,
         );
 
         expect(diagnostics).to.eql([]);
@@ -30,7 +30,7 @@ describe('custom property', () => {
                     }
                 `),
             },
-            filePath
+            filePath,
         );
 
         expect(diagnostics).to.eql([]);

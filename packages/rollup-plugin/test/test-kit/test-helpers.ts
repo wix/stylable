@@ -34,7 +34,7 @@ export function waitForWatcherFinish(watcher: RollupWatcher) {
 export async function actAndWaitForBuild(
     watcher: RollupWatcher,
     action: (bundled: Promise<RollupWatcherEvent>) => Promise<void> | void,
-    options: ActAndWaitOptions = {}
+    options: ActAndWaitOptions = {},
 ) {
     const done = waitForWatcherFinish(watcher);
     await action(done);

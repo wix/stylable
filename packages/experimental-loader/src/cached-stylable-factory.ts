@@ -35,7 +35,7 @@ export function getStylable(compiler: Compiler, initialConfig: StylableConfig): 
 
 function findMatchingStylableInstance(
     initialConfig: StylableConfig,
-    stylableInstances: Map<Stylable, StylableConfig>
+    stylableInstances: Map<Stylable, StylableConfig>,
 ) {
     const entries = Object.entries(initialConfig) as [keyof StylableConfig, unknown][];
     for (const [instance, config] of stylableInstances) {

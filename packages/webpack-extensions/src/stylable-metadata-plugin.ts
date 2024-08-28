@@ -25,7 +25,7 @@ export interface MetadataOptions {
     renderSnapshot?: (
         moduleExports: any,
         component: any,
-        componentConfig: ComponentConfig
+        componentConfig: ComponentConfig,
     ) => string;
     mode?: 'json' | 'cjs' | 'amd:static' | 'amd:factory';
 }
@@ -44,8 +44,8 @@ export class StylableMetadataPlugin {
             compilation.inputFileSystem as any,
             component.resource.replace(
                 /\.[^.]+$/,
-                this.options.configExtension || '.component.json'
-            )
+                this.options.configExtension || '.component.json',
+            ),
         );
     }
     private loadJSON<T>(fs: { readFileSync(path: string): Buffer }, resource: string): T | null {
@@ -60,13 +60,13 @@ export class StylableMetadataPlugin {
     }
     private async createMetadataAssets(compilation: Compilation) {
         const stylableModules = uniqueFilterMap(compilation.modules, (m) =>
-            isStylableModule(m) ? m : null
+            isStylableModule(m) ? m : null,
         );
 
         const builder = new ComponentMetadataBuilder(
             this.options.context || compilation.compiler.options.context || process.cwd(),
             this.options.name,
-            this.options.version
+            this.options.version,
         );
         const getViewModule = getCSSViewModuleWebpack(compilation.moduleGraph);
         const stylableModulesWithData = getStylableModules(compilation);
@@ -83,7 +83,7 @@ export class StylableMetadataPlugin {
             builder.addSource(
                 resource,
                 (compilation.inputFileSystem as any).readFileSync(resource).toString(),
-                { namespace, depth }
+                { namespace, depth },
             );
 
             const component = getViewModule(module);
@@ -105,7 +105,7 @@ export class StylableMetadataPlugin {
                 compilation,
                 builder,
                 namespace,
-                depth
+                depth,
             );
 
             if (this.options.renderSnapshot) {
@@ -113,7 +113,7 @@ export class StylableMetadataPlugin {
                     compilation,
                     component.context,
                     component.resource,
-                    []
+                    [],
                 );
 
                 const componentModule = exec(source, component.resource, component.context);
@@ -121,7 +121,7 @@ export class StylableMetadataPlugin {
                 const html = this.options.renderSnapshot(
                     componentModule,
                     component,
-                    componentConfig
+                    componentConfig,
                 );
                 builder.addComponentSnapshot(componentConfig.id, html);
             }
@@ -151,7 +151,7 @@ export class StylableMetadataPlugin {
             }.metadata.json${!jsonMode ? '.js' : ''}`;
             compilation.emitAsset(
                 fileName,
-                new compilation.compiler.webpack.sources.RawSource(fileContent, false)
+                new compilation.compiler.webpack.sources.RawSource(fileContent, false),
             );
         }
     }
@@ -162,7 +162,7 @@ export class StylableMetadataPlugin {
         compilation: Compilation,
         builder: ComponentMetadataBuilder,
         namespace: any,
-        depth: any
+        depth: any,
     ) {
         if (componentConfig.variantsPath) {
             const variantsDir = join(componentDir, componentConfig.variantsPath);
@@ -174,11 +174,11 @@ export class StylableMetadataPlugin {
                 variantsDir,
                 '.st.css',
                 new Set(),
-                true
+                true,
             );
             if (errors.length) {
                 throw new Error(
-                    `Error while reading variants for: ${componentConfig.id} in ${variantsDir}\nOriginal Errors:\n${errors}`
+                    `Error while reading variants for: ${componentConfig.id} in ${variantsDir}\nOriginal Errors:\n${errors}`,
                 );
             }
 
@@ -194,12 +194,12 @@ export class StylableMetadataPlugin {
                         .toString();
                 } catch (e) {
                     throw new Error(
-                        `Error while reading variant: ${variantPath}\nOriginal Error:\n${e}`
+                        `Error while reading variant: ${variantPath}\nOriginal Error:\n${e}`,
                     );
                 }
                 if (name.includes('_')) {
                     throw new Error(
-                        `Error variant name or folder cannot contain "_" found in: ${name}`
+                        `Error variant name or folder cannot contain "_" found in: ${name}`,
                     );
                 }
                 builder.addSource(variantPath, content, {

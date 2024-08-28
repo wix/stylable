@@ -7,7 +7,7 @@ const { writeFile } = promises;
 
 const project = 'watched-project-error-recovery';
 const projectDir = dirname(
-    require.resolve(`@stylable/webpack-plugin/test/e2e/projects/${project}/webpack.config`)
+    require.resolve(`@stylable/webpack-plugin/test/e2e/projects/${project}/webpack.config`),
 );
 
 describe(`(${project})`, () => {
@@ -22,7 +22,7 @@ describe(`(${project})`, () => {
         },
         before,
         afterEach,
-        after
+        after,
     );
     it('renders css', async () => {
         const { page } = await projectRunner.openInBrowser();
@@ -35,14 +35,14 @@ describe(`(${project})`, () => {
             async () => {
                 return writeFile(
                     join(projectRunner.testDir, 'src', 'index.st.css'),
-                    '.root{ color: green; }'
+                    '.root{ color: green; }',
                 );
             },
             async () => {
                 const { page } = await projectRunner.openInBrowser();
                 const color = await page.evaluate(() => getComputedStyle(document.body).color);
                 expect(color).to.equal('rgb(0, 128, 0)');
-            }
+            },
         );
 
         await projectRunner.actAndWaitForRecompile(
@@ -50,7 +50,7 @@ describe(`(${project})`, () => {
             async () => {
                 return writeFile(
                     join(projectRunner.testDir, 'src', 'index.st.css'),
-                    '.root{ color:: blue; }'
+                    '.root{ color:: blue; }',
                 );
             },
             async () => {
@@ -64,7 +64,7 @@ describe(`(${project})`, () => {
                 const { page } = await projectRunner.openInBrowser();
                 const color = await page.evaluate(() => getComputedStyle(document.body).color);
                 expect(color).to.equal('rgb(0, 0, 0)');
-            }
+            },
         );
 
         await projectRunner.actAndWaitForRecompile(
@@ -72,7 +72,7 @@ describe(`(${project})`, () => {
             () => {
                 return writeFile(
                     join(projectRunner.testDir, 'src', 'index.st.css'),
-                    '.root{ color: blue; }'
+                    '.root{ color: blue; }',
                 );
             },
             async () => {
@@ -81,7 +81,7 @@ describe(`(${project})`, () => {
                 const color = await page.evaluate(() => getComputedStyle(document.body).color);
                 // Broken css never loaded to the browser
                 expect(color).to.equal('rgb(0, 0, 255)');
-            }
+            },
         );
     });
 });

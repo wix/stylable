@@ -94,13 +94,13 @@ export async function createProjectFromTemplate({
     if (packageJson) {
         const packageJsonPath = path.join(targetDirectoryPath, 'package.json');
         const originalPackageJson = JSON.parse(
-            await promises.readFile(packageJsonPath, { encoding: 'utf8' })
+            await promises.readFile(packageJsonPath, { encoding: 'utf8' }),
         ) as object;
 
         const packageJsonWithOverrides = { ...originalPackageJson, ...packageJson };
         await promises.writeFile(
             packageJsonPath,
-            `${JSON.stringify(packageJsonWithOverrides, null, 2)}\n`
+            `${JSON.stringify(packageJsonWithOverrides, null, 2)}\n`,
         );
     }
 
@@ -116,17 +116,17 @@ export async function createProjectFromTemplate({
 
             return promises.writeFile(
                 gitIgnorePath,
-                `${gitIgnoreContent}\n# Stylable dts files\nst-types`
+                `${gitIgnoreContent}\n# Stylable dts files\nst-types`,
             );
         },
-        progressDotInterval
+        progressDotInterval,
     );
 
     if (dependencies?.length) {
         await executeWithProgress(
             `# Installing dependencies.`,
             () => spawnSafe('npm', ['install', ...dependencies], spawnOptions),
-            progressDotInterval
+            progressDotInterval,
         );
     }
 
@@ -134,7 +134,7 @@ export async function createProjectFromTemplate({
         await executeWithProgress(
             `# Installing devDependencies.`,
             () => spawnSafe('npm', ['install', '-D', ...devDependencies], spawnOptions),
-            progressDotInterval
+            progressDotInterval,
         );
     }
 
@@ -146,7 +146,7 @@ export async function createProjectFromTemplate({
                     await spawnSafe(command, params, spawnOptions);
                 }
             },
-            progressDotInterval
+            progressDotInterval,
         );
     }
 

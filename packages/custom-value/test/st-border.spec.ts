@@ -4,7 +4,7 @@ import { dirname } from 'path';
 
 const project = 'st-border';
 const projectDir = dirname(
-    require.resolve(`@stylable/custom-value/test/projects/${project}/webpack.config`)
+    require.resolve(`@stylable/custom-value/test/projects/${project}/webpack.config`),
 );
 
 describe(`(${project})`, () => {
@@ -17,7 +17,7 @@ describe(`(${project})`, () => {
         },
         before,
         afterEach,
-        after
+        after,
     );
 
     it('renders css', async () => {

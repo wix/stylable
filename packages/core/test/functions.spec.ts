@@ -232,7 +232,7 @@ describe('Stylable functions (native, formatter and variable)', () => {
 
                         const rule = result.nodes[0] as postcss.Rule;
                         expect(rule.nodes[0].toString()).to.equal(
-                            `border: ${cssFunc}(${cssFunc}(1))`
+                            `border: ${cssFunc}(${cssFunc}(1))`,
                         );
                     });
                 }
@@ -369,7 +369,7 @@ describe('Stylable functions (native, formatter and variable)', () => {
                 });
 
                 const rules = (result.nodes[0] as postcss.Rule).nodes.map((node) =>
-                    node.toString()
+                    node.toString(),
                 );
                 expect(rules, 'failed resolving third party asset').to.eql([
                     'background: url(./node_modules/external-package/asset.png)',
@@ -568,7 +568,7 @@ describe('Stylable functions (native, formatter and variable)', () => {
                     {
                         message: functionStringDiagnostics.FAIL_TO_EXECUTE_FORMATTER(
                             'fail(a, red, c)',
-                            'FAIL FAIL FAIL'
+                            'FAIL FAIL FAIL',
                         ),
                         file: '/main.st.css',
                     },

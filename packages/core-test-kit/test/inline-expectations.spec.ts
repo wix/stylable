@@ -31,7 +31,7 @@ describe('inline-expectations', () => {
         });
 
         expect(() => testInlineExpects(result, 5)).to.throw(
-            testInlineExpectsErrors.matchAmount(5, 1)
+            testInlineExpectsErrors.matchAmount(5, 1),
         );
     });
     it('should throw when expected amount is not found (auto)', () => {
@@ -71,7 +71,7 @@ describe('inline-expectations', () => {
         });
 
         expect(() => testInlineExpects(result)).to.throw(
-            testInlineExpectsErrors.selector(`.entry__before\\@after-x`, `.entry__before\\@after`)
+            testInlineExpectsErrors.selector(`.entry__before\\@after-x`, `.entry__before\\@after`),
         );
     });
     describe(`@rule`, () => {
@@ -90,7 +90,7 @@ describe('inline-expectations', () => {
             });
 
             expect(() => testInlineExpects(result)).to.throw(
-                testInlineExpectsErrors.selector(`.otherNamespace__root`, `.entry__root`)
+                testInlineExpectsErrors.selector(`.otherNamespace__root`, `.entry__root`),
             );
         });
         it('should throw for unexpected declarations', () => {
@@ -110,7 +110,7 @@ describe('inline-expectations', () => {
             });
 
             expect(() => testInlineExpects(result)).to.throw(
-                testInlineExpectsErrors.declarations(`color: green`, `color: red`, `.entry__root`)
+                testInlineExpectsErrors.declarations(`color: green`, `color: red`, `.entry__root`),
             );
         });
         it('should throw for unexpected declarations (multiple variations)', () => {
@@ -155,29 +155,29 @@ describe('inline-expectations', () => {
                     testInlineExpectsErrors.declarations(
                         `color: green; width: 1px`,
                         `color: green; width: 2px`,
-                        `.entry__multi`
+                        `.entry__multi`,
                     ),
                     testInlineExpectsErrors.declarations(
                         `width: 2px; color: green`,
                         `color: green; width: 2px`,
-                        `.entry__order`
+                        `.entry__order`,
                     ),
                     testInlineExpectsErrors.declarations(
                         `color: red; width: 2px`,
                         `color: green; width: 1px`,
-                        `.entry__multiline`
+                        `.entry__multiline`,
                     ),
                     testInlineExpectsErrors.ruleMalformedDecl(
                         `color:`,
-                        `(only prop) .entry__malformed {color:}`
+                        `(only prop) .entry__malformed {color:}`,
                     ),
                     testInlineExpectsErrors.declarations(
                         `color: var(--entry-y)`,
                         `color: var(--entry-x)`,
                         `.entry__parenthesis`,
-                        `(with parenthesis): `
+                        `(with parenthesis): `,
                     ),
-                ])
+                ]),
             );
         });
         it('should ignore comments between declarations', () => {
@@ -219,7 +219,7 @@ describe('inline-expectations', () => {
             });
 
             expect(() => testInlineExpects(result)).to.throw(
-                testInlineExpectsErrors.selector(`50%`, `100%`)
+                testInlineExpectsErrors.selector(`50%`, `100%`),
             );
         });
         it('should throw for mixed-in rules', () => {
@@ -245,7 +245,7 @@ describe('inline-expectations', () => {
             });
 
             expect(() => testInlineExpects(result)).to.throw(
-                testInlineExpectsErrors.selector(`.entry__root:focus`, `.entry__root:hover`)
+                testInlineExpectsErrors.selector(`.entry__root:focus`, `.entry__root:hover`),
             );
         });
         it('should throw for missing mixed-in rules', () => {
@@ -271,7 +271,7 @@ describe('inline-expectations', () => {
             });
 
             expect(() => testInlineExpects(result)).to.throw(
-                testInlineExpectsErrors.unfoundMixin(`[10] .entry__root:focus`)
+                testInlineExpectsErrors.unfoundMixin(`[10] .entry__root:focus`),
             );
         });
         it(`should support mixed-in atrule`, () => {
@@ -308,9 +308,9 @@ describe('inline-expectations', () => {
                     testInlineExpectsErrors.atruleParams(
                         `mixed-params-y`,
                         `mixed-params-b`,
-                        `(label): `
+                        `(label): `,
                     ),
-                ])
+                ]),
             );
         });
         it(`should throw on none supported mixed-in node type`, () => {
@@ -329,7 +329,7 @@ describe('inline-expectations', () => {
             });
 
             expect(() => testInlineExpects(result)).to.throw(
-                testInlineExpectsErrors.unsupportedMixinNode(`decl`)
+                testInlineExpectsErrors.unsupportedMixinNode(`decl`),
             );
         });
         it('should add label to thrown mismatches', () => {
@@ -353,15 +353,15 @@ describe('inline-expectations', () => {
                     testInlineExpectsErrors.selector(
                         `.entry__onlySelector`,
                         `.entry__onlySelectorXXX`,
-                        `(only selector): `
+                        `(only selector): `,
                     ),
                     testInlineExpectsErrors.declarations(
                         `color: green`,
                         `color: red`,
                         `.entry__decls`,
-                        `(declarations): `
+                        `(declarations): `,
                     ),
-                ])
+                ]),
             );
         });
         it('should throw for removed rule (use @transform-remove for removal check)', () => {
@@ -381,7 +381,7 @@ describe('inline-expectations', () => {
             result.meta.targetAst?.nodes[1].remove();
 
             expect(() => testInlineExpects(result)).to.throw(
-                testInlineExpectsErrors.removedNode(`rule`, `(label): `)
+                testInlineExpectsErrors.removedNode(`rule`, `(label): `),
             );
         });
     });
@@ -417,9 +417,9 @@ describe('inline-expectations', () => {
                     testInlineExpectsErrors.atruleParams(
                         `screen and (min-width: 8px)`,
                         `screen and (min-width: 900px)`,
-                        `(complex): `
+                        `(complex): `,
                     ),
-                ])
+                ]),
             );
         });
         it('should throw for mixed-in rules (unsupported)', () => {
@@ -437,7 +437,7 @@ describe('inline-expectations', () => {
             });
 
             expect(() => testInlineExpects(result)).to.throw(
-                testInlineExpectsErrors.atRuleMultiTest(`[16] entry__anim`)
+                testInlineExpectsErrors.atRuleMultiTest(`[16] entry__anim`),
             );
         });
         it(`should throw on none @atrule`, () => {
@@ -455,7 +455,7 @@ describe('inline-expectations', () => {
             });
 
             expect(() => testInlineExpects(result)).to.throw(
-                testInlineExpectsErrors.unsupportedNode(`@atrule`, `rule`)
+                testInlineExpectsErrors.unsupportedNode(`@atrule`, `rule`),
             );
         });
         it('should throw for removed rule (use @transform-remove for removal check)', () => {
@@ -475,7 +475,7 @@ describe('inline-expectations', () => {
             result.meta.targetAst?.nodes[1].remove();
 
             expect(() => testInlineExpects(result)).to.throw(
-                testInlineExpectsErrors.removedNode(`atrule`, `(label): `)
+                testInlineExpectsErrors.removedNode(`atrule`, `(label): `),
             );
         });
     });
@@ -497,7 +497,7 @@ describe('inline-expectations', () => {
             });
 
             expect(() => testInlineExpects(result)).to.throw(
-                testInlineExpectsErrors.decl(`color: blue`, `color: red`)
+                testInlineExpectsErrors.decl(`color: blue`, `color: red`),
             );
         });
         it('should mark error with label', () => {
@@ -517,7 +517,7 @@ describe('inline-expectations', () => {
             });
 
             expect(() => testInlineExpects(result)).to.throw(
-                testInlineExpectsErrors.decl(`color: blue`, `color: red`, `(text): `)
+                testInlineExpectsErrors.decl(`color: blue`, `color: red`, `(text): `),
             );
         });
         it('should throw on malformed expectation', () => {
@@ -543,7 +543,7 @@ describe('inline-expectations', () => {
                 testInlineExpectsErrors.combine([
                     testInlineExpectsErrors.declMalformed(`color`, ``, `(only prop): `),
                     testInlineExpectsErrors.declMalformed(``, `red`, `(missing prop): `),
-                ])
+                ]),
             );
         });
         it(`should throw on none declaration node`, () => {
@@ -567,7 +567,7 @@ describe('inline-expectations', () => {
                 testInlineExpectsErrors.combine([
                     testInlineExpectsErrors.unsupportedNode(`@decl`, `rule`, `(on rule): `),
                     testInlineExpectsErrors.unsupportedNode(`@decl`, `atrule`, `(on atrule): `),
-                ])
+                ]),
             );
         });
         it('should not throw when valid', () => {
@@ -617,7 +617,7 @@ describe('inline-expectations', () => {
             (result.meta.targetAst!.nodes[0] as Rule).nodes[1].remove();
 
             expect(() => testInlineExpects(result)).to.throw(
-                testInlineExpectsErrors.removedNode(`decl`, `(label): `)
+                testInlineExpectsErrors.removedNode(`decl`, `(label): `),
             );
         });
     });
@@ -649,9 +649,9 @@ describe('inline-expectations', () => {
                     testInlineExpectsErrors.diagnosticsMalformed(
                         `analyze`,
                         `-warn(label)`,
-                        `(label): `
+                        `(label): `,
                     ),
-                ])
+                ]),
             );
         });
         it(`should throw for backwards compatibility (@analyze is not supported with just AST root)`, () => {
@@ -669,7 +669,7 @@ describe('inline-expectations', () => {
             });
 
             expect(() => testInlineExpects(result)).to.throw(
-                testInlineExpectsErrors.deprecatedRootInputNotSupported(`@analyze-warn message`)
+                testInlineExpectsErrors.deprecatedRootInputNotSupported(`@analyze-warn message`),
             );
         });
         it(`should not throw when diagnostic is matched`, () => {
@@ -680,7 +680,7 @@ describe('inline-expectations', () => {
                         namespace: 'entry',
                         content: `
                             /* @analyze-warn(1 line) ${cssTypeDiagnostics.UNSCOPED_TYPE_SELECTOR(
-                                `div`
+                                `div`,
                             )} */
                             div {}
 
@@ -718,9 +718,9 @@ describe('inline-expectations', () => {
                     testInlineExpectsErrors.diagnosticsUnsupportedSeverity(
                         `analyze`,
                         `unknown`,
-                        `(label): `
+                        `(label): `,
                     ),
-                ])
+                ]),
             );
         });
         it(`should throw on possible location mismatch`, () => {
@@ -733,7 +733,7 @@ describe('inline-expectations', () => {
                             /* 
                                 @analyze-warn ${cssTypeDiagnostics.UNSCOPED_TYPE_SELECTOR(`div`)}
                                 @analyze-warn(label) ${cssTypeDiagnostics.UNSCOPED_TYPE_SELECTOR(
-                                    `div`
+                                    `div`,
                                 )}
                             */
                             .root {}
@@ -748,14 +748,14 @@ describe('inline-expectations', () => {
                 testInlineExpectsErrors.combine([
                     testInlineExpectsErrors.diagnosticsLocationMismatch(
                         `analyze`,
-                        cssTypeDiagnostics.UNSCOPED_TYPE_SELECTOR(`div`)
+                        cssTypeDiagnostics.UNSCOPED_TYPE_SELECTOR(`div`),
                     ),
                     testInlineExpectsErrors.diagnosticsLocationMismatch(
                         `analyze`,
                         cssTypeDiagnostics.UNSCOPED_TYPE_SELECTOR(`div`),
-                        `(label): `
+                        `(label): `,
                     ),
-                ])
+                ]),
             );
         });
         it(`should throw on word mismatch`, () => {
@@ -766,12 +766,12 @@ describe('inline-expectations', () => {
                         namespace: 'entry',
                         content: `
                         /* @analyze-warn word(single) ${cssTypeDiagnostics.UNSCOPED_TYPE_SELECTOR(
-                            `div`
+                            `div`,
                         )} */
                         div {}
                         
                         /* @analyze-warn(many words) word(one two) ${cssTypeDiagnostics.UNSCOPED_TYPE_SELECTOR(
-                            `div`
+                            `div`,
                         )} */
                         div {}
                         `,
@@ -784,15 +784,15 @@ describe('inline-expectations', () => {
                     testInlineExpectsErrors.diagnosticsWordMismatch(
                         `analyze`,
                         `single`,
-                        cssTypeDiagnostics.UNSCOPED_TYPE_SELECTOR(`div`)
+                        cssTypeDiagnostics.UNSCOPED_TYPE_SELECTOR(`div`),
                     ),
                     testInlineExpectsErrors.diagnosticsWordMismatch(
                         `analyze`,
                         `one two`,
                         cssTypeDiagnostics.UNSCOPED_TYPE_SELECTOR(`div`),
-                        `(many words): `
+                        `(many words): `,
                     ),
-                ])
+                ]),
             );
         });
         it(`should throw on severity mismatch`, () => {
@@ -806,7 +806,7 @@ describe('inline-expectations', () => {
                         div {}
 
                         /* @analyze-error(label) ${cssTypeDiagnostics.UNSCOPED_TYPE_SELECTOR(
-                            `div`
+                            `div`,
                         )} */
                         div {}
                         `,
@@ -820,16 +820,16 @@ describe('inline-expectations', () => {
                         `analyze`,
                         `error`,
                         `warning`,
-                        cssTypeDiagnostics.UNSCOPED_TYPE_SELECTOR(`div`)
+                        cssTypeDiagnostics.UNSCOPED_TYPE_SELECTOR(`div`),
                     ),
                     testInlineExpectsErrors.diagnosticsSeverityMismatch(
                         `analyze`,
                         `error`,
                         `warning`,
                         cssTypeDiagnostics.UNSCOPED_TYPE_SELECTOR(`div`),
-                        `(label): `
+                        `(label): `,
                     ),
-                ])
+                ]),
             );
         });
         it(`should throw on missing diagnostic`, () => {
@@ -853,14 +853,14 @@ describe('inline-expectations', () => {
                 testInlineExpectsErrors.combine([
                     testInlineExpectsErrors.diagnosticExpectedNotFound(
                         `analyze`,
-                        `fake diagnostic message`
+                        `fake diagnostic message`,
                     ),
                     testInlineExpectsErrors.diagnosticExpectedNotFound(
                         `analyze`,
                         `fake diagnostic message`,
-                        `(label): `
+                        `(label): `,
                     ),
-                ])
+                ]),
             );
         });
         it(`should check against rawAst (for nodes that are removed in transform)`, () => {
@@ -883,8 +883,8 @@ describe('inline-expectations', () => {
             expect(() => testInlineExpects(result)).to.throw(
                 testInlineExpectsErrors.diagnosticExpectedNotFound(
                     `analyze`,
-                    stImportDiagnostics.ST_IMPORT_EMPTY_FROM()
-                )
+                    stImportDiagnostics.ST_IMPORT_EMPTY_FROM(),
+                ),
             );
         });
     });
@@ -907,7 +907,7 @@ describe('inline-expectations', () => {
             });
 
             expect(() => testInlineExpects(result)).to.throw(
-                testInlineExpectsErrors.transformRemoved(`rule`, `(not removed): `)
+                testInlineExpectsErrors.transformRemoved(`rule`, `(not removed): `),
             );
         });
         it(`should throw on malformed expectation`, () => {
@@ -937,9 +937,9 @@ describe('inline-expectations', () => {
                     testInlineExpectsErrors.diagnosticsMalformed(
                         `transform`,
                         `-warn(label)`,
-                        `(label): `
+                        `(label): `,
                     ),
-                ])
+                ]),
             );
         });
         it(`should throw for backwards compatibility (@transform is not supported with just AST root)`, () => {
@@ -957,7 +957,7 @@ describe('inline-expectations', () => {
             });
 
             expect(() => testInlineExpects(result)).to.throw(
-                testInlineExpectsErrors.deprecatedRootInputNotSupported(`@transform-warn message`)
+                testInlineExpectsErrors.deprecatedRootInputNotSupported(`@transform-warn message`),
             );
         });
         it(`should not throw when diagnostic is matched`, () => {
@@ -971,7 +971,7 @@ describe('inline-expectations', () => {
 
                         .root {
                             /* @transform-error(1 line) ${cssClassDiagnostics.CANNOT_EXTEND_UNKNOWN_SYMBOL(
-                                `unknown`
+                                `unknown`,
                             )}*/
                             -st-extends: unknown;
                         }
@@ -1015,13 +1015,14 @@ describe('inline-expectations', () => {
                     testInlineExpectsErrors.diagnosticsUnsupportedSeverity(
                         `transform`,
                         `unknown`,
-                        `(label): `
+                        `(label): `,
                     ),
-                ])
+                ]),
             );
         });
         it(`should throw on possible location mismatch`, () => {
-            const resolveErrorMessage = "Stylable could not resolve \"./unknown.st.css\" from \"/\"\nVisited paths:\n/unknown.st.css\n/unknown.st.css.js\n/unknown.st.css.mjs\n/unknown.st.css.cjs\n/unknown.st.css.ts\n/unknown.st.css.mts\n/unknown.st.css.cts\n/unknown.st.css.json"
+            const resolveErrorMessage =
+                'Stylable could not resolve "./unknown.st.css" from "/"\nVisited paths:\n/unknown.st.css\n/unknown.st.css.js\n/unknown.st.css.mjs\n/unknown.st.css.cjs\n/unknown.st.css.ts\n/unknown.st.css.mts\n/unknown.st.css.cts\n/unknown.st.css.json';
             const result = generateStylableResult({
                 entry: `/style.st.css`,
                 files: {
@@ -1033,11 +1034,11 @@ describe('inline-expectations', () => {
                             /* 
                                 @transform-warn ${stImportDiagnostics.UNKNOWN_IMPORTED_FILE(
                                     `./unknown.st.css`,
-                                    resolveErrorMessage
+                                    resolveErrorMessage,
                                 )}
                                 @transform-warn(label) ${stImportDiagnostics.UNKNOWN_IMPORTED_FILE(
                                     `./unknown.st.css`,
-                                    resolveErrorMessage
+                                    resolveErrorMessage,
                                 )}
                             */
                             .root {}
@@ -1052,18 +1053,18 @@ describe('inline-expectations', () => {
                         `transform`,
                         stImportDiagnostics.UNKNOWN_IMPORTED_FILE(
                             `./unknown.st.css`,
-                            resolveErrorMessage
-                        )
+                            resolveErrorMessage,
+                        ),
                     ),
                     testInlineExpectsErrors.diagnosticsLocationMismatch(
                         `transform`,
                         stImportDiagnostics.UNKNOWN_IMPORTED_FILE(
                             `./unknown.st.css`,
-                            resolveErrorMessage
+                            resolveErrorMessage,
                         ),
-                        `(label): `
+                        `(label): `,
                     ),
-                ])
+                ]),
             );
         });
         it(`should throw on word mismatch`, () => {
@@ -1074,12 +1075,12 @@ describe('inline-expectations', () => {
                         namespace: 'entry',
                         content: `
                         /* @transform-warn word(something-else) ${transformerStringDiagnostics.UNKNOWN_PSEUDO_ELEMENT(
-                            `not-a-real-thing`
+                            `not-a-real-thing`,
                         )} */
                         .root::not-a-real-thing {}
                         
                         /* @transform-warn(many) word(a b c) ${transformerStringDiagnostics.UNKNOWN_PSEUDO_ELEMENT(
-                            `not-a-real-thing`
+                            `not-a-real-thing`,
                         )} */
                         .root::not-a-real-thing {}
                         `,
@@ -1092,15 +1093,15 @@ describe('inline-expectations', () => {
                     testInlineExpectsErrors.diagnosticsWordMismatch(
                         `transform`,
                         `something-else`,
-                        transformerStringDiagnostics.UNKNOWN_PSEUDO_ELEMENT(`not-a-real-thing`)
+                        transformerStringDiagnostics.UNKNOWN_PSEUDO_ELEMENT(`not-a-real-thing`),
                     ),
                     testInlineExpectsErrors.diagnosticsWordMismatch(
                         `transform`,
                         `a b c`,
                         transformerStringDiagnostics.UNKNOWN_PSEUDO_ELEMENT(`not-a-real-thing`),
-                        `(many): `
+                        `(many): `,
                     ),
-                ])
+                ]),
             );
         });
         it(`should throw on severity mismatch`, () => {
@@ -1111,12 +1112,12 @@ describe('inline-expectations', () => {
                         namespace: 'entry',
                         content: `
                         /* @transform-info ${transformerStringDiagnostics.UNKNOWN_PSEUDO_ELEMENT(
-                            `not-a-real-thing`
+                            `not-a-real-thing`,
                         )} */
                         .root::not-a-real-thing {}
                         
                         /* @transform-warning(label) ${transformerStringDiagnostics.UNKNOWN_PSEUDO_ELEMENT(
-                            `not-a-real-thing`
+                            `not-a-real-thing`,
                         )} */
                         .root::not-a-real-thing {}
                         `,
@@ -1130,16 +1131,16 @@ describe('inline-expectations', () => {
                         `transform`,
                         `info`,
                         `error`,
-                        transformerStringDiagnostics.UNKNOWN_PSEUDO_ELEMENT(`not-a-real-thing`)
+                        transformerStringDiagnostics.UNKNOWN_PSEUDO_ELEMENT(`not-a-real-thing`),
                     ),
                     testInlineExpectsErrors.diagnosticsSeverityMismatch(
                         `transform`,
                         `warning`,
                         `error`,
                         transformerStringDiagnostics.UNKNOWN_PSEUDO_ELEMENT(`not-a-real-thing`),
-                        `(label): `
+                        `(label): `,
                     ),
-                ])
+                ]),
             );
         });
         it(`should throw on missing diagnostic`, () => {
@@ -1163,14 +1164,14 @@ describe('inline-expectations', () => {
                 testInlineExpectsErrors.combine([
                     testInlineExpectsErrors.diagnosticExpectedNotFound(
                         `transform`,
-                        `fake diagnostic message`
+                        `fake diagnostic message`,
                     ),
                     testInlineExpectsErrors.diagnosticExpectedNotFound(
                         `transform`,
                         `fake diagnostic message`,
-                        `(label): `
+                        `(label): `,
                     ),
-                ])
+                ]),
             );
         });
         it(`should check against rawAst (for nodes that are removed in transform)`, () => {
@@ -1181,7 +1182,7 @@ describe('inline-expectations', () => {
                         namespace: 'entry',
                         content: `
                             /* @transform-error(should match) word(./x.st.css) ${stImportDiagnostics.UNKNOWN_IMPORTED_FILE(
-                                `./x.st.css`
+                                `./x.st.css`,
                             )} */
                             @st-import A from "./x.st.css";
 
@@ -1196,8 +1197,8 @@ describe('inline-expectations', () => {
             expect(() => testInlineExpects(result)).to.throw(
                 testInlineExpectsErrors.diagnosticExpectedNotFound(
                     `transform`,
-                    stImportDiagnostics.ST_IMPORT_EMPTY_FROM()
-                )
+                    stImportDiagnostics.ST_IMPORT_EMPTY_FROM(),
+                ),
             );
         });
     });
@@ -1223,7 +1224,7 @@ describe('inline-expectations', () => {
                 testInlineExpectsErrors.combine([
                     testInlineExpectsErrors.selector(`.otherNamespace__root`, `.entry__root`),
                     testInlineExpectsErrors.atruleParams(`entry__anim`, `entry__animX`),
-                ])
+                ]),
             );
         });
         it(`should throw on none @rule or @atrule`, () => {
@@ -1243,7 +1244,7 @@ describe('inline-expectations', () => {
             });
 
             expect(() => testInlineExpects(result)).to.throw(
-                testInlineExpectsErrors.unsupportedNode(`@check`, `decl`)
+                testInlineExpectsErrors.unsupportedNode(`@check`, `decl`),
             );
         });
     });
@@ -1279,10 +1280,10 @@ describe('inline-expectations', () => {
                     testInlineExpectsErrors.diagnosticExpectedNotFound(
                         `transform`,
                         `msg 3`,
-                        `(label): `
+                        `(label): `,
                     ),
                     testInlineExpectsErrors.diagnosticsDump(result.meta),
-                ])
+                ]),
             );
         });
     });

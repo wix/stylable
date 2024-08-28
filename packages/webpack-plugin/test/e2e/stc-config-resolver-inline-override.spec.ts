@@ -4,7 +4,7 @@ import { dirname } from 'path';
 
 const project = 'stylable-config-resolver-inline-override';
 const projectDir = dirname(
-    require.resolve(`@stylable/webpack-plugin/test/e2e/projects/${project}/package.json`)
+    require.resolve(`@stylable/webpack-plugin/test/e2e/projects/${project}/package.json`),
 );
 
 describe(`(${project})`, () => {
@@ -17,7 +17,7 @@ describe(`(${project})`, () => {
         },
         before,
         afterEach,
-        after
+        after,
     );
 
     it('config is resolved and css is working', async () => {

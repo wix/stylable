@@ -11,7 +11,7 @@ describe(
     contractTest(StylableDOMUtil, {
         scopeSelectorTest: true,
         createElement: () => minDoc.createElement('div') as unknown as PartialElement,
-    })
+    }),
 );
 
 describe('stylable-dom-utils type compliance', function () {
@@ -45,12 +45,12 @@ describe('stylable-dom-utils type compliance', function () {
                     const tk = new StylableDOMUtil(stylesheet);
             `,
             },
-            false
+            false,
         );
         tk.linkNodeModules();
 
         expect(tk.typecheck('test.ts')).to.include(
-            "Argument of type 'unknown' is not assignable to parameter of type 'StylesheetHost'"
+            "Argument of type 'unknown' is not assignable to parameter of type 'StylesheetHost'",
         );
     });
 

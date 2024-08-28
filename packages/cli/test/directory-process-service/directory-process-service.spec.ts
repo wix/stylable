@@ -68,7 +68,7 @@ describe('DirectoryWatchService', () => {
                 `
                 const ATemplate = use('./a.template.js');
                 output(\`0(\${ATemplate})\`);
-            `
+            `,
             );
 
             await waitFor(() => {
@@ -82,7 +82,7 @@ describe('DirectoryWatchService', () => {
                 '/a.template.js',
                 `
                 output('A()');
-            `
+            `,
             );
 
             await waitFor(() => {
@@ -334,7 +334,7 @@ describe('DirectoryWatchService', () => {
                 /* changed */
                 const CTemplate = use('./c.template.js');
                 output(\`B(\${CTemplate})\`);
-                `
+                `,
             );
 
             await waitFor(() => {
@@ -355,7 +355,7 @@ describe('DirectoryWatchService', () => {
                 /* changed */
                 const ATemplate = use('./a.template.js');
                 output(\`0(\${ATemplate}\`);
-                `
+                `,
             );
 
             await waitFor(() => {
@@ -421,7 +421,7 @@ function writeTemplateOutputToDist(fs: IFileSystem, filePath: string, value: str
 
 function expectInvalidationMap(
     watcher: DirectoryProcessService,
-    expected: Record<string, string[]>
+    expected: Record<string, string[]>,
 ) {
     const actual: Record<string, string[]> = {};
     for (const [key, invalidationSet] of watcher.invalidationMap) {

@@ -15,7 +15,7 @@ export const diagnostics = {
     UNKNOWN_CUSTOM_SELECTOR: createDiagnosticReporter(
         '18001',
         'error',
-        (selector: string) => `The selector '${selector}' is undefined`
+        (selector: string) => `The selector '${selector}' is undefined`,
     ),
 };
 
@@ -125,10 +125,13 @@ export function getCustomSelector(meta: StylableMeta, name: string): SelectorLis
 }
 export function getCustomSelectors(meta: StylableMeta) {
     const analyzed = plugableRecord.getUnsafe(meta.data, dataKey);
-    return Object.entries(analyzed).reduce((acc, [name, { ast }]) => {
-        acc[name] = ast;
-        return acc;
-    }, {} as Record<string, AnalyzedCustomSelector['ast']>);
+    return Object.entries(analyzed).reduce(
+        (acc, [name, { ast }]) => {
+            acc[name] = ast;
+            return acc;
+        },
+        {} as Record<string, AnalyzedCustomSelector['ast']>,
+    );
 }
 
 export function getCustomSelectorExpended(meta: StylableMeta, name: string): string | undefined {
@@ -144,7 +147,7 @@ export function getCustomSelectorNames(meta: StylableMeta): string[] {
 export function transformCustomSelectorInline(
     meta: StylableMeta,
     selector: string,
-    options: { diagnostics?: Diagnostics; node?: postcss.Node } = {}
+    options: { diagnostics?: Diagnostics; node?: postcss.Node } = {},
 ) {
     const ast = parseSelectorWithCache(selector, { clone: true });
     const analyzed = plugableRecord.getUnsafe(meta.data, dataKey);
@@ -159,7 +162,7 @@ export function transformCustomSelectorInline(
                     word: unknownSelector,
                 });
             }
-        }
+        },
     );
     return stringifySelectorAst(inlined);
 }

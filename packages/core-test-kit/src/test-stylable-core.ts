@@ -30,7 +30,7 @@ type RemoveRelative<T extends string> = T extends `./${infer U}` ? U : T;
  */
 export function testStylableCore<
     const T extends string | IDirectoryContents,
-    const O extends Partial<TestOptions>
+    const O extends Partial<TestOptions>,
 >(input: T, options: O = {} as O) {
     // infra
     const fs =
@@ -100,7 +100,7 @@ export function createJavascriptRequireModule(fs: IFileSystem) {
                 'module',
                 'exports',
                 'require',
-                fs.readFileSync(id, { encoding: 'utf8', flag: 'r' })
+                fs.readFileSync(id, { encoding: 'utf8', flag: 'r' }),
             );
             fn(_module, _module.exports, requireModule);
         } catch {

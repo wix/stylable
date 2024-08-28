@@ -15,7 +15,7 @@ interface ProcessProjectsOptions {
 
 export function processProjects<P extends string>(
     { projects, presets }: MultipleProjectsConfig<P>,
-    { defaultOptions = createDefaultOptions() }: ProcessProjectsOptions = {}
+    { defaultOptions = createDefaultOptions() }: ProcessProjectsOptions = {},
 ) {
     const entities: RawProjectEntity[] = [];
     if (!Array.isArray(projects) && typeof projects !== 'object') {
@@ -28,8 +28,8 @@ export function processProjects<P extends string>(
                 resolveProjectEntry(
                     typeof entry === 'string' ? [entry] : entry,
                     defaultOptions,
-                    presets
-                )
+                    presets,
+                ),
             );
         }
     } else if (typeof projects === 'object') {
@@ -46,7 +46,7 @@ export function processProjects<P extends string>(
 function resolveProjectEntry<P extends string>(
     [request, value]: [string, ProjectEntryValues<P>] | [string],
     configOptions: BuildOptions,
-    availablePresets: Presets = {}
+    availablePresets: Presets = {},
 ): RawProjectEntity {
     const totalOptions: Array<BuildOptions | PartialBuildOptions> = [];
 
@@ -87,8 +87,8 @@ function resolveProjectEntry<P extends string>(
                     mergeBuildOptions(
                         configOptions,
                         resolvePreset(presetName, availablePresets),
-                        entryValue.options || {}
-                    )
+                        entryValue.options || {},
+                    ),
                 );
             } else {
                 return [entryValue];
@@ -101,7 +101,7 @@ function resolveProjectEntry<P extends string>(
 
 function resolvePreset(
     presetName: string,
-    availablePresets: NonNullable<MultipleProjectsConfig<string>['presets']>
+    availablePresets: NonNullable<MultipleProjectsConfig<string>['presets']>,
 ): BuildOptions | PartialBuildOptions {
     const preset = availablePresets[presetName];
 

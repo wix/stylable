@@ -88,7 +88,7 @@ async function run() {
             ...(parallel ? ['--parallel'] : []),
             ...(timeout !== undefined ? ['--timeout', String(timeout)] : []),
         ],
-        { stdio: 'inherit' }
+        { stdio: 'inherit' },
     );
 
     return once(childProcess, 'exit');

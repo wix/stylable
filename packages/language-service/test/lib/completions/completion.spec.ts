@@ -30,7 +30,7 @@ describe('Completions - file system fixtures', () => {
 
         it('should not complete broken classes at top level', () => {
             const asserter = asserters.getCompletions(
-                'general/top-level-existing-classes-broken.st.css'
+                'general/top-level-existing-classes-broken.st.css',
             );
             asserter.suggested([
                 asserters.importDirectiveCompletion(topLevelExistingRange),
@@ -111,20 +111,20 @@ describe('Completions - file system fixtures', () => {
                 asserters.stateSelectorCompletion(
                     'shmover',
                     createRange(10, 5, 10, 6),
-                    './comp-to-import.st.css'
+                    './comp-to-import.st.css',
                 ),
             ]);
         });
 
         it('complete states for localy imported component (including local states)', () => {
             const asserter = asserters.getCompletions(
-                'states/locally-imported-component-with-states.st.css'
+                'states/locally-imported-component-with-states.st.css',
             );
             asserter.suggested([
                 asserters.stateSelectorCompletion(
                     'shmover',
                     createRange(11, 5, 11, 6),
-                    './comp-to-import.st.css'
+                    './comp-to-import.st.css',
                 ),
                 asserters.stateSelectorCompletion('clover', createRange(11, 5, 11, 6)),
             ]);
@@ -132,18 +132,18 @@ describe('Completions - file system fixtures', () => {
 
         it('complete states for localy imported component ( recursive )', () => {
             const asserter = asserters.getCompletions(
-                'states/locally-imported-component-recursive.st.css'
+                'states/locally-imported-component-recursive.st.css',
             );
             asserter.suggested([
                 asserters.stateSelectorCompletion(
                     'shmover',
                     createRange(11, 11, 11, 12),
-                    './comp-to-import.st.css'
+                    './comp-to-import.st.css',
                 ),
                 asserters.stateSelectorCompletion(
                     'hoover',
                     createRange(11, 11, 11, 12),
-                    './mid-level-import.st.css'
+                    './mid-level-import.st.css',
                 ),
                 asserters.stateSelectorCompletion('clover', createRange(11, 11, 11, 12)),
             ]);

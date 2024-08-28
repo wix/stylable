@@ -123,7 +123,7 @@ describe('createNamespaceStrategy', () => {
                     false,
                     'x-1',
                     '/package/x2.st.css',
-                    new Map([['x-1', '/package/x1.st.css']])
+                    new Map([['x-1', '/package/x1.st.css']]),
                 );
             } catch (e) {
                 return (e as Error).message;
@@ -149,7 +149,7 @@ describe('createNamespaceStrategy', () => {
                     true,
                     'x',
                     '/package/x1.st.css',
-                    new Map([['x', '/package/x.st.css']])
+                    new Map([['x', '/package/x.st.css']]),
                 );
             } catch (e) {
                 return (e as Error).message;

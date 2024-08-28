@@ -25,7 +25,7 @@ export type TestStylableConfig = Omit<
 
 export function testLangService(
     input: string | IDirectoryContents,
-    options: Partial<TestOptions> = {}
+    options: Partial<TestOptions> = {},
 ) {
     // infra
     const fs = setupFileSystem(input, options);
@@ -77,7 +77,7 @@ export function testLangService(
         },
         completion<T>(
             data: T[],
-            template: (value: T) => Partial<CompletionItem>
+            template: (value: T) => Partial<CompletionItem>,
         ): Partial<CompletionItem>[] {
             return data.map(template);
         },
@@ -86,7 +86,7 @@ export function testLangService(
                 URI.file(filePath).toString(),
                 'stylable',
                 1,
-                fs.readFileSync(filePath, { encoding: 'utf-8' })
+                fs.readFileSync(filePath, { encoding: 'utf-8' }),
             );
             return {
                 replaceText: createReplaceText(document),
@@ -99,7 +99,7 @@ function createReplaceText(document: TextDocument) {
     return function replaceText(
         offset: number,
         text: string,
-        replaceOffsets?: Parameters<typeof range>[1]
+        replaceOffsets?: Parameters<typeof range>[1],
     ) {
         const position = document.positionAt(offset);
         return TextEdit.replace(range(position, replaceOffsets), text);
@@ -137,12 +137,12 @@ type AssertArgs =
               textEdit: {
                   replaceText: ReturnType<typeof createReplaceText>;
               };
-          }) => AssertCompletionsConfig
+          }) => AssertCompletionsConfig,
       ];
 
 export function assertCompletions(
     api: Pick<TestKitApi, 'carets' | 'textEditContext'>,
-    [configOrPath, generateConfig]: AssertArgs
+    [configOrPath, generateConfig]: AssertArgs,
 ) {
     const {
         actualList,
@@ -162,11 +162,11 @@ export function assertCompletions(
         const actual = actualList.find(({ label }) => label === expected.label);
         if (!actual) {
             throw new Error(
-                `${messagePrefix}expected to find completion with label "${expected.label}"`
+                `${messagePrefix}expected to find completion with label "${expected.label}"`,
             );
         }
         for (const [expectedField, expectedValue] of Object.entries(expected) as [
-            [keyof CompletionItem, any]
+            [keyof CompletionItem, any],
         ]) {
             const expectLabel = `${messagePrefix}expected "${expected.label}" completions to have ${expectedField}`;
             expect(actual[expectedField], expectLabel).to.eql(expectedValue);
@@ -176,7 +176,7 @@ export function assertCompletions(
         const actual = actualList.find(({ label }) => label === expected.label);
         if (actual) {
             throw new Error(
-                `${messagePrefix}expected NOT to find completion with label "${expected.label}"`
+                `${messagePrefix}expected NOT to find completion with label "${expected.label}"`,
             );
         }
     }
@@ -201,7 +201,7 @@ export function createJavascriptRequireModule(fs: IFileSystem) {
                 'module',
                 'exports',
                 'require',
-                fs.readFileSync(id, { encoding: 'utf8', flag: 'r' })
+                fs.readFileSync(id, { encoding: 'utf8', flag: 'r' }),
             );
             fn(_module, _module.exports, requireModule);
         } catch {

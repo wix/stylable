@@ -16,7 +16,7 @@ function walkValue(
     ast: BaseAstNode | BaseAstNode[],
     visit: (node: BaseAstNode, parents: BaseAstNode[], siblings: BaseAstNode[]) => void,
     options: { insideOut?: boolean } = {},
-    parents: BaseAstNode[] = []
+    parents: BaseAstNode[] = [],
 ) {
     ast = Array.isArray(ast) ? ast : [ast];
     const insideOut = !!options.insideOut;
@@ -154,7 +154,7 @@ function formatAst(ast: AnyNode, index: number, options: FormatOptions) {
             walkValue(
                 valueAst,
                 normalizeDeclValueAndCollectLength(preserveComponentNewLines, NL, nodesInfo),
-                { insideOut: true }
+                { insideOut: true },
             );
             // format each top level segment
             flowDeclValueSegment({
@@ -285,7 +285,7 @@ class AtRuleParamFormatter {
     private getContext(
         node: ValueParser.BaseAstNode,
         parents: NodeContext['parents'],
-        siblings: NodeContext['parents']
+        siblings: NodeContext['parents'],
     ): NodeContext {
         const index = siblings.indexOf(node);
         const prevNode = siblings[index - 1];
@@ -308,7 +308,7 @@ class AtRuleParamFormatter {
     private formatAroundComma(
         _node: ValueParser.Literal,
         context: NodeContext,
-        options: FormatOptions
+        options: FormatOptions,
     ) {
         const { prevNode, nextNode } = context;
         // argument delimiter
@@ -323,13 +323,13 @@ class AtRuleParamFormatter {
                 inlineSpace: ' ',
             },
             context,
-            options
+            options,
         );
     }
     private formatBlockOpen(
         node: ValueParser.Literal,
         { nextNode }: NodeContext,
-        { endOfLine: NL }: FormatOptions
+        { endOfLine: NL }: FormatOptions,
     ) {
         const isSpaceAfter = nextNode?.type === 'space';
         const isNewline = isSpaceAfter && stringifyCSSValue(nextNode).includes('\n');
@@ -344,7 +344,7 @@ class AtRuleParamFormatter {
     private formatBlockClose(
         node: ValueParser.Literal,
         context: NodeContext,
-        options: FormatOptions
+        options: FormatOptions,
     ) {
         const { prevNode, currentBlock } = context;
         if (currentBlock.type === node.value) {
@@ -352,7 +352,7 @@ class AtRuleParamFormatter {
             if (currentBlock.isNewline) {
                 this.currentNewlineIndent = this.currentNewlineIndent.slice(
                     0,
-                    this.currentNewlineIndent.length - options.indent.length
+                    this.currentNewlineIndent.length - options.indent.length,
                 );
             }
         }
@@ -363,7 +363,7 @@ class AtRuleParamFormatter {
                 inlineSpace: '',
             },
             context,
-            options
+            options,
         );
     }
     private formatFunction(node: ValueParser.Call, { endOfLine: NL }: FormatOptions) {
@@ -391,7 +391,7 @@ class AtRuleParamFormatter {
             inlineSpace: string;
         },
         { currentBlock, siblings, index }: NodeContext,
-        { endOfLine: NL }: FormatOptions
+        { endOfLine: NL }: FormatOptions,
     ) {
         const spaceValue = currentBlock?.isNewline ? NL + this.currentNewlineIndent : inlineSpace;
         if (spaceNode?.type === 'space') {
@@ -418,7 +418,7 @@ class AtRuleParamFormatter {
             if (currentBlock.isNewline) {
                 this.currentNewlineIndent = this.currentNewlineIndent.slice(
                     0,
-                    this.currentNewlineIndent.length - this.options.indent.length
+                    this.currentNewlineIndent.length - this.options.indent.length,
                 );
             }
             currentBlock = this.blockCloserStack[this.blockCloserStack.length - 1];
@@ -430,11 +430,11 @@ class AtRuleParamFormatter {
 function normalizeDeclValueAndCollectLength(
     preserveTopLevelNewLines: boolean,
     NL: string,
-    nodesInfo: Map<ValueParser.BaseAstNode, { length: number; breakFuncArgs: boolean }>
+    nodesInfo: Map<ValueParser.BaseAstNode, { length: number; breakFuncArgs: boolean }>,
 ): (
     node: ValueParser.BaseAstNode,
     parents: ValueParser.BaseAstNode[],
-    siblings: ValueParser.BaseAstNode[]
+    siblings: ValueParser.BaseAstNode[],
 ) => void {
     return (node, parents, siblings) => {
         const preserveNewLines = !parents.length
@@ -581,7 +581,7 @@ function flowDeclValueSegment({
 }
 function isFunctionBreakable(
     funcNode: Call,
-    nodesInfo: Map<BaseAstNode, { length: number; breakFuncArgs: boolean }>
+    nodesInfo: Map<BaseAstNode, { length: number; breakFuncArgs: boolean }>,
 ) {
     const totalSize = nodesInfo.get(funcNode)!.length;
     if (totalSize <= 30) {
@@ -714,7 +714,7 @@ function parseDeclBetweenRaws(between: string) {
 function formatSelectors(
     rule: Rule,
     forceNL: boolean,
-    { endOfLine: NL, indent, indentLevel }: FormatOptions
+    { endOfLine: NL, indent, indentLevel }: FormatOptions,
 ) {
     const selectors = rule.selectors;
     const newlines = rule.selector.match(/\n/gm)?.length ?? 0;

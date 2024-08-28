@@ -34,7 +34,7 @@ describe(`features/st-import`, () => {
 
         expect(
             STImport.getImportStatements(meta),
-            `STImport.getImportStatements(meta)`
+            `STImport.getImportStatements(meta)`,
         ).to.containSubset([
             {
                 request: `./no/import`,
@@ -63,7 +63,7 @@ describe(`features/st-import`, () => {
             },
         ]);
         expect(meta.getImportStatements(), `meta.getImportStatements()`).to.eql(
-            STImport.getImportStatements(meta)
+            STImport.getImportStatements(meta),
         );
     });
     it(`should process imported symbols`, () => {
@@ -160,10 +160,10 @@ describe(`features/st-import`, () => {
             'entry.st.css': `
                 /* 
                     @analyze-error word(unknown) ${stImportDiagnostics.UNKNOWN_TYPED_IMPORT(
-                        'unknown'
+                        'unknown',
                     )}
                     @analyze-error word(classes) ${stImportDiagnostics.UNKNOWN_TYPED_IMPORT(
-                        'classes'
+                        'classes',
                     )}
                 */
                 @st-import [unknown(u1, u2), classes(c1, c2)] "./a.st.css";
@@ -205,7 +205,7 @@ describe(`features/st-import`, () => {
             
             /* @analyze-error(invalid mapped custom prop) ${stImportDiagnostics.INVALID_CUSTOM_PROPERTY_AS_VALUE(
                 `--x`,
-                `z`
+                `z`,
             )} */
             @st-import [--x as z] from "./a.st.css"
         `);
@@ -218,13 +218,13 @@ describe(`features/st-import`, () => {
         testStylableCore(`
             /* @transform-error(relative) word(./missing.st.css) ${stImportDiagnostics.UNKNOWN_IMPORTED_FILE(
                 `./missing.st.css`,
-                resolveErrorMessage
+                resolveErrorMessage,
             )} */
             @st-import "./missing.st.css";
 
             /* @transform-error(3rd party) word(missing-package/index.st.css) ${stImportDiagnostics.UNKNOWN_IMPORTED_FILE(
                 `missing-package/index.st.css`,
-                resolveErrorMessagePackage
+                resolveErrorMessagePackage,
             )} */
             @st-import "missing-package/index.st.css";
         `);
@@ -235,13 +235,13 @@ describe(`features/st-import`, () => {
             '/entry.st.css': `
                 /* @transform-error(named) word(unknown) ${stImportDiagnostics.UNKNOWN_IMPORTED_SYMBOL(
                     `unknown`,
-                    `./empty.st.css`
+                    `./empty.st.css`,
                 )} */
                 @st-import [unknown] "./empty.st.css";
                 
                 /* @transform-error(mapped) word(unknown) ${stImportDiagnostics.UNKNOWN_IMPORTED_SYMBOL(
                     `unknown`,
-                    `./empty.st.css`
+                    `./empty.st.css`,
                 )} */
                 @st-import [unknown as local] "./empty.st.css";
             `,
@@ -300,7 +300,7 @@ describe(`features/st-import`, () => {
             const { meta } = sheets['/entry.st.css'];
 
             const reports = meta.diagnostics.reports.filter(
-                ({ message }) => message === stSymbolDiagnostics.REDECLARE_SYMBOL(`Name`)
+                ({ message }) => message === stSymbolDiagnostics.REDECLARE_SYMBOL(`Name`),
             );
             expect(reports.length, `for both default and name`).to.eql(2);
         });
@@ -356,7 +356,7 @@ describe(`features/st-import`, () => {
 
             expect(
                 STImport.getImportStatements(meta),
-                `STImport.getImportStatements(meta)`
+                `STImport.getImportStatements(meta)`,
             ).to.containSubset([
                 {
                     request: `./no/import`,
@@ -385,7 +385,7 @@ describe(`features/st-import`, () => {
                 },
             ]);
             expect(meta.getImportStatements(), `meta.getImportStatements()`).to.eql(
-                STImport.getImportStatements(meta)
+                STImport.getImportStatements(meta),
             );
         });
         it(`should process imported symbols`, () => {
@@ -483,10 +483,10 @@ describe(`features/st-import`, () => {
                 'entry.st.css': `
                     /*
                         @analyze-error word(unknown) ${stImportDiagnostics.UNKNOWN_TYPED_IMPORT(
-                            'unknown'
+                            'unknown',
                         )}
                         @analyze-error word(classes) ${stImportDiagnostics.UNKNOWN_TYPED_IMPORT(
-                            'classes'
+                            'classes',
                         )}
                     */
                     :import {
@@ -534,7 +534,7 @@ describe(`features/st-import`, () => {
                 
                 /* @analyze-error(invalid mapped custom prop) ${stImportDiagnostics.INVALID_CUSTOM_PROPERTY_AS_VALUE(
                     `--x`,
-                    `z`
+                    `z`,
                 )} */
                 :import {
                     -st-from: "./a.st.css";
@@ -557,7 +557,7 @@ describe(`features/st-import`, () => {
                     -st-from:"./imported.st.css";
                     -st-default:Comp;
                     /* @analyze-warn(unknown declaration) word(color) ${stImportDiagnostics.ILLEGAL_PROP_IN_IMPORT(
-                        `color`
+                        `color`,
                     )} */
                     color:red;
                 }
@@ -572,7 +572,7 @@ describe(`features/st-import`, () => {
                 :import{
                     /* @transform-error(relative) word(./missing.st.css) ${stImportDiagnostics.UNKNOWN_IMPORTED_FILE(
                         `./missing.st.css`,
-                        resolveErrorMessage
+                        resolveErrorMessage,
                     )} */
                     -st-from: "./missing.st.css";
                 }
@@ -580,7 +580,7 @@ describe(`features/st-import`, () => {
                 :import{
                     /* @transform-error(3rd party) word(missing-package/index.st.css) ${stImportDiagnostics.UNKNOWN_IMPORTED_FILE(
                         `missing-package/index.st.css`,
-                        resolveErrorMessagePackage
+                        resolveErrorMessagePackage,
                     )} */
                     -st-from: "missing-package/index.st.css";
                 }
@@ -594,7 +594,7 @@ describe(`features/st-import`, () => {
                         -st-from: "./empty.st.css";
                         /* @transform-error(named) word(unknown) ${stImportDiagnostics.UNKNOWN_IMPORTED_SYMBOL(
                             `unknown`,
-                            `./empty.st.css`
+                            `./empty.st.css`,
                         )} */
                         -st-named: unknown;
                     }
@@ -603,7 +603,7 @@ describe(`features/st-import`, () => {
                         -st-from: "./empty.st.css";
                         /* @transform-error(mapped) word(unknown) ${stImportDiagnostics.UNKNOWN_IMPORTED_SYMBOL(
                             `unknown`,
-                            `./empty.st.css`
+                            `./empty.st.css`,
                         )} */
                         -st-named: unknown as local;
                     }
@@ -614,7 +614,7 @@ describe(`features/st-import`, () => {
             testStylableCore({
                 '/entry.st.css': `
                     /* @analyze-error ${stImportDiagnostics.FORBIDDEN_DEF_IN_COMPLEX_SELECTOR(
-                        `:import`
+                        `:import`,
                     )} */
                     .gaga:import {
                         -st-from: "./file.st.css";
@@ -656,7 +656,7 @@ describe(`features/st-import`, () => {
                 const { meta } = sheets['/entry.st.css'];
 
                 const reports = meta.diagnostics.reports.filter(
-                    ({ message }) => message === stSymbolDiagnostics.REDECLARE_SYMBOL(`Name`)
+                    ({ message }) => message === stSymbolDiagnostics.REDECLARE_SYMBOL(`Name`),
                 );
                 expect(reports.length, `for both default and name`).to.eql(2);
             });

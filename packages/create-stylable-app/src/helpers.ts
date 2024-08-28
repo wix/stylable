@@ -19,7 +19,7 @@ export interface DirectoryItem {
  */
 export async function* directoryDeepChildren(
     directoryPath: string,
-    basePath = directoryPath
+    basePath = directoryPath,
 ): AsyncGenerator<DirectoryItem, void, unknown> {
     for (const item of await promises.readdir(directoryPath, { withFileTypes: true })) {
         const itemName = item.name;
@@ -59,7 +59,7 @@ export async function spawnSafe(command: string, args: string[], options?: Spawn
 export async function executeWithProgress(
     message: string,
     action: () => Promise<any>,
-    dotIntervalMs = 5000
+    dotIntervalMs = 5000,
 ) {
     let dotInterval: ReturnType<typeof setInterval> | undefined;
     try {

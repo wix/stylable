@@ -26,7 +26,7 @@ describe('Stylable postcss process', () => {
             `
 
         `,
-            { from }
+            { from },
         );
 
         expect(result.namespace).to.eql(processNamespace('style', from));
@@ -43,7 +43,7 @@ describe('Stylable postcss process', () => {
                 -st-extends: Style;
             }
         `,
-            { from: 'path/to/style.st.css' }
+            { from: 'path/to/style.st.css' },
         );
 
         expect(result.diagnostics.reports.length, 'no reports').to.eql(0);
@@ -73,11 +73,11 @@ describe('Stylable postcss process', () => {
                 .map((name) =>
                     name.startsWith(`nth`)
                         ? `:${name}(5n, El-${name}.cls-${name}) {}`
-                        : `:${name}(El-${name}.cls-${name}) {}`
+                        : `:${name}(El-${name}.cls-${name}) {}`,
                 )
                 .join(``)}
         `,
-            { from: 'path/to/style.st.css' }
+            { from: 'path/to/style.st.css' },
         );
 
         // unknown pseudo-class
@@ -100,7 +100,7 @@ describe('Stylable postcss process', () => {
             `
 
         `,
-            { from: 'path/to/style.st.css' }
+            { from: 'path/to/style.st.css' },
         );
 
         expect(result.getAllClasses()).to.eql({
@@ -121,7 +121,7 @@ describe('Stylable postcss process', () => {
             :not(.classD){}
             .classE:hover{}
         `,
-            { from: 'path/to/style.st.css' }
+            { from: 'path/to/style.st.css' },
         );
 
         expect(Object.keys(result.getAllClasses()).length).to.eql(6);
@@ -138,7 +138,7 @@ describe('Stylable postcss process', () => {
                 .classE:hover{}
             }
         `,
-            { from: 'path/to/style.st.css' }
+            { from: 'path/to/style.st.css' },
         );
 
         expect(Object.keys(result.getAllClasses()).length).to.eql(6);
@@ -152,7 +152,7 @@ describe('Stylable postcss process', () => {
                     img: url('./x.svg');
                 }
             `,
-                { from: 'path/to/style.st.css' }
+                { from: 'path/to/style.st.css' },
             );
 
             expect(result.urls.length).to.eql(1);

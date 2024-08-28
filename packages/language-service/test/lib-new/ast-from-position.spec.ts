@@ -22,7 +22,7 @@ function setupWithCursor(source: string, options: { deindent?: boolean } = {}) {
 }
 function assertNodes(
     nodes: NodeType[],
-    expectedNodes: { str: string; desc?: string; type?: string }[]
+    expectedNodes: { str: string; desc?: string; type?: string }[],
 ) {
     expect(nodes.length, 'expected amount').to.eql(expectedNodes.length);
     nodes.forEach((actual, i) => {
@@ -57,7 +57,7 @@ function expectAstLocation(
         deindent?: boolean;
         where?: string;
         parents?: { str: string; desc?: string; type?: string }[];
-    }
+    },
 ) {
     if (expectation.node) {
         expect(actual.node, 'node').to.equal(expectation.node);
@@ -669,7 +669,7 @@ describe('ast-from-position', () => {
             });
             // decl-value level
             expect(stringifyCSSValue(declValue!.ast), 'value ast').to.eql(
-                ' before nest(bookmark) after'
+                ' before nest(bookmark) after',
             );
             expectAstLocation(declValue!, {
                 stringify: 'book|mark',
@@ -872,7 +872,7 @@ describe('ast-from-position', () => {
             });
             // atrule-params level
             expect(stringifyCSSValue(atRuleParams!.ast), 'params ast').to.eql(
-                ' before bookmark after '
+                ' before bookmark after ',
             );
             expectAstLocation(atRuleParams!, {
                 stringify: 'book|mark',
@@ -903,7 +903,7 @@ describe('ast-from-position', () => {
             });
             // atrule-params level
             expect(stringifyCSSValue(atRuleParams!.ast), 'params ast').to.eql(
-                ' before nest(bookmark) after '
+                ' before nest(bookmark) after ',
             );
             expectAstLocation(atRuleParams!, {
                 stringify: 'book|mark',

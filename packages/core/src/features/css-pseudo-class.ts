@@ -10,7 +10,7 @@ export const diagnostics = {
     UNKNOWN_STATE_USAGE: createDiagnosticReporter(
         '08001',
         'error',
-        (name: string) => `unknown pseudo-class "${name}"`
+        (name: string) => `unknown pseudo-class "${name}"`,
     ),
 };
 
@@ -36,7 +36,7 @@ export const hooks = createFeature({
                     inferredState.meta.namespace,
                     context.resolver,
                     context.diagnostics,
-                    ruleOrAtRule
+                    ruleOrAtRule,
                 );
             }
         }
@@ -54,13 +54,13 @@ export const hooks = createFeature({
                                 symbol: CSSType.createSymbol({ name: '*' }),
                             },
                         ],
-                        node
+                        node,
                     );
                 }
                 return;
             } else {
                 const hasSubSelectors = node.value.match(
-                    /not|any|-\w+?-any|matches|is|where|has|local|nth-child|nth-last-child/
+                    /not|any|-\w+?-any|matches|is|where|has|local|nth-child|nth-last-child/,
                 );
                 // pickup all nested selectors except nth initial selector
                 const innerSelectors = (
@@ -68,7 +68,7 @@ export const hooks = createFeature({
                 ) as Selector[];
                 const nestedContext = selectorContext.createNestedContext(
                     innerSelectors,
-                    selectorContext.inferredSelector
+                    selectorContext.inferredSelector,
                 );
                 scopeSelectorAst(nestedContext);
                 // change selector inference
@@ -81,17 +81,17 @@ export const hooks = createFeature({
                         const prevNode = selectorContext.lastInferredSelectorNode;
                         if (prevNode && prevNode.type !== 'combinator') {
                             nestedContext.inferredMultipleSelectors.add(
-                                selectorContext.inferredSelector
+                                selectorContext.inferredSelector,
                             );
                         }
                         selectorContext.setNextSelectorScope(
                             nestedContext.inferredMultipleSelectors,
-                            node
+                            node,
                         );
                     }
                     // legacy: delegate elements of first selector
                     selectorContext.elements[selectorContext.selectorIndex].push(
-                        ...nestedContext.elements[0]
+                        ...nestedContext.elements[0],
                     );
                 }
             }

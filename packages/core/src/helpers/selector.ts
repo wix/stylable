@@ -28,11 +28,11 @@ const selectorAstCache = new Map<string, ImmutableSelectorList>();
 export function parseSelectorWithCache(selector: string, options: { clone: true }): SelectorList;
 export function parseSelectorWithCache(
     selector: string,
-    options?: { clone?: false }
+    options?: { clone?: false },
 ): ImmutableSelectorList;
 export function parseSelectorWithCache(
     selector: string,
-    options: { clone?: boolean } = {}
+    options: { clone?: boolean } = {},
 ): ImmutableSelectorList {
     if (!selectorAstCache.has(selector)) {
         if (selectorAstCache.size > 10000) {
@@ -71,7 +71,7 @@ export function isSimpleSelector(selector: string): {
                 foundType = node.type;
                 return;
             },
-            { ignoreList: [`selector`, `comment`] }
+            { ignoreList: [`selector`, `comment`] },
         );
         if (foundType === `class` || foundType === `type`) {
             return { type: foundType, isSimple: true };
@@ -120,7 +120,7 @@ export function convertToSelector(node: SelectorNode): Selector {
 export function convertToPseudoClass(
     node: SelectorNode,
     name: string,
-    nestedSelectors?: SelectorList
+    nestedSelectors?: SelectorList,
 ): PseudoClass {
     const castedNode = node as PseudoClass;
     castedNode.type = 'pseudo_class';
@@ -159,7 +159,7 @@ export function isInPseudoClassContext(parents: ReadonlyArray<ImmutableSelectorN
 
 export function matchTypeAndValue(
     a: Partial<ImmutableSelectorNode>,
-    b: Partial<ImmutableSelectorNode>
+    b: Partial<ImmutableSelectorNode>,
 ) {
     return a.type === b.type && (a as any).value === (b as any).value;
 }
@@ -178,7 +178,7 @@ export function scopeNestedSelector(
     scopeSelectorAst: ImmutableSelectorList,
     nestedSelectorAst: ImmutableSelectorList,
     rootScopeLevel = false,
-    isAnchor: (node: SelectorNode) => boolean = isNestedNode
+    isAnchor: (node: SelectorNode) => boolean = isNestedNode,
 ): { selector: string; ast: SelectorList } {
     const resultSelectors: SelectorList = [];
     nestedSelectorAst.forEach((targetAst) => {
@@ -195,7 +195,7 @@ export function scopeNestedSelector(
                     first = node;
                     return walkSelector.stopAll;
                 },
-                { ignoreList: [`selector`] }
+                { ignoreList: [`selector`] },
             );
             // merge scope flags
             const nestStartWithNesting = first.type === `nesting`;

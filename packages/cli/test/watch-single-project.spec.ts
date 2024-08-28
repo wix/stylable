@@ -54,7 +54,7 @@ describe('Stylable Cli Watch - Single project', function () {
                     action() {
                         return writeToExistingFile(
                             join(tempDir.path, 'depend.st.css'),
-                            '.root{ color:yellow; }'
+                            '.root{ color:yellow; }',
                         );
                     },
                 },
@@ -95,7 +95,7 @@ describe('Stylable Cli Watch - Single project', function () {
                     action() {
                         return writeToExistingFile(
                             join(tempDir.path, 'deep.st.css'),
-                            ':vars { color: green; }'
+                            ':vars { color: green; }',
                         );
                     },
                 },
@@ -122,7 +122,7 @@ describe('Stylable Cli Watch - Single project', function () {
                     action() {
                         return writeFile(
                             join(tempDir.path, 'style.st.css'),
-                            `.root{ color:green }`
+                            `.root{ color:green }`,
                         );
                     },
                 },
@@ -266,7 +266,7 @@ describe('Stylable Cli Watch - Single project', function () {
                     action() {
                         renameSync(
                             join(tempDir.path, 'style.st.css'),
-                            join(tempDir.path, 'style-renamed.st.css')
+                            join(tempDir.path, 'style-renamed.st.css'),
                         );
                     },
                 },
@@ -349,7 +349,7 @@ describe('Stylable Cli Watch - Single project', function () {
                                 @st-import Module from './does-not-exist.st.css';
                     
                                 .root{ color: blue; }
-                                `
+                                `,
                         );
                     },
                 },
@@ -378,7 +378,7 @@ describe('Stylable Cli Watch - Single project', function () {
                     action() {
                         return writeFile(
                             join(tempDir.path, 'style.st.css'),
-                            `.root{ color:green }`
+                            `.root{ color:green }`,
                         );
                     },
                 },
@@ -387,7 +387,7 @@ describe('Stylable Cli Watch - Single project', function () {
                     action() {
                         return writeToExistingFile(
                             join(tempDir.path, 'style.st.css'),
-                            `.root{ color:blue }`
+                            `.root{ color:blue }`,
                         );
                     },
                 },
@@ -428,7 +428,7 @@ describe('Stylable Cli Watch - Single project', function () {
                         expect(files['dist/bundle.css']).to.include('z-index:1');
                         return writeFile(
                             join(tempDir.path, 'src', 'comp.st.css'),
-                            `.root{ z-index:2 }`
+                            `.root{ z-index:2 }`,
                         );
                     },
                 },
@@ -440,7 +440,7 @@ describe('Stylable Cli Watch - Single project', function () {
                         expect(files['dist/bundle.css']).to.include('z-index:1');
                         return writeFile(
                             join(tempDir.path, 'src', 'style.st.css'),
-                            `.root{ z-index:3 }`
+                            `.root{ z-index:3 }`,
                         );
                     },
                 },
@@ -512,20 +512,20 @@ describe('Stylable Cli Watch - Single project', function () {
                             `.root{ 
                                 color:red;
                                 background: url('./icon.svg')
-                             }`
+                             }`,
                         );
                     },
                 },
                 {
                     msg: buildMessages.FINISHED_PROCESSING(
                         2,
-                        `[0] ${sep}` + join('packages', 'project-a')
+                        `[0] ${sep}` + join('packages', 'project-a'),
                     ),
                 },
                 {
                     msg: buildMessages.FINISHED_PROCESSING(
                         2,
-                        `[1] ${sep}` + join('packages', 'project-a')
+                        `[1] ${sep}` + join('packages', 'project-a'),
                     ),
                     action() {
                         return {
@@ -541,13 +541,13 @@ describe('Stylable Cli Watch - Single project', function () {
                 new RegExp(
                     escapeRegExp(
                         buildMessages.CHANGE_EVENT_TRIGGERED(
-                            join(tempDir.path, 'packages', 'project-a', 'src', 'icon.svg')
-                        )
+                            join(tempDir.path, 'packages', 'project-a', 'src', 'icon.svg'),
+                        ),
                     ),
-                    'ig'
-                )
+                    'ig',
+                ),
             )?.length,
-            'svg file should trigger change event once'
+            'svg file should trigger change event once',
         ).to.eql(2, output());
     });
 
@@ -572,7 +572,7 @@ describe('Stylable Cli Watch - Single project', function () {
                     action() {
                         return writeToExistingFile(
                             join(tempDir.path, 'style.st.css'),
-                            `.root{ color:green }`
+                            `.root{ color:green }`,
                         );
                     },
                 },

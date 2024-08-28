@@ -385,7 +385,7 @@ describe('LS: css-pseudo-class', () => {
                             textEdit: replaceText(carets.nestColon, ':bbb', { deltaStart: -1 }),
                         },
                     ],
-                })
+                }),
             );
 
             assertCompletions(
@@ -407,7 +407,7 @@ describe('LS: css-pseudo-class', () => {
                             }),
                         },
                     ],
-                })
+                }),
             );
         });
         it('should NOT suggest root custom states after empty nested selector', () => {
@@ -492,7 +492,7 @@ describe('LS: css-pseudo-class', () => {
                             },
                         ],
                         unexpectedList: [{ label: ':aaa' }, { label: ':bbb' }],
-                    })
+                    }),
                 );
 
                 assertCompletions(
@@ -509,7 +509,7 @@ describe('LS: css-pseudo-class', () => {
                             },
                         ],
                         unexpectedList: [{ label: ':aaa' }, { label: ':bbb' }],
-                    })
+                    }),
                 );
             }
         });
@@ -715,7 +715,7 @@ describe('LS: css-pseudo-class', () => {
                         .extendingNamed^extendingClass^ {}
                     `,
                 },
-                { testOnNativeFileSystem: tempDir.path }
+                { testOnNativeFileSystem: tempDir.path },
             );
             const entryPath = fs.join(tempDir.path, 'entry.st.css');
 
@@ -780,7 +780,7 @@ describe('LS: css-pseudo-class', () => {
                         .extending:xxx::part:another-part-state:yyy::base:^inDeepPseudoElement^ {}
                     `,
                 },
-                { testOnNativeFileSystem: tempDir.path }
+                { testOnNativeFileSystem: tempDir.path },
             );
             const entryPath = fs.join(tempDir.path, 'entry.st.css');
 
@@ -817,7 +817,7 @@ describe('LS: css-pseudo-class', () => {
                         .Root:type(sh^partial^) {}
                     `,
                 },
-                { testOnNativeFileSystem: tempDir.path }
+                { testOnNativeFileSystem: tempDir.path },
             );
             const entryPath = fs.join(tempDir.path, 'entry.st.css');
 

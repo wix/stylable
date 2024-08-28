@@ -20,7 +20,7 @@ export function stylableModuleFactory(
         staticImports = [],
         moduleType = 'cjs',
         runtimeId = '0',
-    }: Partial<Options> = {}
+    }: Partial<Options> = {},
 ) {
     const stylable = new Stylable(stylableOptions);
     return function stylableToModule(source: string, path: string) {
@@ -39,7 +39,7 @@ export function stylableModuleFactory(
                 css: injectCSS ? meta.targetAst!.toString() : '',
                 depth: -1,
                 runtimeId,
-            }
+            },
         );
     };
 }

@@ -4,7 +4,7 @@ import { dirname } from 'path';
 
 const project = 'simplest-project';
 const projectDir = dirname(
-    require.resolve(`@stylable/webpack-plugin/test/e2e/projects/${project}/webpack.config`)
+    require.resolve(`@stylable/webpack-plugin/test/e2e/projects/${project}/webpack.config`),
 );
 
 describe(`(${project})`, () => {
@@ -20,7 +20,7 @@ describe(`(${project})`, () => {
         },
         before,
         afterEach,
-        after
+        after,
     );
 
     it('renders css', async () => {

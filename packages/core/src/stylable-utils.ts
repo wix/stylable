@@ -13,12 +13,12 @@ export const utilDiagnostics = {
     INVALID_MERGE_OF: createDiagnosticReporter(
         '14001',
         'error',
-        (mergeValue: string) => `invalid merge of: \n"${mergeValue}"`
+        (mergeValue: string) => `invalid merge of: \n"${mergeValue}"`,
     ),
     INVALID_RECURSIVE_MIXIN: createDiagnosticReporter(
         '10010',
         'error',
-        () => `invalid recursive mixin`
+        () => `invalid recursive mixin`,
     ),
 };
 
@@ -28,7 +28,7 @@ export function mergeRules(
     rule: postcss.Rule,
     mixinDecl: postcss.Declaration,
     report: Diagnostics,
-    useNestingAsAnchor: boolean
+    useNestingAsAnchor: boolean,
 ) {
     let mixinRoot: postcss.Rule | null | 'NoRoot' = null;
     const nestedInKeyframes = isChildOfAtRule(rule, `keyframes`);
@@ -46,7 +46,7 @@ export function mergeRules(
                     parseSelectorWithCache(rule.selector),
                     parseSelectorWithCache(mixinRule.selector),
                     false,
-                    anchorNodeCheck
+                    anchorNodeCheck,
                 );
                 mixinRoot = 'NoRoot';
                 mixinRule.selector = selector;
@@ -57,7 +57,7 @@ export function mergeRules(
                 parseSelectorWithCache(rule.selector),
                 parseSelectorWithCache(mixinRule.selector),
                 false,
-                anchorNodeCheck
+                anchorNodeCheck,
             );
             mixinRule.selector = selector;
         } else if (mixinRule.selector.includes(anchorSelector)) {
@@ -168,7 +168,7 @@ export const sourcePathDiagnostics = {
     MISSING_SOURCE_FILENAME: createDiagnosticReporter(
         '17001',
         'error',
-        () => 'missing source filename'
+        () => 'missing source filename',
     ),
 };
 

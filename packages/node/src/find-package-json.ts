@@ -4,7 +4,7 @@ import { dirname, join } from 'path';
 export function findPackageJson(
     cwd: string,
     cache = new Map<string, string>(),
-    visited: string[] = []
+    visited: string[] = [],
 ) {
     while (cwd) {
         if (cache.has(cwd)) {

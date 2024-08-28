@@ -64,7 +64,7 @@ interface ModuleOptions {
 
 export function generateStylableJSModuleSource(
     moduleOptions: ModuleOptions,
-    injectOptions?: InjectCSSOptions
+    injectOptions?: InjectCSSOptions,
 ) {
     const {
         namespace,
@@ -121,7 +121,7 @@ function moduleRequest(moduleType: 'esm' | 'cjs') {
 function runtimeImport(
     moduleType: 'esm' | 'cjs',
     runtimeRequest: string | undefined,
-    injectOptions: InjectCSSOptions | undefined
+    injectOptions: InjectCSSOptions | undefined,
 ) {
     const importInjectCSS = injectOptions?.css ? `, injectCSS` : '';
     const request = JSON.stringify(runtimeRequest ?? '@stylable/runtime');
@@ -132,7 +132,7 @@ function runtimeImport(
 
 function runtimeExecuteInject(
     moduleType: 'esm' | 'cjs',
-    injectOptions: InjectCSSOptions | undefined
+    injectOptions: InjectCSSOptions | undefined,
 ) {
     if (!injectOptions?.css) {
         return '';

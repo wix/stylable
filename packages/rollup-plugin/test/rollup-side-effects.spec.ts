@@ -49,7 +49,7 @@ describe('StylableRollupPlugin - include all stylesheets with side-effects', fun
         `);
         const outputFiles = getOutputFiles();
         expect(outputFiles['stylable.css'].replace(/\s+/g, ''), 'css bundle').to.eql(
-            expected.replace(/\s+/g, '')
+            expected.replace(/\s+/g, ''),
         );
     });
 });

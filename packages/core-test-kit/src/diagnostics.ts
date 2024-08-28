@@ -51,17 +51,17 @@ export function matchDiagnostic(
             type: string,
             expectedWord: string,
             message: string,
-            label?: string
+            label?: string,
         ) => string;
         severityMismatch: (
             type: string,
             expectedSeverity: string,
             actualSeverity: string,
             message: string,
-            label?: string
+            label?: string,
         ) => string;
         expectedNotFound: (type: string, message: string, label?: string) => string;
-    }
+    },
 ): string {
     const diagnostics = type === `analyze` ? meta.diagnostics : meta.transformDiagnostics;
     if (!diagnostics) {
@@ -100,7 +100,7 @@ export function matchDiagnostic(
                     type,
                     expected.location.word,
                     expected.message,
-                    expected.label
+                    expected.label,
                 );
                 foundPartialMatch(matchState);
                 continue;
@@ -114,7 +114,7 @@ export function matchDiagnostic(
                     expectedSeverity,
                     report.severity,
                     expected.message,
-                    expected.label
+                    expected.label,
                 );
                 foundPartialMatch(matchState);
                 continue;
@@ -167,7 +167,7 @@ export function findTestLocations(css: string) {
 export function expectAnalyzeDiagnostics(
     css: string,
     warnings: Diagnostic[],
-    { partial = false }: { partial?: boolean } = {}
+    { partial = false }: { partial?: boolean } = {},
 ) {
     const source = findTestLocations(css);
     const root = safeParse(source.css);
@@ -198,13 +198,13 @@ export function expectAnalyzeDiagnostics(
             if (expectedWarning.severity) {
                 expect(
                     report.severity,
-                    `diagnostics severity mismatch, expected "${expectedWarning.severity}" but received "${report.severity}"`
+                    `diagnostics severity mismatch, expected "${expectedWarning.severity}" but received "${report.severity}"`,
                 ).to.equal(expectedWarning.severity);
             }
         });
 
         expect(res.diagnostics.reports.length, 'diagnostics reports match').to.equal(
-            warnings.length
+            warnings.length,
         );
     }
     return res;
@@ -213,7 +213,7 @@ export function expectAnalyzeDiagnostics(
 function matchPartialDiagnostics(
     expectedList: Diagnostic[],
     diagnostics: Diagnostics,
-    locations: Record<string, Location>
+    locations: Record<string, Location>,
 ) {
     // ToDo: adding diagnostics numbered ids would really help
     for (const expectedWarning of expectedList) {
@@ -236,7 +236,7 @@ function matchPartialDiagnostics(
                 if (expectedWarning.severity) {
                     expect(
                         report.severity,
-                        `${report.message}: severity mismatch, expected ${expectedWarning.severity} but received ${report.severity}`
+                        `${report.message}: severity mismatch, expected ${expectedWarning.severity} but received ${report.severity}`,
                     ).to.equal(expectedWarning.severity);
                     matches++;
                 }
@@ -260,7 +260,7 @@ function matchPartialDiagnostics(
 export function expectTransformDiagnostics(
     config: Config,
     expectedWarnings: Diagnostic[],
-    { partial = false }: { partial?: boolean } = {}
+    { partial = false }: { partial?: boolean } = {},
 ): StylableResults {
     config.trimWS = false;
 
@@ -277,7 +277,7 @@ export function expectTransformDiagnostics(
     if (expectedWarnings.length === 0 && diagnostics.reports.length !== 0) {
         expect(
             expectedWarnings.length,
-            `expected no diagnostics but received ${JSON.stringify(warningMessages, null, 2)}`
+            `expected no diagnostics but received ${JSON.stringify(warningMessages, null, 2)}`,
         ).to.equal(diagnostics.reports.length);
     }
 
@@ -304,7 +304,7 @@ export function expectTransformDiagnostics(
             if (expectedWarning.severity) {
                 expect(
                     report.severity,
-                    `diagnostics severity mismatch, expected ${expectedWarning.severity} but received ${report.severity}`
+                    `diagnostics severity mismatch, expected ${expectedWarning.severity} but received ${report.severity}`,
                 ).to.equal(expectedWarning.severity);
             }
         }
@@ -313,8 +313,8 @@ export function expectTransformDiagnostics(
             `expected diagnostics: ${JSON.stringify(
                 expectedWarnings.map((d) => d.message),
                 null,
-                2
-            )}, but received ${JSON.stringify(warningMessages, null, 2)}`
+                2,
+            )}, but received ${JSON.stringify(warningMessages, null, 2)}`,
         ).to.equal(diagnostics.reports.length);
     }
 
@@ -326,14 +326,14 @@ export function shouldReportNoDiagnostics(meta: StylableMeta, checkTransformDiag
 
     expect(
         processReports.length,
-        `processing diagnostics: ${processReports.map((r) => r.message)}`
+        `processing diagnostics: ${processReports.map((r) => r.message)}`,
     ).to.equal(0);
     if (meta.transformDiagnostics && checkTransformDiagnostics) {
         const transformerReports = meta.transformDiagnostics.reports;
 
         expect(
             transformerReports.length,
-            `transforming diagnostics: ${transformerReports.map((r) => r.message)}`
+            `transforming diagnostics: ${transformerReports.map((r) => r.message)}`,
         ).to.equal(0);
     }
 }
@@ -345,7 +345,7 @@ export type UnwrapDiagnosticMessage<T extends DiagnosticsBank> = {
 };
 
 export function diagnosticBankReportToStrings<T extends DiagnosticsBank>(
-    bank: T
+    bank: T,
 ): UnwrapDiagnosticMessage<T> {
     const cleaned = {} as UnwrapDiagnosticMessage<T>;
 

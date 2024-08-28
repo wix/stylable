@@ -32,7 +32,7 @@ const metadataLoader: LoaderDefinition = function (content) {
         stylable,
         content,
         this.resourcePath,
-        exposeNamespaceMapping
+        exposeNamespaceMapping,
     );
 
     for (const [meta] of usedMeta) {
@@ -44,7 +44,7 @@ const metadataLoader: LoaderDefinition = function (content) {
 
 function createStylable(
     loader: LoaderContext<any>,
-    resolveNamespace: (namespace: string, filePath: string) => string
+    resolveNamespace: (namespace: string, filePath: string) => string,
 ): Stylable {
     if (!loader._compiler) {
         throw new Error('Stylable metadata loader requires a compiler instance');

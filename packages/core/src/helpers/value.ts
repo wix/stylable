@@ -9,15 +9,15 @@ export const valueDiagnostics = {
     INVALID_NAMED_PARAMS: createDiagnosticReporter(
         '13001',
         'error',
-        () => `invalid named parameters (e.g. "func(name value, [name value, ...])")`
+        () => `invalid named parameters (e.g. "func(name value, [name value, ...])")`,
     ),
     MISSING_REQUIRED_FORMATTER_ARG: createDiagnosticReporter(
         '13002',
         'error',
         (node: ParsedValue, argIndex: number) =>
             `${postcssValueParser.stringify(
-                node as postcssValueParser.Node
-            )}: argument at index ${argIndex} is empty`
+                node as postcssValueParser.Node,
+            )}: argument at index ${argIndex} is empty`,
     ),
 };
 
@@ -51,7 +51,7 @@ export function getFormatterArgs(
     node: ParsedValue,
     allowComments = false,
     reportWarning?: ReportWarning,
-    preserveQuotes = false
+    preserveQuotes = false,
 ) {
     const argsResult = [];
     let currentArg = '';
@@ -117,7 +117,7 @@ export function listOptions(node: any) {
                 } else {
                     return undefined;
                 }
-            })
+            }),
         )
         .filter((x: string) => typeof x === 'string');
 }
@@ -147,7 +147,7 @@ export function validateAllowedNodesUntil(
     node: ParsedValue,
     i: number,
     untilType = 'div',
-    allowed = ['comment']
+    allowed = ['comment'],
 ) {
     i = 1;
     let current = node.nodes[i];

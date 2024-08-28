@@ -50,7 +50,7 @@ describe('getAtRuleByPosition', () => {
         const root = postcss.parse(css);
 
         expect(getAtRuleByPosition(root, pos, stImportName)!.toString()).to.equal(
-            `@st-import  from './stylesheet2.st.css'`
+            `@st-import  from './stylesheet2.st.css'`,
         );
     });
 

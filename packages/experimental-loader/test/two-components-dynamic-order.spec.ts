@@ -4,7 +4,7 @@ import { dirname, join } from 'path';
 
 const project = 'two-components-dynamic-order';
 const projectDir = dirname(
-    require.resolve(`@stylable/experimental-loader/test/projects/${project}/webpack.config`)
+    require.resolve(`@stylable/experimental-loader/test/projects/${project}/webpack.config`),
 );
 
 describe(`(${project})`, () => {
@@ -20,7 +20,7 @@ describe(`(${project})`, () => {
         },
         before,
         afterEach,
-        after
+        after,
     );
 
     it('renders css', async () => {

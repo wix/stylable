@@ -7,7 +7,7 @@ export function createDiagnosis(
     version: number,
     filePath: string,
     stylable: Stylable,
-    cssService: CssService
+    cssService: CssService,
 ): Diagnostic[] {
     if (!filePath.endsWith('.st.css')) {
         return [];

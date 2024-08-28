@@ -130,7 +130,7 @@ describe(`features/st-global`, () => {
                 },
                 {
                     stylableConfig: { experimentalSelectorInference: false },
-                }
+                },
             );
         });
     });

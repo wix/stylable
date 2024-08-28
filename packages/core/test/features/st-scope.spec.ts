@@ -66,7 +66,7 @@ describe(`features/st-scope`, () => {
                 .external__root {}
                 span {}
             }
-        `)
+        `),
         );
     });
     it('should prepend scoping selector to nested rules', () => {
@@ -183,15 +183,15 @@ describe(`features/st-scope`, () => {
 
             expect(
                 stylable.stScope.getStScope(queryBySelector(meta, '.direct')!),
-                'direct'
+                'direct',
             ).to.equal(queryStScope(meta, 'a'));
             expect(
                 stylable.stScope.getStScope(queryBySelector(meta, '.nested')!),
-                'nested'
+                'nested',
             ).to.equal(queryStScope(meta, 'b'));
             expect(
                 stylable.stScope.getStScope(queryBySelector(meta, '.error-nested-scope')!),
-                'not-top-level-scope'
+                'not-top-level-scope',
             ).to.equal(undefined);
         });
     });

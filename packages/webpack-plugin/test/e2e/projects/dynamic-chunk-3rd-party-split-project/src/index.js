@@ -1,5 +1,5 @@
 // force runtime to be bundled in the main chunk
-import "@stylable/runtime";
+import '@stylable/runtime';
 
 const Lib = {
     async loadButton() {

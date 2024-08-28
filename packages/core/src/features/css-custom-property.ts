@@ -34,42 +34,42 @@ export const diagnostics = {
         '01005',
         'error',
         (name: string) =>
-            `a custom css property must begin with "--" (double-dash), but received "${name}"`
+            `a custom css property must begin with "--" (double-dash), but received "${name}"`,
     ),
     ILLEGAL_CSS_VAR_ARGS: createDiagnosticReporter(
         '01006',
         'error',
         (name: string) =>
-            `custom property "${name}" usage (var()) must receive comma separated values`
+            `custom property "${name}" usage (var()) must receive comma separated values`,
     ),
     DEPRECATED_ST_GLOBAL_CUSTOM_PROPERTY: createDiagnosticReporter(
         '01007',
         'info',
         () =>
-            `"st-global-custom-property" is deprecated and will be removed in the next version. Use "@property" with ${GLOBAL_FUNC}`
+            `"st-global-custom-property" is deprecated and will be removed in the next version. Use "@property" with ${GLOBAL_FUNC}`,
     ),
     GLOBAL_CSS_VAR_MISSING_COMMA: createDiagnosticReporter(
         '01008',
         'error',
         (name: string) =>
-            `"@st-global-custom-property" received the value "${name}", but its values must be comma separated`
+            `"@st-global-custom-property" received the value "${name}", but its values must be comma separated`,
     ),
     ILLEGAL_GLOBAL_CSS_VAR: createDiagnosticReporter(
         '01009',
         'error',
         (name: string) =>
-            `"@st-global-custom-property" received the value "${name}", but it must begin with "--" (double-dash)`
+            `"@st-global-custom-property" received the value "${name}", but it must begin with "--" (double-dash)`,
     ),
     MISSING_PROP_NAME: createDiagnosticReporter(
         '01010',
         'error',
-        () => `missing custom property name for "var(--[PROP NAME])"`
+        () => `missing custom property name for "var(--[PROP NAME])"`,
     ),
     UNDEFINED_CSS_CUSTOM_PROP: createDiagnosticReporter(
         '01011',
         'error',
         (name) =>
-            `Undefined "${name}" custom property. Please define the property using '@property' or import it with '@st-import' when 'strictCustomProperty' is enabled.`
+            `Undefined "${name}" custom property. Please define the property using '@property' or import it with '@st-import' when 'strictCustomProperty' is enabled.`,
     ),
 };
 
@@ -97,13 +97,13 @@ export const hooks = createFeature<{
     analyzeInit(context) {
         // ToDo: move to `STImport.ImportTypeHook`
         for (const [symbolName, symbol] of Object.entries(
-            STSymbol.getAllByType(context.meta, `import`)
+            STSymbol.getAllByType(context.meta, `import`),
         )) {
             if (validateCustomPropertyName(symbolName)) {
                 const importSymbol = STSymbol.get(context.meta, symbolName, `import`);
                 if (!importSymbol) {
                     console.warn(
-                        `imported symbol "${symbolName}" not found on "${context.meta.source}"`
+                        `imported symbol "${symbolName}" not found on "${context.meta.source}"`,
                     );
                     continue;
                 }
@@ -131,7 +131,7 @@ export const hooks = createFeature<{
             }
             const { stCustomGlobalProperty, typedDefinitions } = plugableRecord.getUnsafe(
                 context.meta.data,
-                dataKey
+                dataKey,
             );
             // handle conflict with deprecated `@st-global-custom-property`
             if (stCustomGlobalProperty[name]) {
@@ -186,7 +186,7 @@ export const hooks = createFeature<{
         };
         const resolvedSymbols = getResolvedSymbols(meta);
         for (const [localVarName, localSymbol] of Object.entries(
-            STSymbol.getAllByType(meta, `cssVar`)
+            STSymbol.getAllByType(meta, `cssVar`),
         )) {
             const resolve = resolveFinalSymbol(meta, localSymbol, resolvedSymbols);
             customPropsMapping.localToGlobal[localVarName] = getTransformedName(resolve);
@@ -238,7 +238,7 @@ export const hooks = createFeature<{
 export function transformPropertyIdent(
     meta: StylableMeta,
     node: WordNode,
-    getResolvedSymbols: FeatureTransformContext['getResolvedSymbols']
+    getResolvedSymbols: FeatureTransformContext['getResolvedSymbols'],
 ) {
     const varWithPrefix = node.value || '';
     const resolvedSymbols = getResolvedSymbols(meta);
@@ -255,7 +255,7 @@ export function get(meta: StylableMeta, name: string): CSSVarSymbol | undefined 
 function resolveFinalSymbol(
     meta: StylableMeta,
     localSymbol: CSSVarSymbol,
-    resolvedSymbols: ReturnType<FeatureTransformContext['getResolvedSymbols']>
+    resolvedSymbols: ReturnType<FeatureTransformContext['getResolvedSymbols']>,
 ) {
     return (
         resolvedSymbols.cssVar[localSymbol.name] || {
@@ -347,7 +347,7 @@ export class StylablePublicApi {
         const topLevelDiagnostics = new Diagnostics();
         const getResolvedSymbols = createSymbolResolverWithCache(
             this.stylable.resolver,
-            topLevelDiagnostics
+            topLevelDiagnostics,
         );
         const { cssVar } = getResolvedSymbols(meta);
         for (const [name, symbol] of Object.entries(cssVar)) {

@@ -53,7 +53,7 @@ export async function build(
         log,
         outputFiles = new Map(),
         diagnosticsManager = new DiagnosticsManager({ log }),
-    }: BuildContext
+    }: BuildContext,
 ) {
     const { join, realpathSync, relative, dirname } = fs;
     const projectRoot = realpathSync(_projectRoot);
@@ -84,7 +84,7 @@ export async function build(
         esm,
         runtimeCjsRequest,
         runtimeEsmRequest,
-        fs
+        fs,
     );
 
     const service = new DirectoryProcessService(fs, {
@@ -159,7 +159,7 @@ export async function build(
 
                         if (indexFileGenerator) {
                             indexFileGenerator.removeEntryFromIndex(
-                                outputSources ? targetFilePath : deletedFile
+                                outputSources ? targetFilePath : deletedFile,
                             );
                         }
                     }
@@ -182,7 +182,7 @@ export async function build(
                 // map st output file path to src file path
                 outputFiles.set(
                     join(fullOutDir, relative(fullSrcDir, filePath)),
-                    new Set([filePath])
+                    new Set([filePath]),
                 );
 
                 // remove assets from the affected files (handled in buildAggregatedEntities)
@@ -228,8 +228,8 @@ export async function build(
                     mode,
                     buildMessages.FINISHED_PROCESSING(
                         count,
-                        isMultiPackagesProject ? identifier : undefined
-                    )
+                        isMultiPackagesProject ? identifier : undefined,
+                    ),
                 );
             }
 
@@ -283,7 +283,7 @@ export async function build(
                                     './' +
                                     relative(dirname(targetFilePath), runtimeCjsOutPath).replace(
                                         /\\/g,
-                                        '/'
+                                        '/',
                                     )
                                 );
                             }
@@ -292,7 +292,7 @@ export async function build(
                                     './' +
                                     relative(dirname(targetFilePath), runtimeEsmOutPath).replace(
                                         /\\/g,
-                                        '/'
+                                        '/',
                                     )
                                 );
                             }
@@ -310,7 +310,7 @@ export async function build(
 
                 if (indexFileGenerator) {
                     indexFileGenerator.generateFileIndexEntry(
-                        outputSources ? targetFilePath : filePath
+                        outputSources ? targetFilePath : filePath,
                     );
                 }
             } catch (error) {
@@ -325,7 +325,7 @@ export async function build(
                 sourceFiles.add(filePath);
                 const meta = tryRun(
                     () => stylable.analyze(filePath),
-                    errorMessages.STYLABLE_PROCESS(filePath)
+                    errorMessages.STYLABLE_PROCESS(filePath),
                 );
                 // todo: consider merging this API with stylable.getDependencies()
                 for (const depFilePath of tryCollectImportsDeep(stylable.resolver, meta)) {
@@ -412,7 +412,7 @@ function bundleFiles({
         (m) => {
             return m;
         },
-        -1 /** PRINT_ORDER */
+        -1 /** PRINT_ORDER */,
     );
     const cssBundleCode = sortedModules
         .map((m) => {
@@ -441,7 +441,7 @@ function copyRuntime(
     esm: boolean | undefined,
     runtimeCjsRequest: string,
     runtimeEsmRequest: string,
-    fs: BuildContext['fs']
+    fs: BuildContext['fs'],
 ) {
     let runtimeCjsOutPath;
     let runtimeEsmOutPath;
@@ -474,7 +474,7 @@ function resolveRequestInContext(fs: IFileSystem, request: string, projectRoot: 
 
 export function createGenerator(
     root: string,
-    generatorPath?: string
+    generatorPath?: string,
 ): undefined | typeof BaseIndexGenerator {
     if (!generatorPath) {
         return undefined;

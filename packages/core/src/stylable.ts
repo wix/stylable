@@ -64,7 +64,7 @@ export function validateDefaultConfig(defaultConfigObj: any) {
         for (const configName of Object.keys(defaultConfigObj)) {
             if (!globalDefaultSupportedConfigs.has(configName)) {
                 console.warn(
-                    `Caution: loading "${configName}" config is experimental, and may behave unexpectedly`
+                    `Caution: loading "${configName}" config is experimental, and may behave unexpectedly`,
                 );
             }
         }
@@ -109,7 +109,7 @@ export class Stylable {
             config.experimentalSelectorInference === false ? false : true;
         if (this.experimentalSelectorInference === false) {
             warnOnce(
-                'Stylable is running in a deprecated mode that will be removed in a future 6.x.x release. Please set experimentalSelectorInference=true to avoid this warning.'
+                'Stylable is running in a deprecated mode that will be removed in a future 6.x.x release. Please set experimentalSelectorInference=true to avoid this warning.',
             );
         }
         this.projectRoot = config.projectRoot;
@@ -118,7 +118,7 @@ export class Stylable {
             config.requireModule ||
             (() => {
                 throw new Error(
-                    'Javascript files are not supported without Stylable `requireModule` option'
+                    'Javascript files are not supported without Stylable `requireModule` option',
                 );
             });
         this.onProcess = config.onProcess;
@@ -208,7 +208,7 @@ export class Stylable {
     }
     public transform(
         pathOrMeta: string | StylableMeta,
-        options: Partial<TransformerOptions> = {}
+        options: Partial<TransformerOptions> = {},
     ): StylableResults {
         const meta = typeof pathOrMeta === `string` ? this.analyze(pathOrMeta) : pathOrMeta;
         const transformer = this.createTransformer(options);
@@ -217,7 +217,7 @@ export class Stylable {
     public transformSelector(
         pathOrMeta: string | StylableMeta,
         selector: string,
-        options?: Partial<TransformerOptions>
+        options?: Partial<TransformerOptions>,
     ): { selector: string; resolved: ResolvedElement[][] } {
         const meta = typeof pathOrMeta === `string` ? this.analyze(pathOrMeta) : pathOrMeta;
         const transformer = this.createTransformer(options);
@@ -235,20 +235,20 @@ export class Stylable {
         pathOrMeta: string | StylableMeta,
         prop: string,
         value: string,
-        options?: Partial<TransformerOptions>
+        options?: Partial<TransformerOptions>,
     ) {
         const decl = postcss.decl({ prop, value });
         this.transformAST(
             pathOrMeta,
             postcss.root({}).append(postcss.rule({ selector: `.x` }).append(decl)),
-            options
+            options,
         );
         return { prop: decl.prop, value: decl.value };
     }
     private transformAST(
         pathOrMeta: string | StylableMeta,
         ast: postcss.Root,
-        options?: Partial<TransformerOptions>
+        options?: Partial<TransformerOptions>,
     ): postcss.Root {
         const meta = typeof pathOrMeta === `string` ? this.analyze(pathOrMeta) : pathOrMeta;
         const transformer = this.createTransformer(options);

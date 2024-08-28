@@ -46,7 +46,7 @@ describe('assets', function () {
                 log() {
                     /**/
                 },
-            }
+            },
         );
 
         expect(fs.readdirSync('/dist')).to.eql([
@@ -88,7 +88,7 @@ describe('assets', function () {
                 log() {
                     /**/
                 },
-            }
+            },
         );
 
         expect(fs.readdirSync('/dist')).to.eql([

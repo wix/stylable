@@ -7,7 +7,7 @@ const { writeFile } = promises;
 
 const project = 'stc-watched-project';
 const projectDir = dirname(
-    require.resolve(`@stylable/webpack-plugin/test/e2e/projects/${project}/webpack.config`)
+    require.resolve(`@stylable/webpack-plugin/test/e2e/projects/${project}/webpack.config`),
 );
 
 describe(`(${project})`, () => {
@@ -22,7 +22,7 @@ describe(`(${project})`, () => {
         },
         before,
         afterEach,
-        after
+        after,
     );
     it('build "stc" and webpack in the correct order', async () => {
         const { page } = await projectRunner.openInBrowser();
@@ -35,7 +35,7 @@ describe(`(${project})`, () => {
         });
 
         expect(styleElements[0].css!.replace(/\s\s*/gm, ' ').trim()).to.match(
-            /\.index\d+__root \{ color: red; z-index: 1; \}/
+            /\.index\d+__root \{ color: red; z-index: 1; \}/,
         );
 
         await projectRunner.actAndWaitForRecompile(
@@ -43,14 +43,14 @@ describe(`(${project})`, () => {
             () =>
                 writeFile(
                     join(projectRunner.testDir, 'style-source', 'style-b.st.css'),
-                    '.b{ color: green; }'
+                    '.b{ color: green; }',
                 ),
             (waitFor) =>
                 waitFor(() => {
                     expect(projectRunner.getProjectFiles()['style-output/style-b.st.css']).to.eql(
-                        '.b{ color: green; }'
+                        '.b{ color: green; }',
                     );
-                })
+                }),
         );
 
         await projectRunner.actAndWaitForRecompile(
@@ -65,7 +65,7 @@ describe(`(${project})`, () => {
                         -st-mixin: b;
                         z-index: 1;
                     }
-                `
+                `,
                 ),
             (waitFor) =>
                 waitFor(async () => {
@@ -74,12 +74,12 @@ describe(`(${project})`, () => {
                         browserFunctions.getStyleElementsMetadata,
                         {
                             includeCSSContent: true,
-                        }
+                        },
                     );
                     expect(styleElements[0].css!.replace(/\s\s*/gm, ' ').trim()).to.match(
-                        /\.index\d+__root \{ color: green; z-index: 1; \}/
+                        /\.index\d+__root \{ color: green; z-index: 1; \}/,
                     );
-                })
+                }),
         );
 
         await projectRunner.actAndWaitForRecompile(
@@ -87,13 +87,13 @@ describe(`(${project})`, () => {
             () =>
                 writeFile(
                     join(projectRunner.testDir, 'style-source', 'style-b.st.css'),
-                    '.b{ color: blue; }'
+                    '.b{ color: blue; }',
                 ),
             (waitFor) =>
                 waitFor(
                     async () => {
                         expect(
-                            projectRunner.getProjectFiles()['style-output/style-b.st.css']
+                            projectRunner.getProjectFiles()['style-output/style-b.st.css'],
                         ).to.eql('.b{ color: blue; }');
 
                         await page.reload();
@@ -101,14 +101,14 @@ describe(`(${project})`, () => {
                             browserFunctions.getStyleElementsMetadata,
                             {
                                 includeCSSContent: true,
-                            }
+                            },
                         );
                         expect(styleElements[0].css!.replace(/\s\s*/gm, ' ').trim()).to.match(
-                            /\.index\d+__root \{ color: blue; z-index: 1; \}/
+                            /\.index\d+__root \{ color: blue; z-index: 1; \}/,
                         );
                     },
-                    { delay: 0 }
-                )
+                    { delay: 0 },
+                ),
         );
     });
 });

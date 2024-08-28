@@ -32,7 +32,11 @@ export interface ComponentsMetadata {
 
 export class ComponentMetadataBuilder {
     private output: ComponentsMetadata;
-    constructor(public context: string, name: string, version: string) {
+    constructor(
+        public context: string,
+        name: string,
+        version: string,
+    ) {
         this.output = {
             version,
             name,
@@ -59,7 +63,7 @@ export class ComponentMetadataBuilder {
     public addComponent(
         stylesheetPath: string,
         localComponentConfig: LocalComponentConfig,
-        namespace: string
+        namespace: string,
     ) {
         const componentConfig = cloneObject(localComponentConfig) as ComponentConfig;
         const componentDir = dirname(stylesheetPath);
@@ -71,14 +75,14 @@ export class ComponentMetadataBuilder {
             if (componentConfig.presets) {
                 for (const preset of componentConfig.presets) {
                     preset.path = this.localResourcePath(
-                        join(componentDir, variantsPath, preset.path)
+                        join(componentDir, variantsPath, preset.path),
                     );
                 }
             }
         }
         if (!componentConfig.id) {
             throw new Error(
-                `Invalid component config for resource: ${stylesheetPath}. Missing {id}`
+                `Invalid component config for resource: ${stylesheetPath}. Missing {id}`,
             );
         }
         if (this.output.components[componentConfig.id]) {

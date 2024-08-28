@@ -2,7 +2,7 @@ import type { ClassSymbol, ElementSymbol, STStructure } from '../features';
 import type { CSSResolve } from '../stylable-resolver';
 
 export function getOriginDefinition<T extends ClassSymbol | ElementSymbol | STStructure.PartSymbol>(
-    resolved: CSSResolve<T>[]
+    resolved: CSSResolve<T>[],
 ) {
     for (const r of resolved) {
         const { symbol } = r;

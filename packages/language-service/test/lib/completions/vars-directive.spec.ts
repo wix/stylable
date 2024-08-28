@@ -17,7 +17,7 @@ describe('Variables Directive', () => {
             it('when it exists, with prefix: ' + prefix + ' ', () => {
                 const asserter = asserters.getCompletions(
                     'imports/top-level-import-exists.st.css',
-                    prefix
+                    prefix,
                 );
                 asserter.suggested([asserters.varsDirectiveCompletion(createRange(11, 0, 11, i))]);
             });

@@ -25,14 +25,14 @@ describe('Signature Help', () => {
                                 ParameterInformation.create('numParam: string'),
                                 ParameterInformation.create('strParam: string'),
                                 ParameterInformation.create('aliasedParam: string'),
-                                ParameterInformation.create("enumParam: 'a' | 'b'")
+                                ParameterInformation.create("enumParam: 'a' | 'b'"),
                             ),
                         ],
                     };
 
                     expect(sig).to.not.equal(null);
                     expect(sig).to.deep.equal(exp);
-                }
+                },
             ).timeout(5000);
         });
     });
@@ -73,14 +73,14 @@ describe('Signature Help', () => {
                             SignatureInformation.create(
                                 'mixin(pct: string): object',
                                 undefined,
-                                ParameterInformation.create('pct: string')
+                                ParameterInformation.create('pct: string'),
                             ),
                         ],
                     };
 
                     expect(sig).to.not.equal(null);
                     expect(sig).to.deep.equal(exp);
-                }
+                },
             ).timeout(5000);
         });
     });
@@ -106,14 +106,14 @@ describe('Signature Help', () => {
                                 'A mixin with some params',
                                 ParameterInformation.create('strParam: string', 'A string param'),
                                 ParameterInformation.create('numParam: string', 'A num param'),
-                                ParameterInformation.create("enumParam: 'a'|'b'", 'An enum param')
+                                ParameterInformation.create("enumParam: 'a'|'b'", 'An enum param'),
                             ),
                         ],
                     };
 
                     expect(sig).to.not.equal(null);
                     expect(sig).to.deep.equal(exp);
-                }
+                },
             ).timeout(5000);
         });
     });
@@ -159,14 +159,14 @@ describe('Signature Help', () => {
                                 ParameterInformation.create('numParam: stNumber<0,200>'),
                                 ParameterInformation.create('strParam: styl.stString'),
                                 ParameterInformation.create('aliasedParam: lalaString'),
-                                ParameterInformation.create("enumParam: 'a'|'b'")
+                                ParameterInformation.create("enumParam: 'a'|'b'"),
                             ),
                         ],
                     };
 
                     expect(sig).to.not.equal(null);
                     expect(sig).to.deep.equal(exp);
-                }
+                },
             ).timeout(5000);
         });
     });
@@ -238,16 +238,16 @@ describe('Signature Help', () => {
                                         SignatureInformation.create(
                                             'Supported state types:\n- "string | number | enum"',
                                             undefined,
-                                            ParameterInformation.create('string | number | enum')
+                                            ParameterInformation.create('string | number | enum'),
                                         ),
                                     ],
                                 };
 
                                 expect(sig).to.not.equal(null);
                                 expect(sig).to.deep.equal(exp);
-                            }
+                            },
                         );
-                    })
+                    }),
                 );
 
                 it('Provides signature help and identifies state definition (caret at end of state definition)', () => {
@@ -262,7 +262,7 @@ describe('Signature Help', () => {
                             SignatureInformation.create(
                                 'Supported state types:\n- "string | number | enum"',
                                 undefined,
-                                ParameterInformation.create('string | number | enum')
+                                ParameterInformation.create('string | number | enum'),
                             ),
                         ],
                     };
@@ -295,17 +295,17 @@ describe('Signature Help', () => {
                                             'Supported "string" validator types:\n- "regex, contains, minLength, maxLength"',
                                             undefined,
                                             ParameterInformation.create(
-                                                'regex, contains, minLength, maxLength'
-                                            )
+                                                'regex, contains, minLength, maxLength',
+                                            ),
                                         ),
                                     ],
                                 };
 
                                 expect(sig).to.not.equal(null);
                                 expect(sig).to.deep.equal(exp);
-                            }
+                            },
                         );
-                    })
+                    }),
                 );
 
                 it('Provides signature help and identifies state definition (including validator)', () => {
@@ -320,7 +320,7 @@ describe('Signature Help', () => {
                             SignatureInformation.create(
                                 'Supported state types:\n- "string | number | enum"',
                                 undefined,
-                                ParameterInformation.create('string | number | enum')
+                                ParameterInformation.create('string | number | enum'),
                             ),
                         ],
                     };
@@ -351,14 +351,14 @@ describe('Signature Help', () => {
                                 SignatureInformation.create(
                                     'hello(string)',
                                     undefined,
-                                    ParameterInformation.create('string')
+                                    ParameterInformation.create('string'),
                                 ),
                             ],
                         };
 
                         expect(sig).to.not.equal(null);
                         expect(sig).to.deep.equal(exp);
-                    }
+                    },
                 );
             });
 
@@ -379,14 +379,14 @@ describe('Signature Help', () => {
                                 SignatureInformation.create(
                                     'shmover(number)',
                                     undefined,
-                                    ParameterInformation.create('number')
+                                    ParameterInformation.create('number'),
                                 ),
                             ],
                         };
 
                         expect(sig).to.not.equal(null);
                         expect(sig).to.deep.equal(exp);
-                    }
+                    },
                 );
             });
 
@@ -408,14 +408,14 @@ describe('Signature Help', () => {
                                 SignatureInformation.create(
                                     'shmover(number(min(3), max(42)))',
                                     undefined,
-                                    ParameterInformation.create('number(min(3), max(42))')
+                                    ParameterInformation.create('number(min(3), max(42))'),
                                 ),
                             ],
                         };
 
                         expect(sig).to.not.equal(null);
                         expect(sig).to.deep.equal(exp);
-                    }
+                    },
                 );
             });
 
@@ -438,15 +438,15 @@ describe('Signature Help', () => {
                                     'templateWithParam(string(minLength(2), maxLength(6)))',
                                     undefined,
                                     ParameterInformation.create(
-                                        'string(minLength(2), maxLength(6))'
-                                    )
+                                        'string(minLength(2), maxLength(6))',
+                                    ),
                                 ),
                             ],
                         };
 
                         expect(sig).to.not.equal(null);
                         expect(sig).to.deep.equal(exp);
-                    }
+                    },
                 );
             });
         });
@@ -474,14 +474,14 @@ describe('Signature Help', () => {
                                 'A mixin with some params',
                                 ParameterInformation.create('strParam: string', 'A string param'),
                                 ParameterInformation.create('numParam: string', 'A num param'),
-                                ParameterInformation.create("enumParam: 'a'|'b'", 'An enum param')
+                                ParameterInformation.create("enumParam: 'a'|'b'", 'An enum param'),
                             ),
                         ],
                     };
 
                     expect(sig).to.not.equal(null);
                     expect(sig).to.deep.equal(exp);
-                }
+                },
             ).timeout(5000);
         });
     });

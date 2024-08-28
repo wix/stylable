@@ -54,7 +54,7 @@ describe('build stand alone', () => {
                 rootDir: '/',
                 projectRoot: '/',
                 log,
-            }
+            },
         );
 
         [
@@ -100,7 +100,7 @@ describe('build stand alone', () => {
                 rootDir: '/',
                 projectRoot: '/',
                 log,
-            }
+            },
         );
 
         [
@@ -113,10 +113,10 @@ describe('build stand alone', () => {
         });
 
         expect(fs.readFileSync('/lib/main.st.css.js', 'utf-8')).to.include(
-            'require("./global.css.js");'
+            'require("./global.css.js");',
         );
         expect(fs.readFileSync('/lib/main.st.css.mjs', 'utf-8')).to.include(
-            'import "./global.css.mjs";'
+            'import "./global.css.mjs";',
         );
     });
 
@@ -145,7 +145,7 @@ describe('build stand alone', () => {
             resolveNamespace(n, s) {
                 const normalizedWindowsRoot = fs.relative(
                     '/',
-                    s.replace(/^\w:\\/, '/').replace('\\', '/')
+                    s.replace(/^\w:\\/, '/').replace('\\', '/'),
                 );
                 return n + murmurhash3_32_gc(normalizedWindowsRoot);
             },
@@ -165,7 +165,7 @@ describe('build stand alone', () => {
                 rootDir: '/',
                 projectRoot: '/',
                 log,
-            }
+            },
         );
 
         [
@@ -178,7 +178,7 @@ describe('build stand alone', () => {
         });
 
         expect(fs.readFileSync('/cjs/main.st.css', 'utf-8')).to.include(
-            'st-namespace-reference="../src/main.st.css"'
+            'st-namespace-reference="../src/main.st.css"',
         );
 
         await build(
@@ -193,13 +193,13 @@ describe('build stand alone', () => {
                 rootDir: '/',
                 projectRoot: '/',
                 log,
-            }
+            },
         );
 
         // check two builds using sourceNamespace are identical
         // compare two serializable js modules including their namespace
         expect(fs.readFileSync('/cjs/main.st.css.js', 'utf-8')).to.equal(
-            fs.readFileSync('/cjs2/main.st.css.js', 'utf-8')
+            fs.readFileSync('/cjs2/main.st.css.js', 'utf-8'),
         );
     });
 
@@ -241,15 +241,15 @@ describe('build stand alone', () => {
                 log,
                 diagnosticsManager,
                 identifier,
-            }
+            },
         );
         const messages = diagnosticsManager.get(identifier, '/comp.st.css')!.diagnostics;
 
         expect(messages[0].message).to.contain(
-            cssClassDiagnostics.CANNOT_RESOLVE_EXTEND('MissingComp')
+            cssClassDiagnostics.CANNOT_RESOLVE_EXTEND('MissingComp'),
         );
         expect(messages[1].message).to.contain(
-            stImportDiagnostics.UNKNOWN_IMPORTED_FILE('./missing-file.st.css')
+            stImportDiagnostics.UNKNOWN_IMPORTED_FILE('./missing-file.st.css'),
         );
         expect(messages[2].message).to.contain(stVarDiagnostics.UNKNOWN_VAR('missingVar'));
     });
@@ -287,7 +287,7 @@ describe('build stand alone', () => {
                 rootDir: '/',
                 projectRoot: '/',
                 log,
-            }
+            },
         );
 
         const builtFile = fs.readFileSync('/dist/comp.global.css', 'utf8');
@@ -344,7 +344,7 @@ describe('build stand alone', () => {
                 rootDir: '/',
                 projectRoot: '/',
                 log,
-            }
+            },
         );
 
         const builtFile = fs.readFileSync('/dist/comp.st.css.js', 'utf8');
@@ -385,7 +385,7 @@ describe('build stand alone', () => {
                 rootDir: '/',
                 projectRoot: '/',
                 log,
-            }
+            },
         );
 
         const builtFile = fs.readFileSync('/dist/comp.global.css', 'utf8');
@@ -431,7 +431,7 @@ describe('build stand alone', () => {
                 rootDir: '/',
                 projectRoot: '/',
                 log,
-            }
+            },
         );
 
         const builtFileCjs = fs.readFileSync('/dist/comp.st.css.js', 'utf8');
@@ -443,14 +443,14 @@ describe('build stand alone', () => {
         const runtimeMjs = fs.readFileSync('/dist/stylable-esm-runtime.mjs', 'utf8');
 
         expect(builtFileCjs, 'imports the cjs runtime with full extension').to.contain(
-            `./stylable-cjs-runtime.js`
+            `./stylable-cjs-runtime.js`,
         );
         expect(builtFileEsm, 'imports the esm runtime with full extension').to.contain(
-            `./stylable-esm-runtime.mjs`
+            `./stylable-esm-runtime.mjs`,
         );
         expect(
             innerPathBuiltFileEsm,
-            'imports the esm runtime with full extension with relative path'
+            'imports the esm runtime with full extension with relative path',
         ).to.contain(`./../stylable-esm-runtime.mjs`);
         expect(runtimeCjs).to.eql(`// runtime cjs`);
         expect(runtimeMjs).to.eql(`// runtime esm`);
@@ -488,17 +488,17 @@ describe('build stand alone', () => {
                 rootDir: '/',
                 projectRoot: '/',
                 log,
-            }
+            },
         );
 
         const builtFileCjs = fs.readFileSync('/dist/comp.st.css.cjs', 'utf8');
         const builtFileEsm = fs.readFileSync('/dist/comp.st.css.js', 'utf8');
 
         expect(builtFileCjs, 'imports the cjs runtime with full extension').to.contain(
-            `"@stylable/runtime"`
+            `"@stylable/runtime"`,
         );
         expect(builtFileEsm, 'imports the esm runtime with full extension').to.contain(
-            `"@stylable/runtime"`
+            `"@stylable/runtime"`,
         );
     });
 
@@ -533,14 +533,14 @@ describe('build stand alone', () => {
                 rootDir: '/',
                 projectRoot: '/',
                 log,
-            }
+            },
         );
 
         expect(fs.readFileSync('/dist/comp.st.css.js', 'utf8')).contains(
-            `require("./comp.global.css")`
+            `require("./comp.global.css")`,
         );
         expect(fs.readFileSync('/dist/comp.st.css.mjs', 'utf8')).contains(
-            `import "./comp.global.css"`
+            `import "./comp.global.css"`,
         );
         expect(fs.existsSync('/dist/comp.global.css')).to.equal(true);
     });
@@ -571,7 +571,7 @@ describe('build stand alone', () => {
                 rootDir: '/',
                 projectRoot: '/',
                 log,
-            }
+            },
         );
 
         ['/main.st.css', '/main.st.css.d.ts'].forEach((p) => {
@@ -613,7 +613,7 @@ describe('build stand alone', () => {
                 rootDir: '/',
                 projectRoot: '/',
                 log,
-            }
+            },
         );
 
         ['/main.st.css', '/main.st.css.d.ts'].forEach((p) => {
@@ -669,7 +669,7 @@ describe('build stand alone', () => {
                 rootDir: '/',
                 projectRoot: '/',
                 log,
-            }
+            },
         );
 
         ['/main.st.css', '/main.st.css.d.ts', '/main.st.css.d.ts.map'].forEach((p) => {
@@ -726,11 +726,11 @@ describe('build - bundle', () => {
                 rootDir: '/',
                 projectRoot: '/',
                 log,
-            }
+            },
         );
 
         expect(fs.readFileSync('/lib/bundle.css', 'utf8')).to.equal(
-            '.comp__baga{color:red}.main__gaga{color:#00f}'
+            '.comp__baga{color:red}.main__gaga{color:#00f}',
         );
     });
     it('should rewrite relative urls', async () => {
@@ -774,11 +774,11 @@ describe('build - bundle', () => {
                 rootDir: '/',
                 projectRoot: '/',
                 log,
-            }
+            },
         );
 
         expect(fs.readFileSync('/lib/bundle.css', 'utf8')).to.equal(
-            '.label__part,.button__root{background-image:url(./components/label/image.png)}'
+            '.label__part,.button__root{background-image:url(./components/label/image.png)}',
         );
     });
 });

@@ -32,7 +32,7 @@ export interface FilesStructure {
 export function populateDirectorySync(
     rootDir: string,
     files: FilesStructure,
-    context: { symlinks: Map<string, Set<string>> } = { symlinks: new Map() }
+    context: { symlinks: Map<string, Set<string>> } = { symlinks: new Map() },
 ) {
     for (const [filePath, content] of Object.entries(files)) {
         const path = join(rootDir, filePath);

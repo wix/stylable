@@ -221,7 +221,7 @@ describe(`features/css-custom-property`, () => {
             /* 
                 @atrule(no-dashes) propY 
                 @analyze-error(no-dashes) word(propY) ${customPropertyDiagnostics.ILLEGAL_CSS_VAR_USE(
-                    'propY'
+                    'propY',
                 )}
             */
             @property propY {
@@ -233,7 +233,7 @@ describe(`features/css-custom-property`, () => {
             /* 
                 @atrule(no-dashes-global) st-global(propZ)
                 @analyze-error(no-dashes-global) word(propZ) ${customPropertyDiagnostics.ILLEGAL_CSS_VAR_USE(
-                    'propZ'
+                    'propZ',
                 )}
             */
             @property st-global(propZ) {
@@ -254,7 +254,7 @@ describe(`features/css-custom-property`, () => {
                 /* 
                     @decl(no-dashes) prop: var(propA) 
                     @analyze-error(no-dashes) word(propA) ${customPropertyDiagnostics.ILLEGAL_CSS_VAR_USE(
-                        'propA'
+                        'propA',
                     )}
                 */
                 prop: var(propA);
@@ -262,7 +262,7 @@ describe(`features/css-custom-property`, () => {
                 /* 
                     @decl(space+text) prop: var(--entry-propB notAllowed, fallback) 
                     @analyze-error(space+text) word(--propB notAllowed, fallback) ${customPropertyDiagnostics.ILLEGAL_CSS_VAR_ARGS(
-                        '--propB notAllowed, fallback'
+                        '--propB notAllowed, fallback',
                     )}
                 */
                 prop: var(--propB notAllowed, fallback);
@@ -301,7 +301,7 @@ describe(`features/css-custom-property`, () => {
                     .root {
                         /* 
                             @analyze-error word(--prop) ${customPropertyDiagnostics.UNDEFINED_CSS_CUSTOM_PROP(
-                                '--prop'
+                                '--prop',
                             )}
                             @decl --invalid-prop: green 
                         */
@@ -309,7 +309,7 @@ describe(`features/css-custom-property`, () => {
 
                         /* 
                             @analyze-error word(--prop2) ${customPropertyDiagnostics.UNDEFINED_CSS_CUSTOM_PROP(
-                                '--prop2'
+                                '--prop2',
                             )}
                             @decl color: var(--invalid-prop2) 
                         */
@@ -329,7 +329,7 @@ describe(`features/css-custom-property`, () => {
                     }
                 `,
             },
-            { stylableConfig: { flags: { strictCustomProperty: true } } }
+            { stylableConfig: { flags: { strictCustomProperty: true } } },
         );
     });
     it.skip(`should escape`, () => {
@@ -349,7 +349,7 @@ describe(`features/css-custom-property`, () => {
         it(`should report on missing syntax`, () => {
             const { sheets } = testStylableCore(`
                 /* @analyze-error(syntax) word(--a) ${customPropertyDiagnostics.MISSING_REQUIRED_DESCRIPTOR(
-                    'syntax'
+                    'syntax',
                 )} */
                 @property --a {
                     inherits: true;
@@ -357,7 +357,7 @@ describe(`features/css-custom-property`, () => {
                 }
 
                 /* @analyze-error(inherits) word(--b) ${customPropertyDiagnostics.MISSING_REQUIRED_DESCRIPTOR(
-                    'inherits'
+                    'inherits',
                 )} */
                 @property --b {
                     syntax: '<color>';
@@ -388,7 +388,7 @@ describe(`features/css-custom-property`, () => {
                     inherits: false;
 
                     /* @analyze-error(atrule) word(abc) ${customPropertyDiagnostics.INVALID_DESCRIPTOR_TYPE(
-                        'atrule'
+                        'atrule',
                     )} */
                     @some-at-rule abc{}
                 }
@@ -398,7 +398,7 @@ describe(`features/css-custom-property`, () => {
                     inherits: false;
 
                     /* @analyze-error(rule) word(div) ${customPropertyDiagnostics.INVALID_DESCRIPTOR_TYPE(
-                        'rule'
+                        'rule',
                     )} */
                     div {}
                 }
@@ -411,7 +411,7 @@ describe(`features/css-custom-property`, () => {
                     inherits: false;
 
                     /* @analyze-error word(initialValue) ${customPropertyDiagnostics.INVALID_DESCRIPTOR_NAME(
-                        'initialValue'
+                        'initialValue',
                     )} */
                     initialValue: red;
                 }
@@ -449,10 +449,10 @@ describe(`features/css-custom-property`, () => {
                 
                 /*
                 @analyze-warn(before) word(--before) ${stSymbolDiagnostics.REDECLARE_SYMBOL(
-                    `--before`
+                    `--before`,
                 )}
                 @analyze-warn(after) word(--after) ${stSymbolDiagnostics.REDECLARE_SYMBOL(
-                    `--after`
+                    `--after`,
                 )}
                 */
                 @st-global-custom-property --before, --after;
@@ -484,7 +484,7 @@ describe(`features/css-custom-property`, () => {
                 /* 
                     @transform-remove(no-dashes)
                     @analyze-error(no-dashes) word(propA) ${customPropertyDiagnostics.ILLEGAL_GLOBAL_CSS_VAR(
-                        'propA'
+                        'propA',
                     )}
                 */
                 @st-global-custom-property propA;
@@ -492,7 +492,7 @@ describe(`features/css-custom-property`, () => {
                 /* 
                     @transform-remove(missing comma)
                     @analyze-error(missing comma) word(--propB --propC) ${customPropertyDiagnostics.GLOBAL_CSS_VAR_MISSING_COMMA(
-                        '--propB --propC'
+                        '--propB --propC',
                     )}
                 */
                 @st-global-custom-property --propB --propC;
@@ -613,10 +613,10 @@ describe(`features/css-custom-property`, () => {
                     
                     /* 
                     @analyze-warn(imported before) word(--before) ${stSymbolDiagnostics.REDECLARE_SYMBOL(
-                        `--before`
+                        `--before`,
                     )}
                     @analyze-warn(imported after) word(--after) ${stSymbolDiagnostics.REDECLARE_SYMBOL(
-                        `--after`
+                        `--after`,
                     )}
                     */
                     @st-import [--before, --after] from "./props.st.css";
@@ -720,7 +720,7 @@ describe(`features/css-custom-property`, () => {
                 '/entry.st.css': `
                     /* @transform-error word(--unknown) ${stImportDiagnostics.UNKNOWN_IMPORTED_SYMBOL(
                         '--unknown',
-                        './props.st.css'
+                        './props.st.css',
                     )} */
                     @st-import [--unknown] from './props.st.css';
 
@@ -1059,22 +1059,22 @@ describe(`features/css-custom-property`, () => {
             const { meta } = sheets['/entry.st.css'];
 
             expect(CSSCustomProperty.scopeCSSVar(stylable.resolver, meta, '--unknown')).to.equal(
-                generateScopedCSSVar('entry', 'unknown')
+                generateScopedCSSVar('entry', 'unknown'),
             );
 
             expect(CSSCustomProperty.scopeCSSVar(stylable.resolver, meta, '--local'), `b`).to.equal(
-                generateScopedCSSVar('entry', 'local')
+                generateScopedCSSVar('entry', 'local'),
             );
 
             expect(CSSCustomProperty.scopeCSSVar(stylable.resolver, meta, '--imported')).to.equal(
-                generateScopedCSSVar('imported', 'imported')
+                generateScopedCSSVar('imported', 'imported'),
             );
 
             expect(
-                CSSCustomProperty.scopeCSSVar(stylable.resolver, meta, '--imported-global')
+                CSSCustomProperty.scopeCSSVar(stylable.resolver, meta, '--imported-global'),
             ).to.equal('--imported-global');
             expect(
-                CSSCustomProperty.scopeCSSVar(stylable.resolver, meta, '--local-global')
+                CSSCustomProperty.scopeCSSVar(stylable.resolver, meta, '--local-global'),
             ).to.equal('--local-global');
         });
     });
@@ -1107,7 +1107,7 @@ describe(`features/css-custom-property`, () => {
                     }
                 `,
                 },
-                { stylableConfig: { flags: { strictCustomProperty: true } } }
+                { stylableConfig: { flags: { strictCustomProperty: true } } },
             );
 
             const { meta: nativeMeta } = stylable.transform('/native.css');
@@ -1126,7 +1126,7 @@ describe(`features/css-custom-property`, () => {
                     .x {
                         --b: var(--c);
                     }
-                `)
+                `),
             );
         });
         it('should ignore strictCustomProperty', () => {
@@ -1139,7 +1139,7 @@ describe(`features/css-custom-property`, () => {
                         }
                     `,
                 },
-                { stylableConfig: { flags: { strictCustomProperty: true } } }
+                { stylableConfig: { flags: { strictCustomProperty: true } } },
             );
 
             const { meta } = stylable.transform('/entry.css');
@@ -1170,7 +1170,7 @@ describe(`features/css-custom-property`, () => {
                         inherits: false;
                     }
                     @property --no-body;
-                `)
+                `),
             );
         });
     });
@@ -1200,7 +1200,7 @@ describe(`features/css-custom-property`, () => {
 
                             color: var(--defineInDeclValue);
                         }
-                    `)
+                    `),
                 );
 
                 const { meta } = sheets['/entry.st.css'];

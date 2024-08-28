@@ -67,7 +67,7 @@ const stylableLoader: LoaderDefinition = function (content) {
 
     const resolveModule = createWebpackResolver(
         this.fs as any,
-        this._compiler!.options.resolve as any
+        this._compiler!.options.resolve as any,
     );
     const stylable = getStylable(this._compiler!, {
         projectRoot: this.rootContext,
@@ -153,7 +153,7 @@ const stylableLoader: LoaderDefinition = function (content) {
                 ___CSS_LOADER_EXPORT___.locals = ${JSON.stringify([meta.namespace, exports])}
 
                 module.exports = ___CSS_LOADER_EXPORT___;
-                `
+                `,
             );
         })
         .catch((error) => {
@@ -164,7 +164,7 @@ const stylableLoader: LoaderDefinition = function (content) {
             callback(
                 error.name === 'CssSyntaxError'
                     ? new CssSyntaxError(error)
-                    : new Error('Failed to process css urls. caused by:\n' + error.stack)
+                    : new Error('Failed to process css urls. caused by:\n' + error.stack),
             );
         });
 };

@@ -15,7 +15,7 @@ function collectAssets(ast: postcss.Root) {
                     assetDependencies.push(node.url);
                 }
             },
-            false
+            false,
         );
     });
     return assetDependencies;
@@ -71,9 +71,9 @@ describe('stylable assets', () => {
                     },
                     _,
                     '/root',
-                    '/root/module'
-                )
-            )
+                    '/root/module',
+                ),
+            ),
         ).to.eql([
             normalize('/root/module/a.png'),
             normalize('/root/b.png'),

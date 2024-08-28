@@ -37,7 +37,7 @@ describe('Transformer', () => {
                 stylableConfig: {
                     resolveModule: onResolve,
                 },
-            }
+            },
         );
 
         expect(onResolve.callCount, 'call resolve only once for each import path').to.equal(2);

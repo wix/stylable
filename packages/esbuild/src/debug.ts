@@ -11,7 +11,7 @@ const counters: Record<string, number> = {};
         Object.values(timers)
             .reduce((a, b) => a + b, 0)
             .toFixed(2),
-        'ms'
+        'ms',
     );
 };
 

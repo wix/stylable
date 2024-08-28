@@ -22,7 +22,7 @@ describe('helpers/custom-selector', () => {
                     y: parseCssSelector(':--x.y'),
                     z: parseCssSelector(':--y.z'),
                 },
-                (report) => reports.push(report)
+                (report) => reports.push(report),
             );
 
             expect(stringifySelectorAst(selectors['x']), ':--x').to.eql(':is(target)');
@@ -37,7 +37,7 @@ describe('helpers/custom-selector', () => {
                 {
                     x: parseCssSelector(':--unknown'),
                 },
-                (report) => reports.push(report)
+                (report) => reports.push(report),
             );
 
             expect(stringifySelectorAst(selectors['x']), 'ref').to.eql(':--unknown');
@@ -53,7 +53,7 @@ describe('helpers/custom-selector', () => {
                     x: parseCssSelector(':--x, :is(:--x, :--y)'),
                     y: parseCssSelector('.A'),
                 },
-                (report) => reports.push(report)
+                (report) => reports.push(report),
             );
 
             expect(stringifySelectorAst(selectors['x']), ':--x').to.eql(':--x, :is(:--x, .A)');
@@ -73,7 +73,7 @@ describe('helpers/custom-selector', () => {
                     z: parseCssSelector(':--y.z'),
                     a: parseCssSelector('.A'),
                 },
-                (report) => reports.push(report)
+                (report) => reports.push(report),
             );
 
             expect(stringifySelectorAst(selectors['x']), ':--x').to.eql(':is(:--x.y.z).A');
@@ -92,7 +92,7 @@ describe('helpers/custom-selector', () => {
             const output = transformInlineCustomSelectors(
                 input,
                 (name: string) => selectors[name],
-                noopReport
+                noopReport,
             );
 
             expect(output).to.eql(input);
@@ -106,7 +106,7 @@ describe('helpers/custom-selector', () => {
             const output = transformInlineCustomSelectors(
                 input,
                 (name: string) => selectors[name],
-                noopReport
+                noopReport,
             );
 
             expect(stringifySelectorAst(output)).to.eql('.before.A.after,.before.B.after');
@@ -121,7 +121,7 @@ describe('helpers/custom-selector', () => {
             const output = transformInlineCustomSelectors(
                 input,
                 (name: string) => selectors[name],
-                noopReport
+                noopReport,
             );
 
             expect(stringifySelectorAst(output)).to.eql('.A.C,.B.C,.A.D,.B.D');
@@ -137,7 +137,7 @@ describe('helpers/custom-selector', () => {
             const output = transformInlineCustomSelectors(
                 input,
                 (name: string) => selectors[name],
-                noopReport
+                noopReport,
             );
 
             expect(stringifySelectorAst(output)).to.eql(
@@ -150,7 +150,7 @@ describe('helpers/custom-selector', () => {
                     '.B.C.F',
                     '.A.D.F',
                     '.B.D.F',
-                ].join(',')
+                ].join(','),
             );
         });
         it('should permute from deep selectors', () => {
@@ -163,7 +163,7 @@ describe('helpers/custom-selector', () => {
             const output = transformInlineCustomSelectors(
                 input,
                 (name: string) => selectors[name],
-                noopReport
+                noopReport,
             );
 
             expect(stringifySelectorAst(output)).to.eql(
@@ -172,7 +172,7 @@ describe('helpers/custom-selector', () => {
                     ':is(.BB):not(.CC)',
                     ':is(.AA):not(.DD)',
                     ':is(.BB):not(.DD)',
-                ].join(',')
+                ].join(','),
             );
         });
         it('should permute multi selector input', () => {
@@ -185,7 +185,7 @@ describe('helpers/custom-selector', () => {
             const output = transformInlineCustomSelectors(
                 input,
                 (name: string) => selectors[name],
-                noopReport
+                noopReport,
             );
 
             expect(stringifySelectorAst(output)).to.eql('.A,.B,.C,.D');
@@ -197,13 +197,13 @@ describe('helpers/custom-selector', () => {
                     x: parseCssSelector('.A'),
                     y: parseCssSelector(':--x'),
                 },
-                noopReport
+                noopReport,
             );
 
             const output = transformInlineCustomSelectors(
                 input,
                 (name: string) => selectors[name],
-                noopReport
+                noopReport,
             );
 
             expect(stringifySelectorAst(output)).to.eql('.A');
@@ -215,7 +215,7 @@ describe('helpers/custom-selector', () => {
             const output = transformInlineCustomSelectors(
                 input,
                 (_name: string) => undefined,
-                (data) => reports.push(data)
+                (data) => reports.push(data),
             );
 
             expect(stringifySelectorAst(output), 'transform').to.eql(':--x');
@@ -231,18 +231,18 @@ describe('helpers/custom-selector', () => {
                 },
                 (_path) => {
                     /*circular report*/
-                }
+                },
             );
 
             const outputX = transformInlineCustomSelectors(
                 inputX,
                 (name: string) => selectors[name],
-                noopReport
+                noopReport,
             );
             const outputY = transformInlineCustomSelectors(
                 inputY,
                 (name: string) => selectors[name],
-                noopReport
+                noopReport,
             );
 
             expect(stringifySelectorAst(outputX), ':--x').to.eql(':--x');

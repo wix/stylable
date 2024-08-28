@@ -8,14 +8,14 @@ export class StylableUnidriverUtil {
     public async hasStyleState(
         base: ElementRemoteApi,
         stateName: string,
-        param: StateValue = true
+        param: StateValue = true,
     ): Promise<boolean> {
         const stateClass = this.stylesheet.cssStates({ [stateName]: param });
         return base.hasClass(stateClass);
     }
     public async getStyleState(
         base: ElementRemoteApi,
-        stateName: string
+        stateName: string,
     ): Promise<string | boolean | null> {
         const className = (await base.attr('class')) || '';
         if (!className.includes(stateName)) {

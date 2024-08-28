@@ -4,7 +4,7 @@ import type { ProviderPosition } from '../completion-providers';
 export function isInNode(
     position: ProviderPosition,
     node: postcss.Node,
-    includeSelector = false
+    includeSelector = false,
 ): boolean {
     const nodeStart = node.source?.start;
     const nodeEnd = node.source?.end;
@@ -102,7 +102,7 @@ export function pathFromPosition(
     ast: postcss.AnyNode,
     position: ProviderPosition,
     res: postcss.AnyNode[] = [],
-    includeSelector = false
+    includeSelector = false,
 ): postcss.AnyNode[] {
     res.push(ast);
     if (isContainer(ast) && ast.nodes) {
@@ -119,7 +119,7 @@ export function pathFromPosition(
 export function getAtRuleByPosition(
     ast: postcss.Root,
     position: ProviderPosition,
-    atRuleName: string
+    atRuleName: string,
 ): postcss.AtRule | undefined {
     let res: postcss.AtRule | undefined;
     ast.walkAtRules(atRuleName, (atRule) => {

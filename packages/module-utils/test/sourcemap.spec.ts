@@ -45,7 +45,7 @@ describe('.d.ts source-maps', () => {
 
         sourceMapConsumer = await new SourceMapConsumer(sourcemapText);
         const originalPosition = sourceMapConsumer.originalPositionFor(
-            getPosition(dtsText, 'root":') // source mapping starts after the first double quote
+            getPosition(dtsText, 'root":'), // source mapping starts after the first double quote
         );
 
         expect(originalPosition).to.eql({ line: 1, column: 0, source: 'entry.st.css', name: null });
@@ -84,7 +84,7 @@ describe('.d.ts source-maps', () => {
 
         sourceMapConsumer = await new SourceMapConsumer(sourcemapText);
         const originalPosition = sourceMapConsumer.originalPositionFor(
-            getPosition(dtsText, 'root":') // source mapping starts after the first double quote
+            getPosition(dtsText, 'root":'), // source mapping starts after the first double quote
         );
 
         expect(originalPosition).to.eql({ line: 1, column: 0, source: 'entry.st.css', name: null });
@@ -109,7 +109,7 @@ describe('.d.ts source-maps', () => {
 
         sourceMapConsumer = await new SourceMapConsumer(sourcemapText);
         const originalPosition = sourceMapConsumer.originalPositionFor(
-            getPosition(dtsText, 'c1":') // source mapping starts after the first double quote
+            getPosition(dtsText, 'c1":'), // source mapping starts after the first double quote
         );
 
         expect(originalPosition).to.eql({ line: 2, column: 4, source: 'entry.st.css', name: null });
@@ -131,7 +131,7 @@ describe('.d.ts source-maps', () => {
 
         sourceMapConsumer = await new SourceMapConsumer(sourcemapText);
         const originalPosition = sourceMapConsumer.originalPositionFor(
-            getPosition(dtsText, 'c1":') // source mapping starts after the first double quote
+            getPosition(dtsText, 'c1":'), // source mapping starts after the first double quote
         );
 
         expect(originalPosition).to.eql({ line: 1, column: 8, source: 'entry.st.css', name: null });
@@ -153,7 +153,7 @@ describe('.d.ts source-maps', () => {
 
         sourceMapConsumer = await new SourceMapConsumer(sourcemapText);
         const originalPosition = sourceMapConsumer.originalPositionFor(
-            getPosition(dtsText, 'k1":') // source mapping starts after the first double quote
+            getPosition(dtsText, 'k1":'), // source mapping starts after the first double quote
         );
 
         expect(originalPosition).to.eql({ line: 1, column: 0, source: 'entry.st.css', name: null });
@@ -179,8 +179,8 @@ describe('.d.ts source-maps', () => {
         // local layer
         expect(
             sourceMapConsumer.originalPositionFor(
-                getPosition(dtsText, 'L1":') // source mapping starts after the first double quote
-            )
+                getPosition(dtsText, 'L1":'), // source mapping starts after the first double quote
+            ),
         ).to.eql({ line: 1, column: 0, source: 'entry.st.css', name: null });
     });
 
@@ -206,8 +206,8 @@ describe('.d.ts source-maps', () => {
         // local container
         expect(
             sourceMapConsumer.originalPositionFor(
-                getPosition(dtsText, 'C2":') // source mapping starts after the first double quote
-            )
+                getPosition(dtsText, 'C2":'), // source mapping starts after the first double quote
+            ),
         ).to.eql({ line: 2, column: 4, source: 'entry.st.css', name: null });
     });
 
@@ -229,10 +229,10 @@ describe('.d.ts source-maps', () => {
 
         sourceMapConsumer = await new SourceMapConsumer(sourcemapText);
         const state1OriginalPosition = sourceMapConsumer.originalPositionFor(
-            getPosition(dtsText, 'state1"?:') // source mapping starts after the first double quote
+            getPosition(dtsText, 'state1"?:'), // source mapping starts after the first double quote
         );
         const state2OriginalPosition = sourceMapConsumer.originalPositionFor(
-            getPosition(dtsText, 'state2"?:')
+            getPosition(dtsText, 'state2"?:'),
         );
 
         expect(state1OriginalPosition).to.eql({
@@ -269,13 +269,13 @@ describe('.d.ts source-maps', () => {
 
         sourceMapConsumer = await new SourceMapConsumer(sourcemapText);
         const state1OriginalPosition = sourceMapConsumer.originalPositionFor(
-            getPosition(dtsText, 'state"?:') // source mapping starts after the first double quote
+            getPosition(dtsText, 'state"?:'), // source mapping starts after the first double quote
         );
         const state2OriginalPosition = sourceMapConsumer.originalPositionFor(
-            getPosition(dtsText, 'state2"?:')
+            getPosition(dtsText, 'state2"?:'),
         );
         const state3OriginalPosition = sourceMapConsumer.originalPositionFor(
-            getPosition(dtsText, 'state3"?:')
+            getPosition(dtsText, 'state3"?:'),
         );
 
         expect(state1OriginalPosition).to.eql({
@@ -317,7 +317,7 @@ describe('.d.ts source-maps', () => {
 
         sourceMapConsumer = await new SourceMapConsumer(sourcemapText);
         const sameStateOriginalPosition = sourceMapConsumer.originalPositionFor(
-            getPosition(dtsText, 'sameState"?:') // source mapping starts after the first double quote
+            getPosition(dtsText, 'sameState"?:'), // source mapping starts after the first double quote
         );
 
         expect(sameStateOriginalPosition).to.eql({
@@ -360,34 +360,34 @@ describe('.d.ts source-maps', () => {
         sourceMapConsumer = await new SourceMapConsumer(sourcemapText);
 
         const class1OriginalPosition = sourceMapConsumer.originalPositionFor(
-            getPosition(dtsText, 'root": "') // source mapping starts after the first double quote
+            getPosition(dtsText, 'root": "'), // source mapping starts after the first double quote
         );
         const class2OriginalPosition = sourceMapConsumer.originalPositionFor(
-            getPosition(dtsText, 'other": "')
+            getPosition(dtsText, 'other": "'),
         );
         const stVar1OriginalPosition = sourceMapConsumer.originalPositionFor(
-            getPosition(dtsText, 'c1":')
+            getPosition(dtsText, 'c1":'),
         );
         const stVar2OriginalPosition = sourceMapConsumer.originalPositionFor(
-            getPosition(dtsText, 'c2":')
+            getPosition(dtsText, 'c2":'),
         );
         const cssVar1OriginalPosition = sourceMapConsumer.originalPositionFor(
-            getPosition(dtsText, 'css1":')
+            getPosition(dtsText, 'css1":'),
         );
         const cssVar2OriginalPosition = sourceMapConsumer.originalPositionFor(
-            getPosition(dtsText, 'css2":')
+            getPosition(dtsText, 'css2":'),
         );
         const state1OriginalPosition = sourceMapConsumer.originalPositionFor(
-            getPosition(dtsText, 'state1"?:')
+            getPosition(dtsText, 'state1"?:'),
         );
         const state2OriginalPosition = sourceMapConsumer.originalPositionFor(
-            getPosition(dtsText, 'state2"?:')
+            getPosition(dtsText, 'state2"?:'),
         );
         const keyframes1OriginalPosition = sourceMapConsumer.originalPositionFor(
-            getPosition(dtsText, 'k1":')
+            getPosition(dtsText, 'k1":'),
         );
         const layer1OriginalPosition = sourceMapConsumer.originalPositionFor(
-            getPosition(dtsText, 'l1":')
+            getPosition(dtsText, 'l1":'),
         );
 
         expect(class1OriginalPosition).to.eql({
@@ -477,19 +477,19 @@ describe('.d.ts source-maps', () => {
         sourceMapConsumer = await new SourceMapConsumer(sourcemapText);
 
         const aOriginalPosition = sourceMapConsumer.originalPositionFor(
-            getPosition(dtsText, 'a":')
+            getPosition(dtsText, 'a":'),
         );
         const bOriginalPosition = sourceMapConsumer.originalPositionFor(
-            getPosition(dtsText, 'b":')
+            getPosition(dtsText, 'b":'),
         );
         const cOriginalPosition = sourceMapConsumer.originalPositionFor(
-            getPosition(dtsText, 'c":')
+            getPosition(dtsText, 'c":'),
         );
         const dOriginalPosition = sourceMapConsumer.originalPositionFor(
-            getPosition(dtsText, 'd":')
+            getPosition(dtsText, 'd":'),
         );
         const eOriginalPosition = sourceMapConsumer.originalPositionFor(
-            getPosition(dtsText, 'e":')
+            getPosition(dtsText, 'e":'),
         );
 
         expect(aOriginalPosition).to.eql({

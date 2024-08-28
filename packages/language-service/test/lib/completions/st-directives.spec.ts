@@ -12,7 +12,7 @@ describe('Inner Directives', () => {
             it(' with Prefix: ' + prefix + ' ', () => {
                 const asserter = asserters.getCompletions(
                     'imports/inside-import-selector.st.css',
-                    prefix
+                    prefix,
                 );
                 asserter.suggested([
                     asserters.importFromDirectiveCompletion(createRange(2, 4, 2, 4 + i)),
@@ -27,7 +27,7 @@ describe('Inner Directives', () => {
             it(' with Prefix: ' + prefix + ' ', () => {
                 const asserter = asserters.getCompletions(
                     'imports/inside-import-selector.st.css',
-                    prefix
+                    prefix,
                 );
                 asserter.suggested([
                     asserters.importDefaultDirectiveCompletion(createRange(2, 4, 2, 4 + i)),
@@ -42,7 +42,7 @@ describe('Inner Directives', () => {
             it(' with Prefix: ' + prefix + ' ', () => {
                 const asserter = asserters.getCompletions(
                     'imports/inside-import-selector.st.css',
-                    prefix
+                    prefix,
                 );
                 asserter.suggested([
                     asserters.importNamedDirectiveCompletion(createRange(2, 4, 2, 4 + i)),
@@ -53,7 +53,7 @@ describe('Inner Directives', () => {
 
     it('should not complete -st-from, -st-default, -st-named inside import directives when exists', () => {
         const asserter = asserters.getCompletions(
-            'imports/inside-import-selector-with-fields.st.css'
+            'imports/inside-import-selector-with-fields.st.css',
         );
         asserter.notSuggested([
             asserters.importFromDirectiveCompletion(createRange(0, 0, 0, 0)),
@@ -109,7 +109,7 @@ describe('Inner Directives', () => {
 
     it('should not complete -st-states, -st-extends, -st-mixin inside simple selector ruleset when they exist', () => {
         const asserter = asserters.getCompletions(
-            'general/inside-simple-ruleset-with-all-st-fields.st.css'
+            'general/inside-simple-ruleset-with-all-st-fields.st.css',
         );
         asserter.notSuggested([
             asserters.statesDirectiveCompletion(createRange(0, 0, 0, 0)),

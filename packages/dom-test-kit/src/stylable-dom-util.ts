@@ -29,7 +29,10 @@ function convertToClass(node: SelectorNode) {
 }
 
 export class StylableDOMUtil {
-    constructor(private stylesheet: StylesheetHost, private root?: Element) {}
+    constructor(
+        private stylesheet: StylesheetHost,
+        private root?: Element,
+    ) {}
     public select(selector?: string, element?: PartialElement): Element | null {
         const el = element || this.root;
         return el ? el.querySelector(this.scopeSelector(selector)) : null;
@@ -55,19 +58,19 @@ export class StylableDOMUtil {
                 if (!args) {
                     convertToClass(node).value = STCustomState.createBooleanStateClassName(
                         node.value,
-                        namespace
+                        namespace,
                     );
                 } else {
                     const nestedContent = stringifySelectorAst(args);
                     convertToClass(node).value = STCustomState.createStateWithParamClassName(
                         node.value,
                         namespace,
-                        nestedContent
+                        nestedContent,
                     );
                 }
             } else if (node.type === 'pseudo_element' || node.type === 'type') {
                 throw new Error(
-                    `selector with ${node.type.replace(/_/, `-`)} is not supported yet.`
+                    `selector with ${node.type.replace(/_/, `-`)} is not supported yet.`,
                 );
             }
         });
@@ -77,18 +80,18 @@ export class StylableDOMUtil {
     public hasStyleState(
         element: PartialElement,
         stateName: string,
-        param: StateValue = true
+        param: StateValue = true,
     ): boolean {
         const namespace = this.stylesheet.namespace;
 
         if (typeof param === 'boolean') {
             return element.classList.contains(
-                STCustomState.createBooleanStateClassName(stateName, namespace)
+                STCustomState.createBooleanStateClassName(stateName, namespace),
             );
         }
 
         return element.classList.contains(
-            STCustomState.createStateWithParamClassName(stateName, namespace, String(param))
+            STCustomState.createStateWithParamClassName(stateName, namespace, String(param)),
         );
     }
 
@@ -99,7 +102,7 @@ export class StylableDOMUtil {
 
         const booleanState = STCustomState.createBooleanStateClassName(
             stateName,
-            this.stylesheet.namespace
+            this.stylesheet.namespace,
         );
         if (element.classList.contains(booleanState)) {
             return true;
@@ -135,7 +138,7 @@ export class StylableDOMUtil {
         return STCustomState.createStateWithParamClassName(
             stateName,
             this.stylesheet.namespace,
-            singleCharState
+            singleCharState,
         ).slice(0, -3);
     }
 }

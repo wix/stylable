@@ -254,7 +254,7 @@ export function createDefaultOptions(): BuildOptions {
 
 export function validateOptions(
     { outDir, srcDir, outputSources, dts, dtsSourceMap }: BuildOptions,
-    name?: string
+    name?: string,
 ) {
     const prefix = name ? `"${name}" options - ` : '';
 
@@ -267,7 +267,7 @@ export function validateOptions(
             prefix +
                 'Invalid configuration: When using "stcss" outDir and srcDir must be different.' +
                 `\noutDir: ${outDir}` +
-                `\nsrcDir: ${srcDir}`
+                `\nsrcDir: ${srcDir}`,
         );
     }
 }
@@ -280,7 +280,7 @@ export function mergeBuildOptions(
     return Object.assign(
         {},
         config,
-        ...rest.map((currentConfig) => (currentConfig ? removeUndefined(currentConfig) : {}))
+        ...rest.map((currentConfig) => (currentConfig ? removeUndefined(currentConfig) : {})),
     );
 }
 
@@ -289,13 +289,13 @@ export function createBuildIdentifier(
     projectRoot: string,
     index: number,
     hasMultipleOptions: boolean,
-    isMultipleProjects: boolean
+    isMultipleProjects: boolean,
 ) {
     return hasMultipleOptions
         ? `[${index}] ${projectRoot.replace(rootDir, '')}`
         : isMultipleProjects
-        ? projectRoot.replace(rootDir, '')
-        : projectRoot;
+          ? projectRoot.replace(rootDir, '')
+          : projectRoot;
 }
 
 export function hasStylableCSSOutput(options: BuildOptions): boolean {

@@ -11,7 +11,7 @@ export function compileAsEntry(
     compilation: Compilation,
     context: string,
     request: string,
-    plugins: WebpackPluginInstance[] = []
+    plugins: WebpackPluginInstance[] = [],
 ): Promise<string> {
     const pluginName = 'compileAsEntry';
     const outputOptions = {
@@ -20,7 +20,7 @@ export function compileAsEntry(
     const childCompiler = compilation.createChildCompiler(
         `${pluginName} ${request}`,
         outputOptions,
-        []
+        [],
     );
 
     new NodeTemplatePlugin(outputOptions).apply(childCompiler);

@@ -6,7 +6,7 @@ export type OnFunction = (node: AnyValueNode, level: number) => void;
 export function processDeclarationFunctions(
     decl: Declaration,
     onFunction: OnFunction,
-    transform = false
+    transform = false,
 ) {
     const ast = parseValues(decl.value);
 

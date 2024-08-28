@@ -10,7 +10,7 @@ describe(`testStylableCore()`, () => {
         const { meta, exports } = sheets[`/entry.st.css`];
 
         expect(CSSClass.get(meta, `root`), `meta`).to.deep.contain(
-            CSSClass.createSymbol({ name: `root` })
+            CSSClass.createSymbol({ name: `root` }),
         );
         expect(exports.classes.root, `exports.classes`).to.equal(`entry__root`);
     });
@@ -19,14 +19,14 @@ describe(`testStylableCore()`, () => {
             testStylableCore(`
                 /* @rule .entry__pass */
                 .pass {}
-            `)
+            `),
         ).to.not.throw();
 
         expect(() =>
             testStylableCore(`
                 /* @rule .xxx__fail */
                 .fail {}
-            `)
+            `),
         ).to.throw();
     });
     it(`should expose stylable instance and filesystem`, () => {
@@ -37,7 +37,7 @@ describe(`testStylableCore()`, () => {
             `
             @st-import [part] from './entry.st.css';
             .part {}
-            `
+            `,
         );
         const newMeta = stylable.analyze(`/new.st.css`);
         stylable.transform(newMeta);
@@ -68,9 +68,9 @@ describe(`testStylableCore()`, () => {
                 },
                 {
                     entries: [`/a.st.css`, `/b.st.css`],
-                }
+                },
             );
-            
+
             // @ts-expect-error entry is not processed
             const entryNotProcessed = sheets[`/entry.st.css`];
             const a = sheets[`/a.st.css`];
@@ -89,8 +89,8 @@ describe(`testStylableCore()`, () => {
                     {
                         // @ts-expect-error paths must start with "/"
                         entries: [`a.st.css`],
-                    }
-                )
+                    },
+                ),
             ).to.throw(testStylableCore.errors.absoluteEntry(`a.st.css`));
         });
         it(`should inline test all files (even these that are not linked to entries)`, () => {
@@ -104,7 +104,7 @@ describe(`testStylableCore()`, () => {
                         /* @rule .other__part */
                         .part {}
                     `,
-                })
+                }),
             ).to.not.throw();
 
             expect(() =>
@@ -117,7 +117,7 @@ describe(`testStylableCore()`, () => {
                         /* @rule .fail__part */
                         .part {}
                     `,
-                })
+                }),
             ).to.throw();
         });
         it(`should provide default naive requireModule for JS files`, () => {
@@ -162,7 +162,7 @@ describe(`testStylableCore()`, () => {
 
             expect(fs, `filesystem`).to.equal(inputFS);
             expect(sheets['/abc.st.css'].exports.classes.root, `sheet from config fs`).to.equal(
-                `abc__root`
+                `abc__root`,
             );
         });
     });

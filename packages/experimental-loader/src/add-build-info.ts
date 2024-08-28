@@ -8,8 +8,8 @@ export function addBuildInfo(ctx: LoaderContext<any>, namespace: string) {
             new Error(
                 `Failed to add stylableNamespace buildInfo for: ${ctx.resourcePath} because ${
                     (error as Error).message
-                }`
-            )
+                }`,
+            ),
         );
     }
 }

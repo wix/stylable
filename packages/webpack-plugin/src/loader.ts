@@ -5,7 +5,7 @@ import { generateStylableJSModuleSource } from '@stylable/core';
 
 export default function StylableWebpackLoader(this: StylableLoaderContext, source: string) {
     const { meta, exports } = this.stylable.transform(
-        this.stylable.analyze(this.resourcePath, source)
+        this.stylable.analyze(this.resourcePath, source),
     );
 
     const { urls, imports, buildDependencies, unusedImports, cssDepth } = getImports(
@@ -14,7 +14,7 @@ export default function StylableWebpackLoader(this: StylableLoaderContext, sourc
         this.stylable.projectRoot,
         this.assetFilter,
         this.assetsMode,
-        this.includeGlobalSideEffects
+        this.includeGlobalSideEffects,
     );
 
     for (const dep of buildDependencies) {
@@ -58,6 +58,6 @@ export default function StylableWebpackLoader(this: StylableLoaderContext, sourc
                   runtimeId: rt('runtimeId'),
                   id: rt('id'),
               }
-            : undefined
+            : undefined,
     );
 }

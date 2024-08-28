@@ -10,7 +10,7 @@ export class Completion {
         public insertText: string | Snippet = label,
         public range: ProviderRange,
         public additionalCompletions: boolean = false,
-        public triggerSignature: boolean = false
+        public triggerSignature: boolean = false,
     ) {}
 }
 
@@ -20,7 +20,7 @@ export class Snippet {
 
 export function range(
     pos: { line: number; character: number },
-    { deltaStart = 0, deltaEnd = 0 }: { deltaStart?: number; deltaEnd?: number } = {}
+    { deltaStart = 0, deltaEnd = 0 }: { deltaStart?: number; deltaEnd?: number } = {},
 ) {
     return {
         start: { line: pos.line, character: pos.character + deltaStart },
@@ -61,7 +61,7 @@ export function importInternalDirective(type: keyof typeof importDirectives, rng
                 'Default export name',
                 'a',
                 new Snippet(`-st-default` + ': $1;'),
-                rng
+                rng,
             );
         case `-st-from`:
             return new Completion(
@@ -69,7 +69,7 @@ export function importInternalDirective(type: keyof typeof importDirectives, rng
                 'Path to library',
                 'a',
                 new Snippet(`-st-from` + ': "$1";'),
-                rng
+                rng,
             );
         case `-st-named`:
             return new Completion(
@@ -77,7 +77,7 @@ export function importInternalDirective(type: keyof typeof importDirectives, rng
                 'Named export name',
                 'a',
                 new Snippet(`-st-named` + ': $1;'),
-                rng
+                rng,
             );
     }
 }
@@ -91,7 +91,7 @@ export function rulesetInternalDirective(type: keyof typeof rulesetDirectives, r
                 'a',
                 new Snippet('-st-extends: $1;'),
                 rng,
-                true
+                true,
             );
         case `-st-mixin`:
             return new Completion(
@@ -100,7 +100,7 @@ export function rulesetInternalDirective(type: keyof typeof rulesetDirectives, r
                 'a',
                 new Snippet('-st-mixin: $1;'),
                 rng,
-                true
+                true,
             );
         case `-st-states`:
             return new Completion(
@@ -108,7 +108,7 @@ export function rulesetInternalDirective(type: keyof typeof rulesetDirectives, r
                 'Define the CSS states available for this class',
                 'a',
                 new Snippet('-st-states: $1;'),
-                rng
+                rng,
             );
     }
 }
@@ -121,7 +121,7 @@ export function topLevelDirective(type: keyof typeof topLevelDirectives, rng: Pr
                 'Import an external library',
                 'a',
                 new Snippet(':import {\n\t-st-from: "$1";\n}'),
-                rng
+                rng,
             );
         case topLevelDirectives.namespace:
             return new Completion(
@@ -129,7 +129,7 @@ export function topLevelDirective(type: keyof typeof topLevelDirectives, rng: Pr
                 'Declare a namespace for the file',
                 'a',
                 new Snippet('@st-namespace "$1";\n'),
-                rng
+                rng,
             );
         case topLevelDirectives.customSelector:
             return new Completion(
@@ -137,7 +137,7 @@ export function topLevelDirective(type: keyof typeof topLevelDirectives, rng: Pr
                 'Define a custom selector',
                 'a',
                 topLevelDirectives.customSelector,
-                rng
+                rng,
             );
         case topLevelDirectives.root:
             return new Completion(topLevelDirectives.root, 'The root class', 'a', undefined, rng);
@@ -147,7 +147,7 @@ export function topLevelDirective(type: keyof typeof topLevelDirectives, rng: Pr
                 'Declare variables',
                 'a',
                 new Snippet(':vars {\n\t$1\n}'),
-                rng
+                rng,
             );
         case topLevelDirectives.stScope:
             return new Completion(
@@ -155,7 +155,7 @@ export function topLevelDirective(type: keyof typeof topLevelDirectives, rng: Pr
                 'Define an @st-scope',
                 'a',
                 new Snippet('@st-scope $1 {\n\t$2\n}'),
-                rng
+                rng,
             );
         case topLevelDirectives.stImport:
             return new Completion(
@@ -163,7 +163,7 @@ export function topLevelDirective(type: keyof typeof topLevelDirectives, rng: Pr
                 'Define an @st-import',
                 'a',
                 new Snippet('@st-import $2 from "$1";'),
-                rng
+                rng,
             );
         case topLevelDirectives.stGlobalCustomProperty:
             return new Completion(
@@ -171,7 +171,7 @@ export function topLevelDirective(type: keyof typeof topLevelDirectives, rng: Pr
                 'Define global custom properties using @st-global-custom-property',
                 'a',
                 new Snippet('@st-global-custom-property --$1;'),
-                rng
+                rng,
             );
     }
 }
@@ -182,7 +182,7 @@ export function valueDirective(rng: ProviderRange) {
         'Use the value of a variable',
         'a',
         new Snippet(' value($1)'),
-        rng
+        rng,
     );
 }
 
@@ -192,7 +192,7 @@ export function globalCompletion(rng: ProviderRange) {
         'Target a global selector',
         'a',
         new Snippet(':global($1)'),
-        rng
+        rng,
     );
 }
 
@@ -203,7 +203,7 @@ export function classCompletion(className: string, rng: ProviderRange, removeDot
         'Stylable class or tag',
         'a',
         undefined,
-        rng
+        rng,
     );
 }
 
@@ -215,14 +215,14 @@ export function namedCompletion(
     symbolName: string,
     rng: ProviderRange,
     from: string,
-    value?: string
+    value?: string,
 ) {
     return new Completion(
         symbolName,
         'from: ' + from + '\n' + 'Value: ' + value,
         'a',
         new Snippet(symbolName),
-        rng
+        rng,
     );
 }
 
@@ -310,7 +310,7 @@ stImportNamedCompletion.typeAssertCall = ({
         'a',
         new Snippet(`${localName}($1)`),
         rng,
-        triggerCompletion
+        triggerCompletion,
     );
 };
 stImportNamedCompletion.typeAssertCallDetail = (type: string) => {
@@ -337,7 +337,7 @@ export function codeMixinCompletion(symbolName: string, rng: ProviderRange, from
         new Snippet(symbolName + '($1)'),
         rng,
         false,
-        true
+        true,
     );
 }
 
@@ -349,7 +349,7 @@ export function formatterCompletion(symbolName: string, rng: ProviderRange, from
         new Snippet(symbolName + '($1)'),
         rng,
         false,
-        true
+        true,
     );
 }
 
@@ -364,7 +364,7 @@ export function stateTypeCompletion(type: string, from: string, rng: ProviderRan
         'a',
         new Snippet(`${type}($1)`),
         rng,
-        false
+        false,
     );
 }
 
@@ -373,7 +373,7 @@ export function stateCompletion(
     from: string,
     rng: ProviderRange,
     type: string | null,
-    hasParam?: boolean
+    hasParam?: boolean,
 ) {
     return new Completion(
         ':' + stateName + (hasParam ? '()' : ''),
@@ -382,7 +382,7 @@ export function stateCompletion(
         new Snippet(':' + stateName + (hasParam ? '($1)' : '')),
         rng,
         type === 'enum',
-        hasParam
+        hasParam,
     );
 }
 
@@ -396,6 +396,6 @@ export function valueCompletion(name: string, from: string, value: string, rng: 
         'from: ' + from + '\n' + 'value: ' + value,
         'a',
         new Snippet(name),
-        rng
+        rng,
     );
 }

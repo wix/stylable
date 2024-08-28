@@ -129,7 +129,7 @@ describe(`features/st-symbol`, () => {
         expect(STSymbol.get(meta, `localA`)).to.eql(
             CSSClass.createSymbol({
                 name: `A`,
-            })
+            }),
         );
         expect(STSymbol.get(meta, `A`)).to.eql(undefined);
     });

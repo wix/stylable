@@ -4,7 +4,7 @@ import { dirname } from 'path';
 
 const project = 'native-css';
 const projectDir = dirname(
-    require.resolve(`@stylable/webpack-plugin/test/e2e/projects/${project}/webpack.config`)
+    require.resolve(`@stylable/webpack-plugin/test/e2e/projects/${project}/webpack.config`),
 );
 
 describe(`(${project})`, () => {
@@ -20,7 +20,7 @@ describe(`(${project})`, () => {
         },
         before,
         afterEach,
-        after
+        after,
     );
 
     it('include native CSS imports from local and 3rd party', async () => {
@@ -45,13 +45,13 @@ describe(`(${project})`, () => {
                 libColor: computedStyle.color,
                 customResolveColor: computedStyle.borderColor,
                 customResolveSideEffect: computedStyle.getPropertyValue(
-                    '--custom-resolved-side-effect'
+                    '--custom-resolved-side-effect',
                 ),
             };
         });
         expect(localSideEffect, 'local side effect').to.eql('from local side-effect');
         expect(customResolveSideEffect, 'custom resolve side effect').to.eql(
-            'from custom resolved side-effect'
+            'from custom resolved side-effect',
         );
         expect(libSideEffect, 'lib side effect').to.eql('from lib side-effect');
         expect(libClass, 'lib class').to.eql('from lib class');
@@ -81,7 +81,7 @@ describe(`(${project}) (production)`, () => {
         },
         before,
         afterEach,
-        after
+        after,
     );
 
     it('include native CSS imports from local and 3rd party', async () => {
@@ -95,7 +95,7 @@ describe(`(${project}) (production)`, () => {
             };
         });
         expect(nativeClassProp, 'un-optimized native class').to.eql(
-            'from local un-optimized class'
+            'from local un-optimized class',
         );
     });
 });

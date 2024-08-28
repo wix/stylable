@@ -4,7 +4,7 @@ import { dirname } from 'path';
 
 const project = 'stylable-config-resolver';
 const projectDir = dirname(
-    require.resolve(`@stylable/webpack-plugin/test/e2e/projects/${project}/package.json`)
+    require.resolve(`@stylable/webpack-plugin/test/e2e/projects/${project}/package.json`),
 );
 
 describe(`(${project})`, () => {
@@ -17,7 +17,7 @@ describe(`(${project})`, () => {
         },
         before,
         afterEach,
-        after
+        after,
     );
 
     it('config is resolved and css is working', async () => {
@@ -31,10 +31,10 @@ describe(`(${project})`, () => {
         });
 
         expect(backgroundColor, 'should be resolved to green through webpack alias').to.eql(
-            'rgb(0, 128, 0)'
+            'rgb(0, 128, 0)',
         );
         expect(color, 'should be resolved to blue through typescript paths').to.eql(
-            'rgb(0, 0, 255)'
+            'rgb(0, 0, 255)',
         );
     });
 });

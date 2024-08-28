@@ -21,7 +21,7 @@ export interface ParseForEditingResult {
 }
 export function parseForEditing(
     source: string,
-    { from = '' }: { from?: string } = {}
+    { from = '' }: { from?: string } = {},
 ): ParseForEditingResult {
     const input = new postcss.Input(source, { from }); // ToDo: check why stringifier option doesn't work
     const parser = new EditTimeParser(input);

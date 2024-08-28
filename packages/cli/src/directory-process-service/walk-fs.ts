@@ -17,7 +17,7 @@ export async function* directoryDeepChildren(
     fs: IFileSystem,
     directoryPath: string,
     filterItem: (item: DirectoryItem) => boolean = returnsTrue,
-    basePath = directoryPath
+    basePath = directoryPath,
 ): AsyncGenerator<DirectoryItem, void, unknown> {
     for (const item of await fs.promises.readdir(directoryPath, {
         withFileTypes: true,

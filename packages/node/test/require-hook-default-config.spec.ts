@@ -4,7 +4,7 @@ import { dirname, join } from 'path';
 import { attachHook } from '@stylable/node';
 
 const fixturesPath = dirname(
-    require.resolve('@stylable/node/test/fixtures/default-config/package.json')
+    require.resolve('@stylable/node/test/fixtures/default-config/package.json'),
 );
 
 describe('require hook', () => {
@@ -22,7 +22,7 @@ describe('require hook', () => {
 
         // this checks that a mapped module was correctly resolved using -st-extends
         expect(indexModule.classes.root).to.equal(
-            indexModule.namespace + '__root' + ' ' + mappedModule.namespace + '__test'
+            indexModule.namespace + '__root' + ' ' + mappedModule.namespace + '__test',
         );
     });
 });

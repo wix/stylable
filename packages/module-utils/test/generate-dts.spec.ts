@@ -380,7 +380,7 @@ describe('Generate DTS', function () {
             });
 
             expect(tk.typecheck('test.ts')).to.include(
-                "Argument of type '{ state1: boolean; }' is not assignable"
+                "Argument of type '{ state1: boolean; }' is not assignable",
             );
         });
 
@@ -395,7 +395,7 @@ describe('Generate DTS', function () {
             });
 
             expect(tk.typecheck('test.ts')).to.include(
-                "Type 'string' is not assignable to type 'boolean | undefined'"
+                "Type 'string' is not assignable to type 'boolean | undefined'",
             );
         });
 
@@ -413,7 +413,7 @@ describe('Generate DTS', function () {
 
             const diagnostics = tk.typecheck('test.ts');
             expect(diagnostics).to.include(
-                "Type 'string' is not assignable to type 'boolean | undefined'"
+                "Type 'string' is not assignable to type 'boolean | undefined'",
             );
             // changing error message to comply with typescript v4.6
             // https://github.com/microsoft/TypeScript/issues/48083
@@ -430,7 +430,7 @@ describe('Generate DTS', function () {
                 `,
             });
             expect(tk.typecheck('test.ts')).to.include(
-                "Argument of type '{ mapped: string; }' is not assignable"
+                "Argument of type '{ mapped: string; }' is not assignable",
             );
         });
 
@@ -444,7 +444,7 @@ describe('Generate DTS', function () {
                 `,
             });
             expect(tk.typecheck('test.ts')).to.include(
-                "Argument of type '{ mappedWithParam: string; }' is not assignable"
+                "Argument of type '{ mappedWithParam: string; }' is not assignable",
             );
         });
 
@@ -479,7 +479,7 @@ describe('Generate DTS', function () {
                 // changing error message to comply with typescript v4.6
                 // https://github.com/microsoft/TypeScript/issues/48083
                 expect(tk.typecheck('test.ts')).to.include(
-                    `Type 'boolean' is not assignable to type 'string'`
+                    `Type 'boolean' is not assignable to type 'string'`,
                 );
             });
 
@@ -511,7 +511,7 @@ describe('Generate DTS', function () {
                 });
 
                 expect(tk.typecheck('test.ts')).to.include(
-                    "Argument of type '{ state1: string; }' is not assignable"
+                    "Argument of type '{ state1: string; }' is not assignable",
                 );
             });
 
@@ -528,7 +528,7 @@ describe('Generate DTS', function () {
                 });
 
                 expect(tk.typecheck('test.ts')).to.include(
-                    "Argument of type '{ state1: string; }' is not assignable"
+                    "Argument of type '{ state1: string; }' is not assignable",
                 );
             });
 
@@ -548,7 +548,7 @@ describe('Generate DTS', function () {
                 });
 
                 expect(tk.typecheck('test.ts')).to.include(
-                    `Argument of type '{ state1: boolean; }' is not assignable to parameter of type 'NullableString'`
+                    `Argument of type '{ state1: boolean; }' is not assignable to parameter of type 'NullableString'`,
                 );
             });
         });
@@ -580,7 +580,7 @@ describe('Generate DTS', function () {
             });
 
             expect(tk.typecheck('test.ts')).to.include(
-                "only specify known properties, and 'unknown' does not exist in type"
+                "only specify known properties, and 'unknown' does not exist in type",
             );
         });
 

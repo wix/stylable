@@ -115,7 +115,7 @@ describe('Colors', () => {
             const res = getDocColorPresentation(
                 'colors/color-presentation-import.st.css',
                 color,
-                range
+                range,
             );
 
             expect(res.length).to.equal(4);

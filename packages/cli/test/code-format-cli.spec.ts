@@ -154,7 +154,7 @@ describe('Stylable Code Format Cli', function () {
                             green,
                             blue;
                     }
-                `)
+                `),
             );
         });
         it('should accept configuration', () => {
@@ -186,7 +186,7 @@ describe('Stylable Code Format Cli', function () {
                       prop2: 123456789
                              123456789;
                     }
-                `) + '\n'
+                `) + '\n',
             );
             //
         });
@@ -207,7 +207,7 @@ describe('Stylable Code Format Cli', function () {
             expect(dirContent[filePath]).to.equal(fileContent);
             expect(stdout).to.equal('');
             expect(stderr).to.include(
-                'cannot find any Stylable stylesheets (.st.css) in directory'
+                'cannot find any Stylable stylesheets (.st.css) in directory',
             );
         });
 

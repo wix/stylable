@@ -62,67 +62,67 @@ export const diagnostics = {
         '00002',
         'warning',
         (name: string) =>
-            `unscoped class "${name}" will affect all elements of the same type in the document`
+            `unscoped class "${name}" will affect all elements of the same type in the document`,
     ),
     STATE_DEFINITION_IN_ELEMENT: createDiagnosticReporter(
         '11002',
         'error',
-        () => 'cannot define pseudo states inside a type selector'
+        () => 'cannot define pseudo states inside a type selector',
     ),
     STATE_DEFINITION_IN_COMPLEX: createDiagnosticReporter(
         '11003',
         'error',
-        () => 'cannot define pseudo states inside complex selectors'
+        () => 'cannot define pseudo states inside complex selectors',
     ),
     OVERRIDE_TYPED_RULE: createDiagnosticReporter(
         '11006',
         'warning',
-        (key: string, name: string) => `override "${key}" on typed rule "${name}"`
+        (key: string, name: string) => `override "${key}" on typed rule "${name}"`,
     ),
     CANNOT_RESOLVE_EXTEND: createDiagnosticReporter(
         '11004',
         'error',
-        (name: string) => `cannot resolve '-st-extends' type for '${name}'`
+        (name: string) => `cannot resolve '-st-extends' type for '${name}'`,
     ),
     CANNOT_EXTEND_IN_COMPLEX: createDiagnosticReporter(
         '11005',
         'error',
-        () => `cannot define "-st-extends" inside a complex selector`
+        () => `cannot define "-st-extends" inside a complex selector`,
     ),
     EMPTY_ST_GLOBAL: createDiagnosticReporter(
         '00003',
         'error',
-        () => `-st-global must contain a valid selector`
+        () => `-st-global must contain a valid selector`,
     ),
     UNSUPPORTED_MULTI_SELECTORS_ST_GLOBAL: createDiagnosticReporter(
         '00004',
         'error',
-        () => `unsupported multi selector in -st-global`
+        () => `unsupported multi selector in -st-global`,
     ),
     UNSUPPORTED_COMPLEX_SELECTOR: createDiagnosticReporter(
         '00010',
         'error',
-        () => `unsupported complex selector`
+        () => `unsupported complex selector`,
     ),
     IMPORT_ISNT_EXTENDABLE: createDiagnosticReporter(
         '00005',
         'error',
-        () => 'import is not extendable'
+        () => 'import is not extendable',
     ),
     CANNOT_EXTEND_UNKNOWN_SYMBOL: createDiagnosticReporter(
         '00006',
         'error',
-        (name: string) => `cannot extend unknown symbol "${name}"`
+        (name: string) => `cannot extend unknown symbol "${name}"`,
     ),
     CANNOT_EXTEND_JS: createDiagnosticReporter(
         '00007',
         'error',
-        () => 'JS import is not extendable'
+        () => 'JS import is not extendable',
     ),
     UNKNOWN_IMPORT_ALIAS: createDiagnosticReporter(
         '00008',
         'error',
-        (name: string) => `cannot use alias for unknown import "${name}"`
+        (name: string) => `cannot use alias for unknown import "${name}"`,
     ),
     DISABLED_DIRECTIVE: createDiagnosticReporter(
         '00009',
@@ -132,12 +132,12 @@ export const diagnostics = {
                 directive === '-st-extends'
                     ? ` use "@st .${className} :is(.base)" instead`
                     : directive === '-st-global'
-                    ? `use "@st .${className} => :global(<selector>)" instead`
-                    : directive === '-st-states'
-                    ? `use "@st .${className} { @st .state; }" instead`
-                    : '';
+                      ? `use "@st .${className} => :global(<selector>)" instead`
+                      : directive === '-st-states'
+                        ? `use "@st .${className} { @st .state; }" instead`
+                        : '';
             return `cannot use ${directive} on .${className} since class is defined with "@st" - ${alternative}`;
-        }
+        },
     ),
 };
 
@@ -165,7 +165,7 @@ export const hooks = createFeature<{
                 {
                     node: rule,
                     word: stringifySelector(node),
-                }
+                },
             );
         }
         addClass(context, node.value, rule);
@@ -204,7 +204,7 @@ export const hooks = createFeature<{
                             }
                             return globalClasses;
                         },
-                        []
+                        [],
                     );
                     if (isOnlyClasses) {
                         exportedClasses.push(...globalClasses);
@@ -243,7 +243,7 @@ export const hooks = createFeature<{
                 selectorContext.ruleOrAtRule,
                 context.meta,
                 resolver,
-                context.diagnostics
+                context.diagnostics,
             );
         }
         if (selectorContext.transform) {
@@ -332,7 +332,7 @@ export function namespaceClass(
     meta: StylableMeta,
     symbol: StylableSymbol,
     node: SelectorNode, // ToDo: check this is the correct type, should this be inline selector?
-    wrapInGlobal = true
+    wrapInGlobal = true,
 ) {
     if (`-st-global` in symbol && symbol[`-st-global`]) {
         // change node to `-st-global` value
@@ -380,8 +380,8 @@ export function addDevRules({ getResolvedSymbols, meta }: FeatureTransformContex
                     basename(b.meta.source),
                     '.' + a.symbol.name,
                     getNamespacedClass(a.meta, a.symbol),
-                    basename(a.meta.source)
-                )
+                    basename(a.meta.source),
+                ),
             );
         }
     }
@@ -393,7 +393,7 @@ export function createWarningRule(
     extendedFile: string,
     extendingNode: string,
     scopedExtendingNode: string,
-    extendingFile: string
+    extendingFile: string,
 ) {
     const message = `"class extending component '${extendingNode} => ${scopedExtendingNode}' in stylesheet '${extendingFile}' was set on a node that does not extend '${extendedNode} => ${scopedExtendedNode}' from stylesheet '${extendedFile}'" !important`;
     return postcss.rule({
@@ -470,7 +470,7 @@ export function checkForScopedNodeAfter(
     context: FeatureContext,
     rule: postcss.Rule,
     nodes: ImmutableSelectorNode[],
-    index: number
+    index: number,
 ) {
     for (let i = index + 1; i < nodes.length; i++) {
         const node = nodes[i];
@@ -493,7 +493,7 @@ export function checkForScopedNodeAfter(
 }
 
 function isDirectiveDeclaration(
-    decl: postcss.Declaration
+    decl: postcss.Declaration,
 ): decl is postcss.Declaration & { prop: keyof typeof stPartDirectives } {
     return decl.prop in stPartDirectives;
 }
@@ -506,16 +506,19 @@ export function disableDirectivesForClass(context: FeatureContext, className: st
 
 function handleDirectives(
     context: FeatureContext,
-    decl: postcss.Declaration & { prop: keyof typeof stPartDirectives }
+    decl: postcss.Declaration & { prop: keyof typeof stPartDirectives },
 ) {
     const rule = decl.parent as postcss.Rule;
     if (rule?.type !== 'rule') {
         return;
     }
     const isSimplePerSelector = isSimpleSelector(rule.selector);
-    const type = isSimplePerSelector.reduce((accType, { type }) => {
-        return !accType ? type : accType !== type ? `complex` : type;
-    }, `` as (typeof isSimplePerSelector)[number]['type']);
+    const type = isSimplePerSelector.reduce(
+        (accType, { type }) => {
+            return !accType ? type : accType !== type ? `complex` : type;
+        },
+        `` as (typeof isSimplePerSelector)[number]['type'],
+    );
     const isSimple = type !== `complex`;
 
     const { classesDefinedWithAtSt } = plugableRecord.getUnsafe(context.meta.data, dataKey);
@@ -524,7 +527,7 @@ function handleDirectives(
             diagnostics.DISABLED_DIRECTIVE(rule.selector.replace('.', ''), decl.prop),
             {
                 node: decl,
-            }
+            },
         );
         return;
     } else if (decl.prop === `-st-states`) {
@@ -534,7 +537,7 @@ function handleDirectives(
                 decl,
                 rule.selector,
                 `-st-states`,
-                STCustomState.parsePseudoStates(decl.value, decl, context.diagnostics)
+                STCustomState.parsePseudoStates(decl.value, decl, context.diagnostics),
             );
         } else {
             if (type === 'type') {
@@ -565,7 +568,7 @@ function handleDirectives(
                     decl,
                     rule.selector,
                     `-st-extends`,
-                    getAlias(extendsRefSymbol) || extendsRefSymbol
+                    getAlias(extendsRefSymbol) || extendsRefSymbol,
                 );
             } else {
                 context.diagnostics.report(diagnostics.CANNOT_RESOLVE_EXTEND(decl.value), {
@@ -600,7 +603,7 @@ export function extendTypedRule(
     node: postcss.Node,
     selector: string,
     key: keyof StPartDirectives,
-    value: any
+    value: any,
 ) {
     const name = selector.replace('.', '');
     const typedRule = STSymbol.get(context.meta, name) as ClassSymbol | ElementSymbol;
@@ -654,7 +657,7 @@ export function parseStExtends(value: string) {
 }
 function parseStGlobal(
     context: FeatureContext,
-    decl: postcss.Declaration
+    decl: postcss.Declaration,
 ): SelectorNodes | undefined {
     const selector = parseSelectorWithCache(decl.value.replace(/^['"]/, '').replace(/['"]$/, ''), {
         clone: true,

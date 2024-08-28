@@ -52,7 +52,7 @@ export function tokenizeDTS(source: string) {
             getCommentStartType: getJSCommentStartType,
             isCommentEnd,
             getUnclosedComment,
-        })
+        }),
     );
 }
 

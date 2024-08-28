@@ -8,7 +8,7 @@ import { dirname } from 'path';
 
 const project = 'project-with-3rd-party-mixin-assets';
 const projectDir = dirname(
-    require.resolve(`@stylable/webpack-plugin/test/e2e/projects/${project}/webpack.config`)
+    require.resolve(`@stylable/webpack-plugin/test/e2e/projects/${project}/webpack.config`),
 );
 
 describe(`(${project})`, () => {
@@ -21,7 +21,7 @@ describe(`(${project})`, () => {
         },
         before,
         afterEach,
-        after
+        after,
     );
 
     it('renders css', async () => {
@@ -37,7 +37,7 @@ describe(`(${project})`, () => {
         const assetResponses = filterAssetResponses(responses, expectedAssets);
 
         expect(assetResponses.length, 'all expected assets has matching responses').to.equal(
-            expectedAssets.length
+            expectedAssets.length,
         );
 
         for (const response of assetResponses) {

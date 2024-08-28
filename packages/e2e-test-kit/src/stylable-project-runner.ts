@@ -5,7 +5,7 @@ export class StylableProjectRunner extends ProjectRunner {
         const config = super.loadWebpackConfig();
         if (config.plugins) {
             const plugin = config.plugins.find(
-                (plugin) => plugin?.constructor.name === 'StylableWebpackPlugin'
+                (plugin) => plugin?.constructor.name === 'StylableWebpackPlugin',
             );
 
             if (plugin) {

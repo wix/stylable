@@ -11,7 +11,7 @@ export function setFieldForDeprecation(
         pleaseUse?: string;
         enumerable?: boolean;
         valueOnThis?: boolean;
-    } = {}
+    } = {},
 ) {
     const objectPrefix = options.objectType ? options.objectType + `.` : ``;
     const alternative = options.pleaseUse ? `, please use ${options.pleaseUse}` : ``;
@@ -43,7 +43,7 @@ export function wrapFunctionForDeprecation<FUNC extends (this: any, ...args: any
     options: {
         name: string;
         pleaseUse?: string;
-    }
+    },
 ): FUNC {
     const alternative = options.pleaseUse ? `, please use ${options.pleaseUse}` : ``;
     const warning = `"${options.name || func.name}" is deprecated${alternative}`;

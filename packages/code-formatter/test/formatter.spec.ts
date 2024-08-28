@@ -11,7 +11,7 @@ describe('Formatting', () => {
 
     it('should preserve custom selectors with immediate descendants ', () => {
         const res = getDocumentFormatting(
-            '@custom-selector :--some-selector     >      :global(div) > :global(span);'
+            '@custom-selector :--some-selector     >      :global(div) > :global(span);',
         );
 
         expect(res).to.eql('@custom-selector :--some-selector > :global(div) > :global(span);');
@@ -25,7 +25,7 @@ describe('Formatting', () => {
                         ".     type .    ."    16px
                         ".     desc desc desc" 20px
                         / 16px 3fr  2fr  4fr;
-                }`)
+                }`),
         );
 
         expect(res).to.eql(
@@ -36,7 +36,7 @@ describe('Formatting', () => {
                         ".     type .    ."    16px
                         ".     desc desc desc" 20px
                         / 16px 3fr  2fr  4fr;
-                }`)
+                }`),
         );
     });
     it('should preserve grid declarations', () => {
@@ -48,7 +48,7 @@ describe('Formatting', () => {
                         ".     type .    ."    16px
                         ".     desc desc desc" 20px
                         / 16px 3fr  2fr  4fr;
-                }`)
+                }`),
         );
 
         expect(res).to.eql(
@@ -59,7 +59,7 @@ describe('Formatting', () => {
                         ".     type .    ."    16px
                         ".     desc desc desc" 20px
                         / 16px 3fr  2fr  4fr;
-                }`)
+                }`),
         );
     });
 
@@ -84,7 +84,7 @@ describe('Formatting', () => {
                 undefined,
                 {
                     indent_empty_lines: true,
-                }
+                },
             );
 
             expect(res).to.eql('.root {\n    color: red;\n    \n    background: green;\n}');
@@ -112,7 +112,7 @@ describe('Formatting', () => {
                 undefined,
                 {
                     max_preserve_newlines: 2,
-                }
+                },
             );
 
             expect(res).to.eql('.root {\n    color: red;\n\n    background: green;\n}');
@@ -132,7 +132,7 @@ describe('Formatting', () => {
                 undefined,
                 {
                     preserve_newlines: true,
-                }
+                },
             );
 
             expect(res).to.eql('.root {\n    color: red;\n\n\n    background: green;\n}');
@@ -161,11 +161,11 @@ describe('Formatting', () => {
                 undefined,
                 {
                     wrap_line_length: 10,
-                }
+                },
             );
 
             expect(res).to.eql(
-                '.background {\n    background: repeating-linear-gradient(\n-45deg,\ntransparent 0,\ntransparent 25%,\ndodgerblue 0,\ndodgerblue 50%);\n}'
+                '.background {\n    background: repeating-linear-gradient(\n-45deg,\ntransparent 0,\ntransparent 25%,\ndodgerblue 0,\ndodgerblue 50%);\n}',
             );
         });
     });

@@ -56,7 +56,7 @@ describe(`helpers/rule`, () => {
                 /*nesting at-rule*/
                 .i[out] { @media (x) { [in] {} } }
             `),
-                '.i'
+                '.i',
             );
 
             const expected = [
@@ -107,7 +107,7 @@ describe(`helpers/rule`, () => {
             `),
                 '.root',
                 undefined,
-                true
+                true,
             );
 
             const expected = [
@@ -128,7 +128,7 @@ describe(`helpers/rule`, () => {
                     .i:hover {}
                 }
             `),
-                '.i'
+                '.i',
             );
 
             const expected = [
@@ -155,7 +155,7 @@ describe(`helpers/rule`, () => {
                     .x {}
                 }
             `),
-                '.i'
+                '.i',
             );
 
             const expected = [{ selector: '[st-mixin-marker]' }];

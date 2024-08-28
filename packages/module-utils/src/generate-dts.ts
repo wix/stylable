@@ -10,7 +10,7 @@ const asString = (v: string) => JSON.stringify(v);
 
 function addStatesEntries(
     stateEntries: Map<string, MappedStates[string]>,
-    stStates: MappedStates | undefined
+    stStates: MappedStates | undefined,
 ) {
     if (stStates) {
         for (const [stateName, stateDef] of Object.entries(stStates)) {
@@ -64,7 +64,7 @@ function stringifyStringRecord(
     record: Record<string, any>,
     addParentheses = false,
     indent = SPACING,
-    delimiter = '\n'
+    delimiter = '\n',
 ): string {
     const s = Object.entries(record)
         .map(
@@ -72,8 +72,8 @@ function stringifyStringRecord(
                 `${indent}${asString(key)}: ${stringifyTypedValue(
                     value,
                     indent + SPACING,
-                    delimiter
-                )};`
+                    delimiter,
+                )};`,
         )
         .join(delimiter);
 
@@ -84,14 +84,14 @@ function stringifyStringArray(array: any[], indent = SPACING, delimiter = '\n') 
     return `[${wrapNL(
         array
             .map((value) => `${indent}${stringifyTypedValue(value, indent + SPACING, delimiter)},`)
-            .join(delimiter)
+            .join(delimiter),
     )}${indent.replace(SPACING, '')}]`;
 }
 
 function stringifyTypedValue(
     value: string | any[] | Record<string, any>,
     indent = SPACING,
-    delimiter = '\n'
+    delimiter = '\n',
 ): string {
     if (typeof value === 'string') {
         return 'string';
@@ -118,10 +118,10 @@ function getStateTSType(stateDef: StateParsedValue | null) {
     return stateDef === null
         ? 'boolean'
         : stateDef.type === 'enum'
-        ? stateDef.arguments
-              .map((v) => (typeof v === 'string' ? asString(v) : 'unknown'))
-              .join(' | ')
-        : stateDef.type /* string | number */;
+          ? stateDef.arguments
+                .map((v) => (typeof v === 'string' ? asString(v) : 'unknown'))
+                .join(' | ')
+          : stateDef.type /* string | number */;
 }
 
 function wrapNL(code: string) {

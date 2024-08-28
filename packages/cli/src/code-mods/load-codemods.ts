@@ -15,7 +15,7 @@ export const registeredMods: Map<string, CodeMod> = new Map([
 export function loadBuiltInCodemods(
     mods: string[],
     loadedMods: Set<{ id: string; apply: CodeMod }>,
-    log: Log
+    log: Log,
 ) {
     for (const id of mods) {
         const apply = registeredMods.get(id);
@@ -31,7 +31,7 @@ export function loadExternalCodemods(
     external: string[],
     rootDir: string,
     loadedMods: Set<{ id: string; apply: CodeMod }>,
-    log: Log
+    log: Log,
 ) {
     for (const externalMod of external) {
         try {
@@ -47,15 +47,15 @@ export function loadExternalCodemods(
                 } else {
                     throw new Error(
                         `Invalid codemod entry. Codemods must contain a "id" string and "apply" function fields got ${Object.keys(
-                            mod
-                        )}`
+                            mod,
+                        )}`,
                     );
                 }
             }
         } catch (e) {
             log(`Failed to load external codemods from: ${externalMod}`);
             log(
-                `Make sure you specify a package request and the resolved module has exports.codemods as iterable`
+                `Make sure you specify a package request and the resolved module has exports.codemods as iterable`,
             );
             log(`${e instanceof Error ? e.stack : e}`);
         }

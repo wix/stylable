@@ -49,7 +49,7 @@ export function attachHook({
             resolveNamespace,
             ...options,
         },
-        { runtimePath }
+        { runtimePath },
     );
 
     if (!matcher) {
@@ -67,7 +67,7 @@ export function attachHook({
             return prevHook(m, filename);
         } else {
             throw new Error(
-                `Failed to load file: ${filename}. Could not find require extension for .css`
+                `Failed to load file: ${filename}. Could not find require extension for .css`,
             );
         }
     };

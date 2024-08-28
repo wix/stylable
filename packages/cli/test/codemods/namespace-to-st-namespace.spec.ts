@@ -52,7 +52,7 @@ describe('CLI Codemods namespace-to-st-namespace', () => {
         const dirContent = loadDirSync(tempDir.path);
 
         expect(dirContent['style.st.css']).equal(
-            '@namespace "http://button"; @namespace prefix "btn";'
+            '@namespace "http://button"; @namespace prefix "btn";',
         );
     });
 });

@@ -4,7 +4,7 @@ import { dirname } from 'path';
 
 const project = 'duplicate-namespace-warning';
 const projectDir = dirname(
-    require.resolve(`@stylable/webpack-plugin/test/e2e/projects/${project}/webpack.config`)
+    require.resolve(`@stylable/webpack-plugin/test/e2e/projects/${project}/webpack.config`),
 );
 
 describe(`(${project})`, () => {
@@ -18,7 +18,7 @@ describe(`(${project})`, () => {
         },
         before,
         afterEach,
-        after
+        after,
     );
 
     it('should report detailed path of duplicate namespaced files (as warning)', () => {

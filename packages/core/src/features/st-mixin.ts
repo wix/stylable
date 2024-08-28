@@ -68,43 +68,43 @@ export const diagnostics = {
         '10001',
         'error',
         (type: string) =>
-            `"${MixinType.PARTIAL}" can only be used with override arguments provided, missing overrides on "${type}"`
+            `"${MixinType.PARTIAL}" can only be used with override arguments provided, missing overrides on "${type}"`,
     ),
     UNKNOWN_MIXIN: createDiagnosticReporter(
         '10002',
         'error',
-        (name: string) => `unknown mixin: "${name}"`
+        (name: string) => `unknown mixin: "${name}"`,
     ),
     OVERRIDE_MIXIN: createDiagnosticReporter(
         '10003',
         'warning',
-        (mixinType: string) => `override ${mixinType} on same rule`
+        (mixinType: string) => `override ${mixinType} on same rule`,
     ),
     FAILED_TO_APPLY_MIXIN: createDiagnosticReporter(
         '10004',
         'error',
-        (error: string) => `could not apply mixin: ${error}`
+        (error: string) => `could not apply mixin: ${error}`,
     ),
     JS_MIXIN_NOT_A_FUNC: createDiagnosticReporter(
         '10005',
         'error',
-        () => `js mixin must be a function`
+        () => `js mixin must be a function`,
     ),
     UNSUPPORTED_MIXIN_SYMBOL: createDiagnosticReporter(
         '10007',
         'error',
         (name: string, symbolType: STSymbol.StylableSymbol['_kind']) =>
-            `cannot mix unsupported symbol "${name}" of type "${STSymbol.readableTypeMap[symbolType]}"`
+            `cannot mix unsupported symbol "${name}" of type "${STSymbol.readableTypeMap[symbolType]}"`,
     ),
     CIRCULAR_MIXIN: createDiagnosticReporter(
         '10006',
         'error',
-        (circularPaths: string[]) => `circular mixin found: ${circularPaths.join(' --> ')}`
+        (circularPaths: string[]) => `circular mixin found: ${circularPaths.join(' --> ')}`,
     ),
     UNKNOWN_ARG: createDiagnosticReporter(
         '10009',
         'warning',
-        (argName) => `unknown mixin argument "${argName}"`
+        (argName) => `unknown mixin argument "${argName}"`,
     ),
 };
 
@@ -117,7 +117,7 @@ export const hooks = createFeature({
             selectorContext.setNextSelectorScope(
                 selectorContext.inferredSelectorMixin,
                 node,
-                node.value
+                node.value,
             );
         }
         return isMarker;
@@ -136,7 +136,7 @@ export class StylablePublicApi {
         {
             diagnostics = new Diagnostics(),
             resolveOptionalArgs = false,
-        }: { diagnostics?: Diagnostics; resolveOptionalArgs?: boolean } = {}
+        }: { diagnostics?: Diagnostics; resolveOptionalArgs?: boolean } = {},
     ) {
         const resolvedSymbols = this.stylable.resolver.resolveSymbols(meta, diagnostics);
         const { mainNamespace } = resolvedSymbols;
@@ -144,7 +144,7 @@ export class StylablePublicApi {
             { meta, diagnostics },
             resolvedSymbols,
             postcss.decl({ prop: '-st-mixin', value: expr }),
-            (mixinSymbolName) => (mainNamespace[mixinSymbolName] === 'js' ? 'args' : 'named')
+            (mixinSymbolName) => (mainNamespace[mixinSymbolName] === 'js' ? 'args' : 'named'),
         );
         const result: MixinReflection[] = [];
         for (const { data } of analyzedMixins) {
@@ -168,7 +168,7 @@ export class StylablePublicApi {
                         collectOptionalArgs(
                             { meta, resolver: this.stylable.resolver },
                             mixinRoot,
-                            names
+                            names,
                         );
                         names.forEach((name) => varMap.set(name, { name }));
                     });
@@ -212,7 +212,7 @@ function appendMixins(
     context: FeatureTransformContext,
     transformer: StylableTransformer,
     rule: postcss.Rule,
-    path: string[] = []
+    path: string[] = [],
 ) {
     const [decls, mixins] = collectRuleMixins(context, rule);
     if (!mixins || mixins.length === 0) {
@@ -230,7 +230,7 @@ function appendMixins(
 
 function collectRuleMixins(
     context: FeatureTransformContext,
-    rule: postcss.Rule
+    rule: postcss.Rule,
 ): [decls: postcss.Declaration[], mixins: AnalyzedMixin[]] {
     let mixins: AnalyzedMixin[] = [];
     const resolvedSymbols = context.getResolvedSymbols(context.meta);
@@ -249,7 +249,7 @@ function collectRuleMixins(
                 (mixinSymbolName) => {
                     return mainNamespace[mixinSymbolName] === 'js' ? 'args' : 'named';
                 },
-                mixins
+                mixins,
             );
         }
     }
@@ -261,7 +261,7 @@ function collectDeclMixins(
     resolvedSymbols: MetaResolvedSymbols,
     decl: postcss.Declaration,
     paramSignature: (mixinSymbolName: string) => 'named' | 'args',
-    previousMixins?: AnalyzedMixin[]
+    previousMixins?: AnalyzedMixin[],
 ): AnalyzedMixin[] {
     const { meta } = context;
     let mixins: AnalyzedMixin[] = [];
@@ -269,8 +269,8 @@ function collectDeclMixins(
         decl.prop === MixinType.ALL
             ? parseStMixin
             : decl.prop === MixinType.PARTIAL
-            ? parseStPartialMixin
-            : null;
+              ? parseStPartialMixin
+              : null;
     if (!parser) {
         return previousMixins || mixins;
     }
@@ -298,7 +298,7 @@ function collectDeclMixins(
                         {
                             node: decl,
                             word: mixin.type,
-                        }
+                        },
                     );
                 }
             } else {
@@ -320,7 +320,7 @@ function collectDeclMixins(
                         {
                             node: decl,
                             word: mixin.type,
-                        }
+                        },
                     );
                 } else {
                     context.diagnostics.report(diagnostics.UNKNOWN_MIXIN(mixin.type), {
@@ -329,7 +329,7 @@ function collectDeclMixins(
                     });
                 }
             }
-        }
+        },
     );
 
     if (previousMixins) {
@@ -390,7 +390,7 @@ function appendMixin(context: FeatureTransformContext, config: ApplyMixinContext
 
 function checkRecursive(
     { meta, diagnostics: report }: FeatureTransformContext,
-    { mixDef, path, rule }: ApplyMixinContext
+    { mixDef, path, rule }: ApplyMixinContext,
 ) {
     const symbolName =
         mixDef.symbol.name === meta.root
@@ -413,7 +413,7 @@ function checkRecursive(
 function handleJSMixin(
     context: FeatureTransformContext,
     config: ApplyMixinContext,
-    mixinFunction: (...args: any[]) => any
+    mixinFunction: (...args: any[]) => any,
 ) {
     const stVarOverride = context.evaluator.stVarOverride || {};
     const meta = context.meta;
@@ -432,7 +432,7 @@ function handleJSMixin(
     fixRelativeUrls(
         mixinRoot,
         context.resolver.resolvePath(dirname(meta.source), mixinPath),
-        meta.source
+        meta.source,
     );
 
     mergeRules(mixinRoot, config.rule, mixDef.data.originDecl, context.diagnostics, true);
@@ -441,7 +441,7 @@ function handleJSMixin(
 function handleCSSMixin(
     context: FeatureTransformContext,
     config: ApplyMixinContext,
-    resolveChain: CSSResolve<ClassSymbol | ElementSymbol>[]
+    resolveChain: CSSResolve<ClassSymbol | ElementSymbol>[],
 ) {
     const mixDef = config.mixDef;
     const isPartial = mixDef.data.partial;
@@ -473,12 +473,12 @@ function handleCSSMixin(
                 context.diagnostics,
                 mixDef.data.originDecl,
                 stVarOverride,
-                config.path
+                config.path,
             );
             collectOptionalArgs(
                 { meta: resolved.meta, resolver: context.resolver },
                 mixinRoot,
-                optionalArgs
+                optionalArgs,
             );
             // transform mixin
             const mixinMeta: StylableMeta = resolved.meta;
@@ -494,10 +494,10 @@ function handleCSSMixin(
                 config.transformer.createInferredSelector(mixinMeta, {
                     name: resolved.symbol.name,
                     type: resolved.symbol._kind,
-                })
+                }),
             );
             fixRelativeUrls(mixinRoot, resolved.meta.source, context.meta.source);
-        }
+        },
     );
 
     for (const overrideArg of overrideKeys) {
@@ -515,7 +515,7 @@ function handleCSSMixin(
             config.rule,
             mixDef.data.originDecl,
             config.transformer.diagnostics,
-            false
+            false,
         );
     } else if (roots.length > 1) {
         const mixinRoot = postcss.root();
@@ -525,7 +525,7 @@ function handleCSSMixin(
             config.rule,
             mixDef.data.originDecl,
             config.transformer.diagnostics,
-            false
+            false,
         );
     }
 }
@@ -533,7 +533,7 @@ function handleCSSMixin(
 function collectOptionalArgs(
     context: Pick<FeatureTransformContext, 'meta' | 'resolver'>,
     mixinRoot: postcss.Root,
-    optionalArgs: Set<string> = new Set()
+    optionalArgs: Set<string> = new Set(),
 ) {
     mixinRoot.walk((node) => {
         const value = node.type === 'decl' ? node.value : node.type === 'atrule' ? node.params : '';
@@ -553,7 +553,7 @@ function getCSSMixinRoots(
         mixinRoot: postcss.Root;
         resolved: CSSResolve<ClassSymbol | ElementSymbol>;
         isRootMixin: boolean;
-    }) => void
+    }) => void,
 ) {
     const roots = [];
     for (const resolved of resolveChain) {
@@ -563,7 +563,7 @@ function getCSSMixinRoots(
             (resolved.symbol._kind === 'class' ? '.' : '') + resolved.symbol.name,
             undefined,
             isRootMixin,
-            (name) => STCustomSelector.getCustomSelector(contextMeta, name)
+            (name) => STCustomSelector.getCustomSelector(contextMeta, name),
         );
         processMixinRoot({ mixinRoot, resolved, isRootMixin });
         roots.push(mixinRoot);
@@ -578,7 +578,7 @@ function getCSSMixinRoots(
 function filterPartialMixinDecl(
     meta: StylableMeta,
     mixinRoot: postcss.Root,
-    overrideKeys: string[]
+    overrideKeys: string[],
 ) {
     let regexp: RegExp;
     const overrideSet = new Set(overrideKeys);

@@ -13,31 +13,31 @@ export const atPropertyValidationWarnings = {
     MISSING_REQUIRED_DESCRIPTOR: createDiagnosticReporter(
         '01001',
         'error',
-        (descriptorName: string) => `@property rules require a "${descriptorName}" descriptor`
+        (descriptorName: string) => `@property rules require a "${descriptorName}" descriptor`,
     ),
     MISSING_REQUIRED_INITIAL_VALUE_DESCRIPTOR: createDiagnosticReporter(
         '01002',
         'warning',
         () =>
-            '@property "initial-value" descriptor is optional only if the "syntax" is the universal syntax definition, otherwise the descriptor is required'
+            '@property "initial-value" descriptor is optional only if the "syntax" is the universal syntax definition, otherwise the descriptor is required',
     ),
     INVALID_DESCRIPTOR_TYPE: createDiagnosticReporter(
         '01003',
         'error',
         (descriptorType: string) =>
-            `@property does not support descriptor of type "${descriptorType}"`
+            `@property does not support descriptor of type "${descriptorType}"`,
     ),
     INVALID_DESCRIPTOR_NAME: createDiagnosticReporter(
         '01004',
         'error',
         (descriptorName: string) =>
-            `@property does not support descriptor named "${descriptorName}"`
+            `@property does not support descriptor named "${descriptorName}"`,
     ),
 };
 
 export function validateAtProperty(
     atRule: postcss.AtRule,
-    diagnostics: Diagnostics
+    diagnostics: Diagnostics,
 ): AtPropertyValidationResponse {
     const name = atRule.params;
     const atPropertyValues: Map<string, string> = new Map();
@@ -56,7 +56,7 @@ export function validateAtProperty(
                     {
                         node,
                         word: 'params' in node ? node.params : node.selector,
-                    }
+                    },
                 );
             }
 
@@ -106,7 +106,7 @@ export function validateAtProperty(
             {
                 node: atRule,
                 word: name,
-            }
+            },
         );
 
         return {

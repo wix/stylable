@@ -66,7 +66,7 @@ export function processUrlDependencies({
                     onUrl(functionNode);
                 }
             },
-            true
+            true,
         );
     });
     return urls;

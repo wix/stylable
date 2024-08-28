@@ -25,7 +25,7 @@ describe('References', () => {
             expect(refs[5].range).to.deep.equal(createRange(16, 4, 16, 8));
             refs.forEach((ref) => {
                 expect(ref.uri).to.equal(
-                    getCasePath('references/local-class-from-selector.st.css')
+                    getCasePath('references/local-class-from-selector.st.css'),
                 );
             });
         });
@@ -43,7 +43,7 @@ describe('References', () => {
             expect(refs[5].range).to.deep.equal(createRange(16, 4, 16, 8));
             refs.forEach((ref) => {
                 expect(ref.uri).to.equal(
-                    getCasePath('references/local-class-from-selector.st.css')
+                    getCasePath('references/local-class-from-selector.st.css'),
                 );
             });
         });
@@ -61,7 +61,7 @@ describe('References', () => {
             expect(refs[5].range).to.deep.equal(createRange(16, 4, 16, 8));
             refs.forEach((ref) => {
                 expect(ref.uri).to.equal(
-                    getCasePath('references/local-class-from-selector.st.css')
+                    getCasePath('references/local-class-from-selector.st.css'),
                 );
             });
         });
@@ -237,7 +237,7 @@ describe('References', () => {
                         expect(refs).to.deep.include(exp2);
                         expect(refs).to.deep.include(exp3);
                         expect(refs).to.deep.include(exp4);
-                    }
+                    },
                 );
             });
 
@@ -264,7 +264,7 @@ describe('References', () => {
                         expect(refs).to.deep.include(exp2);
                         expect(refs).to.deep.include(exp3);
                         expect(refs).to.deep.include(exp4);
-                    }
+                    },
                 );
             });
 
@@ -291,7 +291,7 @@ describe('References', () => {
                         expect(refs).to.deep.include(exp2);
                         expect(refs).to.deep.include(exp3);
                         expect(refs).to.deep.include(exp4);
-                    }
+                    },
                 );
             });
         });

@@ -14,7 +14,7 @@ export const stGlobalCustomPropertyToAtProperty: CodeMod = ({ ast, diagnostics, 
                     postcss.atRule({
                         name: 'property',
                         params: `st-global(${property.name})`,
-                    })
+                    }),
                 );
             }
             atRule.remove();
@@ -41,7 +41,7 @@ function parseStGlobalCustomProperty(atRule: AtRule, diagnostics: Diagnostics): 
             {
                 node: atRule,
                 word: atRule.params,
-            }
+            },
         );
         return cssVars;
     }

@@ -60,7 +60,7 @@ describe(`features/css-keyframes`, () => {
         // statements
         expect(
             CSSKeyframes.getKeyframesStatements(meta),
-            `CSSKeyframes.getKeyframesStatements(meta)`
+            `CSSKeyframes.getKeyframesStatements(meta)`,
         ).to.containSubset([meta.sourceAst.nodes[1], meta.sourceAst.nodes[3]]);
     });
     it(`should namespace "animation" and "animation-name" declarations`, () => {
@@ -137,8 +137,8 @@ describe(`features/css-keyframes`, () => {
         CSSKeyframes.reservedKeyFrames.map((reserved) => {
             testStylableCore(`
                 /* @analyze-error(${reserved}) word(${reserved}) ${keyframesDiagnostics.KEYFRAME_NAME_RESERVED(
-                reserved
-            )} */
+                    reserved,
+                )} */
                 @keyframes ${reserved} {}
             `);
         });
@@ -205,7 +205,7 @@ describe(`features/css-keyframes`, () => {
                         return `a|a`;
                     },
                 },
-            }
+            },
         );
 
         const { meta, exports } = sheets['/entry.st.css'];
@@ -373,17 +373,17 @@ describe(`features/css-keyframes`, () => {
                     /* 
                         @atrule entry__before
                         @analyze-warn(local before) word(before) ${stSymbolDiagnostics.REDECLARE_SYMBOL(
-                            `before`
+                            `before`,
                         )}
                     */
                     @keyframes before {}
                     
                     /*
                         @analyze-warn(import before) word(before) ${stSymbolDiagnostics.REDECLARE_SYMBOL(
-                            `before`
+                            `before`,
                         )}
                         @analyze-warn(import after) word(after) ${stSymbolDiagnostics.REDECLARE_SYMBOL(
-                            `after`
+                            `after`,
                         )}
                     */
                     @st-import [keyframes(before, after)] from './import.st.css';
@@ -391,7 +391,7 @@ describe(`features/css-keyframes`, () => {
                     /* 
                         @atrule entry__after
                         @analyze-warn(local after) word(after) ${stSymbolDiagnostics.REDECLARE_SYMBOL(
-                            `after`
+                            `after`,
                         )}
                     */
                     @keyframes after {}
@@ -433,7 +433,7 @@ describe(`features/css-keyframes`, () => {
                 '/entry.st.css': `
                     /* @transform-error word(unknown) ${keyframesDiagnostics.UNKNOWN_IMPORTED_KEYFRAMES(
                         `unknown`,
-                        `./imported.st.css`
+                        `./imported.st.css`,
                     )} */
                     @st-import [keyframes(unknown as local)] from './imported.st.css';
                 `,
@@ -493,7 +493,7 @@ describe(`features/css-keyframes`, () => {
 
             expect(
                 sheets[`/entry.st.css`].meta.targetAst?.toString().match(/@keyframes/g)!.length,
-                `only original @keyframes`
+                `only original @keyframes`,
             ).to.eql(1);
         });
         it(`should mix class with mixin context @keyframes`, () => {
@@ -518,7 +518,7 @@ describe(`features/css-keyframes`, () => {
 
             expect(
                 sheets[`/entry.st.css`].meta.targetAst?.toString(),
-                `@keyframes referenced & not copied`
+                `@keyframes referenced & not copied`,
             ).to.not.include(`@keyframes`);
         });
         it(`should mix root with with copy of @keyframes`, () => {
@@ -602,7 +602,7 @@ describe(`features/css-keyframes`, () => {
                         @transform-error ${mixinDiagnostics.INVALID_MERGE_OF(
                             `0%:hover {
                     color: red;
-                }`
+                }`,
                         )}
                         @rule[0] 0% { color: green } 
                         @rule[1] 100% { } 
@@ -644,7 +644,7 @@ describe(`features/css-keyframes`, () => {
                     .x {
                         animation: jump;
                     }
-                `)
+                `),
             );
 
             // JS exports
@@ -658,7 +658,7 @@ describe(`features/css-keyframes`, () => {
             const { meta: nativeMeta } = stylable.transform('/native.css');
 
             expect(nativeMeta.targetAst?.toString().trim(), 'no native transform').to.eql(
-                '@keyframes st-global(name) {}'
+                '@keyframes st-global(name) {}',
             );
         });
     });

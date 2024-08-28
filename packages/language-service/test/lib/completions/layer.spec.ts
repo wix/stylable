@@ -12,7 +12,7 @@ describe('layer', () => {
                     @layer aaa, st-global(bbb), ccc, st-global(ddd);
                 `),
             },
-            filePath
+            filePath,
         );
 
         expect(diagnostics).to.eql([]);

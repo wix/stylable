@@ -62,14 +62,14 @@ describe('Stylable Cli Watch - Multiple projects', function () {
                     action() {
                         return writeToExistingFile(
                             join(tempDir.path, 'packages', 'project-a', 'style.st.css'),
-                            '.root{ color:yellow; }'
+                            '.root{ color:yellow; }',
                         );
                     },
                 },
                 {
                     msg: buildMessages.FINISHED_PROCESSING(
                         1,
-                        join(tempDir.path, 'packages', 'project-a')
+                        join(tempDir.path, 'packages', 'project-a'),
                     ),
                 },
             ],
@@ -135,7 +135,7 @@ describe('Stylable Cli Watch - Multiple projects', function () {
                             join(tempDir.path, './packages/project-b/src/depend.st.css'),
                             `:vars {
                                     color: blue;
-                                }`
+                                }`,
                         );
                     },
                 },
@@ -152,15 +152,15 @@ describe('Stylable Cli Watch - Multiple projects', function () {
         expect(files['packages/project-a/dist/style.css']).to.include('color:blue');
         expect(
             Object.keys(files).some(
-                (fileName) => fileName.includes('project-b') && fileName.includes('style.st.css')
+                (fileName) => fileName.includes('project-b') && fileName.includes('style.st.css'),
             ),
-            'have files from package "a" inside package "b"'
+            'have files from package "a" inside package "b"',
         ).to.eql(false);
         expect(
             Object.keys(files).some(
-                (fileName) => fileName.includes('project-a') && fileName.includes('depend.st.css')
+                (fileName) => fileName.includes('project-a') && fileName.includes('depend.st.css'),
             ),
-            'have files from package "b" inside package "a"'
+            'have files from package "b" inside package "a"',
         ).to.eql(false);
     });
 
@@ -236,13 +236,13 @@ describe('Stylable Cli Watch - Multiple projects', function () {
                             .a::foo {color: red;}
 
                             .a::bar {color: blue;}
-                            `
+                            `,
                         );
                     },
                 },
                 {
                     msg: buildMessages.CHANGE_DETECTED(
-                        join(tempDir.path, 'packages', 'project-a', 'style.st.css')
+                        join(tempDir.path, 'packages', 'project-a', 'style.st.css'),
                     ),
                     action() {
                         return writeToExistingFile(
@@ -250,18 +250,18 @@ describe('Stylable Cli Watch - Multiple projects', function () {
                             `
                                 .foo {}
                                 .bar {}
-                                `
+                                `,
                         );
                     },
                 },
                 {
                     msg: buildMessages.CHANGE_DETECTED(
-                        join(tempDir.path, 'packages', 'project-b', 'foo.st.css')
+                        join(tempDir.path, 'packages', 'project-b', 'foo.st.css'),
                     ),
                 },
                 {
                     msg: buildMessages.CHANGE_EVENT_TRIGGERED(
-                        join(tempDir.path, 'packages', 'project-b', 'dist', 'index.st.css')
+                        join(tempDir.path, 'packages', 'project-b', 'dist', 'index.st.css'),
                     ),
                 },
             ],
@@ -270,11 +270,11 @@ describe('Stylable Cli Watch - Multiple projects', function () {
         const files = loadDirSync(tempDir.path);
         expect(
             files['packages/project-a/dist/style.css'],
-            `Expected styling to apply.\nBuild output:\n\n${output()}`
+            `Expected styling to apply.\nBuild output:\n\n${output()}`,
         ).to.match(/foo[0-9]+__foo {color: red;}/g);
         expect(
             files['packages/project-a/dist/style.css'],
-            `Expected styling to apply.\nBuild output:\n\n${output()}`
+            `Expected styling to apply.\nBuild output:\n\n${output()}`,
         ).to.match(/foo[0-9]+__bar {color: blue;}/g);
     });
 
@@ -335,7 +335,7 @@ describe('Stylable Cli Watch - Multiple projects', function () {
                             join(tempDir.path, './packages/project-b/mixin.js'),
                             `module.exports = {
                                     color: 'blue'
-                                }`
+                                }`,
                         );
                     },
                 },
@@ -379,14 +379,14 @@ describe('Stylable Cli Watch - Multiple projects', function () {
                     action() {
                         return writeToExistingFile(
                             join(tempDir.path, 'packages', 'project-a', 'style.st.css'),
-                            '.x.y{ -st-states: z; }'
+                            '.x.y{ -st-states: z; }',
                         );
                     },
                 },
                 {
                     msg: buildMessages.FINISHED_PROCESSING(
                         1,
-                        join(tempDir.path, 'packages', 'project-a')
+                        join(tempDir.path, 'packages', 'project-a'),
                     ),
                 },
                 {
@@ -394,14 +394,14 @@ describe('Stylable Cli Watch - Multiple projects', function () {
                     action() {
                         return writeToExistingFile(
                             join(tempDir.path, 'packages', 'project-a', 'style.st.css'),
-                            '.root{ color:blue; }'
+                            '.root{ color:blue; }',
                         );
                     },
                 },
                 {
                     msg: buildMessages.FINISHED_PROCESSING(
                         1,
-                        join(tempDir.path, 'packages', 'project-a')
+                        join(tempDir.path, 'packages', 'project-a'),
                     ),
                 },
             ],
@@ -461,14 +461,14 @@ describe('Stylable Cli Watch - Multiple projects', function () {
                                 @st-import Module from './does-not-exist.st.css';
 
                                 .root{ -st-extends: Module; color:blue; }
-                                `
+                                `,
                         );
                     },
                 },
                 {
                     msg: buildMessages.FINISHED_PROCESSING(
                         1,
-                        `[1] ${sep + join('packages', 'project-a')}`
+                        `[1] ${sep + join('packages', 'project-a')}`,
                     ),
                 },
                 {
@@ -537,8 +537,8 @@ describe('Stylable Cli Watch - Multiple projects', function () {
 
         expect(
             output().match(
-                STImport.diagnostics.UNKNOWN_IMPORTED_FILE('./does-not-exist.st.css').message
-            )
+                STImport.diagnostics.UNKNOWN_IMPORTED_FILE('./does-not-exist.st.css').message,
+            ),
         ).to.lengthOf(1);
     });
 });

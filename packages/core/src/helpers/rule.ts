@@ -47,7 +47,7 @@ export function createSubsetAst<T extends postcss.Root | postcss.AtRule | postcs
     mixinTarget?: T,
     isRoot = false,
     getCustomSelector?: (name: string) => SelectorList | undefined,
-    isNestedInMixin = false
+    isNestedInMixin = false,
 ): T {
     // keyframes on class mixin?
     const prefixSelectorList = parseSelectorWithCache(selectorPrefix);
@@ -84,7 +84,7 @@ export function createSubsetAst<T extends postcss.Root | postcss.AtRule | postcs
                         }
                         replaceTargetWithMixinAnchor(selectorNode, prefixType);
                         return selectorNode;
-                    })
+                    }),
                 );
 
                 const clonedRule = createSubsetAst(
@@ -93,7 +93,7 @@ export function createSubsetAst<T extends postcss.Root | postcss.AtRule | postcs
                     node.clone({ selector, nodes: [] }),
                     isRoot,
                     getCustomSelector,
-                    true /*isNestedInMixin*/
+                    true /*isNestedInMixin*/,
                 );
                 mixinRoot.append(clonedRule);
             }
@@ -121,7 +121,7 @@ export function createSubsetAst<T extends postcss.Root | postcss.AtRule | postcs
                                 }
                                 replaceTargetWithMixinAnchor(selectorNode, prefixType);
                                 return selectorNode;
-                            })
+                            }),
                         );
                     }
                 }
@@ -134,7 +134,7 @@ export function createSubsetAst<T extends postcss.Root | postcss.AtRule | postcs
                     }),
                     isRoot,
                     getCustomSelector,
-                    atruleHasMixin
+                    atruleHasMixin,
                 );
                 if (atRuleSubset.nodes) {
                     mixinRoot.append(atRuleSubset);
@@ -191,7 +191,7 @@ function fixChunkOrdering(selectorNode: Selector, prefixType: ImmutableSelectorN
 
 function containsMatchInFirstChunk(
     prefixType: ImmutableSelectorNode,
-    selectorNode: ImmutableSelectorNode
+    selectorNode: ImmutableSelectorNode,
 ) {
     let isMatch = false;
     walkSelector(selectorNode, (node) => {
@@ -220,7 +220,7 @@ function containsMatchInFirstChunk(
 export function findRule(
     root: postcss.Root,
     selector: string,
-    test: any = (statement: any) => statement.prop === `-st-extends`
+    test: any = (statement: any) => statement.prop === `-st-extends`,
 ): null | postcss.Declaration {
     let found: any = null;
     root.walkRules(selector, (rule) => {

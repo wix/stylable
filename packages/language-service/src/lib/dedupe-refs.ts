@@ -8,7 +8,7 @@ export function dedupeRefs(refs: Location[]): Location[] {
                 (r) =>
                     r.range.start.line === ref.range.start.line &&
                     r.range.start.character === ref.range.start.character &&
-                    r.uri === ref.uri
+                    r.uri === ref.uri,
             )
         ) {
             res.push(ref);

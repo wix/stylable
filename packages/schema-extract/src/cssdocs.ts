@@ -25,7 +25,7 @@ function extractCSSDocsToSymbolMap(meta: StylableMeta) {
         const node = comment.next();
         if (node?.type === 'rule') {
             const symbol = meta.getSymbol(
-                node.selector.startsWith('.') ? node.selector.slice(1) : node.selector
+                node.selector.startsWith('.') ? node.selector.slice(1) : node.selector,
             );
             if (symbol?._kind === 'class' || symbol?._kind === 'element') {
                 docs.set(symbol, parseCommentNode(comment.toString()));

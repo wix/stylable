@@ -4,7 +4,7 @@ import { dirname } from 'path';
 
 const project = 'exports-only-mode';
 const projectDir = dirname(
-    require.resolve(`@stylable/experimental-loader/test/projects/${project}/webpack.config`)
+    require.resolve(`@stylable/experimental-loader/test/projects/${project}/webpack.config`),
 );
 
 describe(`(${project})`, () => {
@@ -17,7 +17,7 @@ describe(`(${project})`, () => {
         },
         before,
         afterEach,
-        after
+        after,
     );
 
     it('load the stylable exports', async () => {

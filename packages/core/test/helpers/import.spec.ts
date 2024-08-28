@@ -43,12 +43,12 @@ describe(`helpers/import`, () => {
                     root,
                     [{ request: 'missing', defaultExport: 'Missing' }],
                     { newImport: 'none' },
-                    diag
+                    diag,
                 );
 
                 expect(diag.reports, 'diagnostics').to.have.lengthOf(1);
                 expect(diag.reports[0].message).to.equal(
-                    ensureImportsDiagnostics.PATCH_CONTAINS_NEW_IMPORT_IN_NEW_IMPORT_NONE_MODE()
+                    ensureImportsDiagnostics.PATCH_CONTAINS_NEW_IMPORT_IN_NEW_IMPORT_NONE_MODE(),
                 );
                 expect(root.nodes, 'no imports added').to.have.lengthOf(0);
             });
@@ -64,13 +64,13 @@ describe(`helpers/import`, () => {
                     root,
                     [{ request: 'x', defaultExport: 'Test' }],
                     { newImport: 'none' },
-                    diag
+                    diag,
                 );
 
                 const importNode = root.nodes[0];
                 expect(diag.reports, 'No diagnostics').to.have.lengthOf(0);
                 expect(importNode.toString()).to.equal(
-                    `:import {-st-from: 'x';-st-default: Test; }`
+                    `:import {-st-from: 'x';-st-default: Test; }`,
                 );
             });
 
@@ -85,7 +85,7 @@ describe(`helpers/import`, () => {
                     root,
                     [{ request: 'x', named: { test: 'test' } }],
                     { newImport: 'none' },
-                    diag
+                    diag,
                 );
 
                 const importNode = root.nodes[0];
@@ -104,13 +104,13 @@ describe(`helpers/import`, () => {
                     root,
                     [{ request: 'x', keyframes: { test: 'test' } }],
                     { newImport: 'none' },
-                    diag
+                    diag,
                 );
 
                 const importNode = root.nodes[0];
                 expect(diag.reports, 'No diagnostics').to.have.lengthOf(0);
                 expect(importNode.toString()).to.equal(
-                    `:import {-st-from: 'x';-st-named: keyframes(test); }`
+                    `:import {-st-from: 'x';-st-named: keyframes(test); }`,
                 );
             });
 
@@ -125,13 +125,13 @@ describe(`helpers/import`, () => {
                     root,
                     [{ request: 'x', named: { asTest: 'test' } }],
                     { newImport: 'none' },
-                    diag
+                    diag,
                 );
 
                 const importNode = root.nodes[0];
                 expect(diag.reports, 'No diagnostics').to.have.lengthOf(0);
                 expect(importNode.toString()).to.equal(
-                    `:import {-st-from: 'x';-st-named: test as asTest; }`
+                    `:import {-st-from: 'x';-st-named: test as asTest; }`,
                 );
             });
 
@@ -146,13 +146,13 @@ describe(`helpers/import`, () => {
                     root,
                     [{ request: 'x', keyframes: { asTest: 'test' } }],
                     { newImport: 'none' },
-                    diag
+                    diag,
                 );
 
                 const importNode = root.nodes[0];
                 expect(diag.reports, 'No diagnostics').to.have.lengthOf(0);
                 expect(importNode.toString()).to.equal(
-                    `:import {-st-from: 'x';-st-named: keyframes(test as asTest); }`
+                    `:import {-st-from: 'x';-st-named: keyframes(test as asTest); }`,
                 );
             });
 
@@ -167,13 +167,13 @@ describe(`helpers/import`, () => {
                     root,
                     [{ request: 'x', named: { test: 'test', test2: 'test2' } }],
                     { newImport: 'none' },
-                    diag
+                    diag,
                 );
 
                 const importNode = root.nodes[0];
                 expect(diag.reports, 'No diagnostics').to.have.lengthOf(0);
                 expect(importNode.toString()).to.equal(
-                    `:import {-st-from: 'x';-st-named: test, test2; }`
+                    `:import {-st-from: 'x';-st-named: test, test2; }`,
                 );
             });
 
@@ -188,13 +188,13 @@ describe(`helpers/import`, () => {
                     root,
                     [{ request: 'x', named: { asTest: 'test' }, defaultExport: 'Test' }],
                     { newImport: 'none' },
-                    diag
+                    diag,
                 );
 
                 const importNode = root.nodes[0];
                 expect(diag.reports, 'No diagnostics').to.have.lengthOf(0);
                 expect(importNode.toString()).to.equal(
-                    `:import {-st-from: 'x';-st-default: Test;-st-named: test as asTest; }`
+                    `:import {-st-from: 'x';-st-default: Test;-st-named: test as asTest; }`,
                 );
             });
 
@@ -209,13 +209,13 @@ describe(`helpers/import`, () => {
                     root,
                     [{ request: 'x', named: { d: 'd', e: 'e' } }],
                     { newImport: 'none' },
-                    diag
+                    diag,
                 );
 
                 const importNode = root.nodes[0];
                 expect(diag.reports, 'No diagnostics').to.have.lengthOf(0);
                 expect(importNode.toString()).to.equal(
-                    `:import {-st-from: 'x';-st-named: a, b, c, d, e; }`
+                    `:import {-st-from: 'x';-st-named: a, b, c, d, e; }`,
                 );
             });
 
@@ -230,13 +230,13 @@ describe(`helpers/import`, () => {
                     root,
                     [{ request: 'x', named: { a: 'a', b: 'b' }, defaultExport: 'A' }],
                     { newImport: 'none' },
-                    diag
+                    diag,
                 );
 
                 const importNode = root.nodes[0];
                 expect(diag.reports, 'No diagnostics').to.have.lengthOf(0);
                 expect(importNode.toString()).to.equal(
-                    `:import {-st-from: 'x';-st-default: A;-st-named: a, b; }`
+                    `:import {-st-from: 'x';-st-default: A;-st-named: a, b; }`,
                 );
             });
 
@@ -258,13 +258,13 @@ describe(`helpers/import`, () => {
                         },
                     ],
                     { newImport: 'none' },
-                    diag
+                    diag,
                 );
 
                 const importNode = root.nodes[0];
                 expect(diag.reports, 'No diagnostics').to.have.lengthOf(0);
                 expect(importNode.toString()).to.equal(
-                    `@st-import Test, [test as asTest, keyframes(kf as asKf)] from "x"`
+                    `@st-import Test, [test as asTest, keyframes(kf as asKf)] from "x"`,
                 );
             });
         });
@@ -279,14 +279,14 @@ describe(`helpers/import`, () => {
                     root,
                     [{ request: 'test', defaultExport: 'Test' }],
                     { newImport: ':import' },
-                    diag
+                    diag,
                 );
 
                 const importNode = root.nodes[0];
 
                 expect(diag.reports, 'No diagnostics').to.have.lengthOf(0);
                 expect(oneSpace(importNode.toString())).to.equal(
-                    `:import { -st-from: "test"; -st-default: Test }`
+                    `:import { -st-from: "test"; -st-default: Test }`,
                 );
             });
             it('should generate imports with named', () => {
@@ -298,14 +298,14 @@ describe(`helpers/import`, () => {
                     root,
                     [{ request: 'test', named: { a: 'a', c: 'b' } }],
                     { newImport: ':import' },
-                    diag
+                    diag,
                 );
 
                 const importNode = root.nodes[0];
 
                 expect(diag.reports, 'No diagnostics').to.have.lengthOf(0);
                 expect(oneSpace(importNode.toString())).to.equal(
-                    `:import { -st-from: "test"; -st-named: a, b as c }`
+                    `:import { -st-from: "test"; -st-named: a, b as c }`,
                 );
             });
             it('should generate imports with keyframes', () => {
@@ -317,14 +317,14 @@ describe(`helpers/import`, () => {
                     root,
                     [{ request: 'test', keyframes: { a: 'a', c: 'b' } }],
                     { newImport: ':import' },
-                    diag
+                    diag,
                 );
 
                 const importNode = root.nodes[0];
 
                 expect(diag.reports, 'No diagnostics').to.have.lengthOf(0);
                 expect(oneSpace(importNode.toString())).to.equal(
-                    `:import { -st-from: "test"; -st-named: keyframes(a, b as c) }`
+                    `:import { -st-from: "test"; -st-named: keyframes(a, b as c) }`,
                 );
             });
             it('should generate imports with named and default and keyframes', () => {
@@ -343,14 +343,14 @@ describe(`helpers/import`, () => {
                         },
                     ],
                     { newImport: ':import' },
-                    diag
+                    diag,
                 );
 
                 const importNode = root.nodes[0];
 
                 expect(diag.reports, 'No diagnostics').to.have.lengthOf(0);
                 expect(oneSpace(importNode.toString())).to.equal(
-                    `:import { -st-from: "test"; -st-default: Test; -st-named: a, b as c, keyframes(a, b as c) }`
+                    `:import { -st-from: "test"; -st-default: Test; -st-named: a, b as c, keyframes(a, b as c) }`,
                 );
             });
         });
@@ -365,7 +365,7 @@ describe(`helpers/import`, () => {
                     root,
                     [{ request: 'test', defaultExport: 'Test' }],
                     { newImport: 'st-import' },
-                    diag
+                    diag,
                 );
 
                 const importNode = root.nodes[0];
@@ -382,14 +382,14 @@ describe(`helpers/import`, () => {
                     root,
                     [{ request: 'test', named: { a: 'a', c: 'b' } }],
                     { newImport: 'st-import' },
-                    diag
+                    diag,
                 );
 
                 const importNode = root.nodes[0];
 
                 expect(diag.reports, 'No diagnostics').to.have.lengthOf(0);
                 expect(oneSpace(importNode.toString())).to.equal(
-                    `@st-import [a, b as c] from "test"`
+                    `@st-import [a, b as c] from "test"`,
                 );
             });
             it('should generate imports with keyframes', () => {
@@ -401,14 +401,14 @@ describe(`helpers/import`, () => {
                     root,
                     [{ request: 'test', keyframes: { a: 'a', c: 'b' } }],
                     { newImport: 'st-import' },
-                    diag
+                    diag,
                 );
 
                 const importNode = root.nodes[0];
 
                 expect(diag.reports, 'No diagnostics').to.have.lengthOf(0);
                 expect(oneSpace(importNode.toString())).to.equal(
-                    `@st-import [keyframes(a, b as c)] from "test"`
+                    `@st-import [keyframes(a, b as c)] from "test"`,
                 );
             });
             it('should generate imports with named and default and keyframes', () => {
@@ -427,14 +427,14 @@ describe(`helpers/import`, () => {
                         },
                     ],
                     { newImport: 'st-import' },
-                    diag
+                    diag,
                 );
 
                 const importNode = root.nodes[0];
 
                 expect(diag.reports, 'No diagnostics').to.have.lengthOf(0);
                 expect(oneSpace(importNode.toString())).to.equal(
-                    `@st-import Test, [a, b as c, keyframes(a, b as c)] from "test"`
+                    `@st-import Test, [a, b as c, keyframes(a, b as c)] from "test"`,
                 );
             });
         });
@@ -452,11 +452,11 @@ describe(`helpers/import`, () => {
                     root,
                     [{ request: 'x', named: { test: 'test' } }],
                     { newImport: 'none' },
-                    diag
+                    diag,
                 );
 
                 expect(root.nodes[0].toString()).to.equal(
-                    `:import {-st-from: 'x';-st-named: test; }`
+                    `:import {-st-from: 'x';-st-named: test; }`,
                 );
                 expect(root.nodes[1].toString()).to.equal(`:import {-st-from: 'x'; }`);
                 expect(diag.reports, 'No diagnostics').to.have.lengthOf(0);
@@ -467,14 +467,14 @@ describe(`helpers/import`, () => {
                 const { diagnostics } = ensureModuleImport(
                     root,
                     [{ request: 'x', defaultExport: 'Y' }],
-                    { newImport: 'none' }
+                    { newImport: 'none' },
                 );
                 const importNode = root.nodes[0];
 
                 expect(importNode.toString(), 'no change').to.equal(`@st-import Test from "x"`);
                 expect(diagnostics.reports, 'diagnostics').to.have.lengthOf(1);
                 expect(diagnostics.reports[0].message).to.equal(
-                    ensureImportsDiagnostics.ATTEMPT_OVERRIDE_SYMBOL('default', 'Test', 'Y')
+                    ensureImportsDiagnostics.ATTEMPT_OVERRIDE_SYMBOL('default', 'Test', 'Y'),
                 );
             });
             it('should report collision diagnostics for named and not patch', () => {
@@ -483,14 +483,14 @@ describe(`helpers/import`, () => {
                 const { diagnostics } = ensureModuleImport(
                     root,
                     [{ request: 'x', named: { Y: 'X' } }],
-                    { newImport: 'none' }
+                    { newImport: 'none' },
                 );
                 const importNode = root.nodes[0];
 
                 expect(importNode.toString(), 'no change').to.equal(`@st-import [Y] from "x"`);
                 expect(diagnostics.reports, 'diagnostics').to.have.lengthOf(1);
                 expect(diagnostics.reports[0].message).to.equal(
-                    ensureImportsDiagnostics.ATTEMPT_OVERRIDE_SYMBOL('named', 'Y', 'X as Y')
+                    ensureImportsDiagnostics.ATTEMPT_OVERRIDE_SYMBOL('named', 'Y', 'X as Y'),
                 );
             });
             it('should report collision diagnostics for named "as" with "as" (no patch)', () => {
@@ -499,14 +499,14 @@ describe(`helpers/import`, () => {
                 const { diagnostics } = ensureModuleImport(
                     root,
                     [{ request: 'x', named: { Y: 'X' } }],
-                    { newImport: 'none' }
+                    { newImport: 'none' },
                 );
                 const importNode = root.nodes[0];
 
                 expect(importNode.toString(), 'no change').to.equal(`@st-import [A as Y] from "x"`);
                 expect(diagnostics.reports, 'diagnostics').to.have.lengthOf(1);
                 expect(diagnostics.reports[0].message).to.equal(
-                    ensureImportsDiagnostics.ATTEMPT_OVERRIDE_SYMBOL('named', 'A as Y', 'X as Y')
+                    ensureImportsDiagnostics.ATTEMPT_OVERRIDE_SYMBOL('named', 'A as Y', 'X as Y'),
                 );
             });
             it('should report collision diagnostics for named "as" (no patch)', () => {
@@ -515,14 +515,14 @@ describe(`helpers/import`, () => {
                 const { diagnostics } = ensureModuleImport(
                     root,
                     [{ request: 'x', named: { Y: 'Y' } }],
-                    { newImport: 'none' }
+                    { newImport: 'none' },
                 );
                 const importNode = root.nodes[0];
 
                 expect(importNode.toString(), 'no change').to.equal(`@st-import [A as Y] from "x"`);
                 expect(diagnostics.reports, 'diagnostics').to.have.lengthOf(1);
                 expect(diagnostics.reports[0].message).to.equal(
-                    ensureImportsDiagnostics.ATTEMPT_OVERRIDE_SYMBOL('named', 'A as Y', 'Y')
+                    ensureImportsDiagnostics.ATTEMPT_OVERRIDE_SYMBOL('named', 'A as Y', 'Y'),
                 );
             });
         });
@@ -568,7 +568,7 @@ describe(`helpers/import`, () => {
             });
             it('mix named and keyframes with as', () => {
                 const { typedMap, namedMap } = parseNamedImport(
-                    'a as x, b, keyframes(a, b as z, c), c as y, d'
+                    'a as x, b, keyframes(a, b as z, c), c as y, d',
                 );
                 expect(typedMap, 'typed').to.eql({ keyframes: { a: 'a', z: 'b', c: 'c' } });
                 expect(namedMap, 'named').to.eql({ x: 'a', b: 'b', y: 'c', d: 'd' });
@@ -576,7 +576,7 @@ describe(`helpers/import`, () => {
 
             it('mix named and keyframes and comments', () => {
                 const { typedMap, namedMap } = parseNamedImport(
-                    'a as x /* comment 0 */, b, /* comment 1 */keyframes(a, b as z, c), c as y, d'
+                    'a as x /* comment 0 */, b, /* comment 1 */keyframes(a, b as z, c), c as y, d',
                 );
                 expect(typedMap, 'typed').to.eql({ keyframes: { a: 'a', z: 'b', c: 'c' } });
                 expect(namedMap, 'named').to.eql({ x: 'a', b: 'b', y: 'c', d: 'd' });
@@ -584,7 +584,7 @@ describe(`helpers/import`, () => {
 
             it('keyframes nested', () => {
                 const { typedMap, namedMap } = parseNamedImport(
-                    'keyframes(a as b, keyframes(d), e), f'
+                    'keyframes(a as b, keyframes(d), e), f',
                 );
                 expect(typedMap, 'keyframes').to.eql({ keyframes: { b: 'a', e: 'e' } });
                 expect(namedMap, 'named').to.eql({ f: 'f' });
@@ -618,11 +618,11 @@ describe(`helpers/import`, () => {
                     parsePseudoImportNamed(
                         value,
                         postcss.decl({ prop: '-st-named', value }),
-                        diagnostics
+                        diagnostics,
                     );
                     expect(diagnostics.reports).to.be.lengthOf(1);
                     expect(diagnostics.reports[0].message).to.equal(
-                        parseImportsDiagnostics.INVALID_NAMED_IMPORT_AS('x')
+                        parseImportsDiagnostics.INVALID_NAMED_IMPORT_AS('x'),
                     );
                 });
                 it('invalid nested keyframes', () => {
@@ -631,11 +631,11 @@ describe(`helpers/import`, () => {
                     parsePseudoImportNamed(
                         value,
                         postcss.decl({ prop: '-st-named', value }),
-                        diagnostics
+                        diagnostics,
                     );
                     expect(diagnostics.reports).to.be.lengthOf(1);
                     expect(diagnostics.reports[0].message).to.equal(
-                        parseImportsDiagnostics.INVALID_NESTED_KEYFRAMES('keyframes(b)')
+                        parseImportsDiagnostics.INVALID_NESTED_KEYFRAMES('keyframes(b)'),
                     );
                 });
             });
@@ -657,7 +657,7 @@ describe(`helpers/import`, () => {
 
             const imports = tryCollectImportsDeep(
                 stylable.resolver,
-                stylable.analyze('/entry.st.css')
+                stylable.analyze('/entry.st.css'),
             );
 
             expect(imports).to.eql(new Set(['/deep.st.css', '/middle.st.css']));
@@ -678,7 +678,7 @@ describe(`helpers/import`, () => {
 
             const imports = tryCollectImportsDeep(
                 stylable.resolver,
-                stylable.analyze('/entry.st.css')
+                stylable.analyze('/entry.st.css'),
             );
 
             expect(imports).to.eql(new Set(['/a.st.css', '/b.st.css']));
@@ -700,7 +700,7 @@ describe(`helpers/import`, () => {
 
             const imports = tryCollectImportsDeep(
                 stylable.resolver,
-                stylable.analyze('entry.st.css')
+                stylable.analyze('entry.st.css'),
             );
 
             expect(imports).to.eql(new Set(['/deep.st.css', '/middle.st.css']));

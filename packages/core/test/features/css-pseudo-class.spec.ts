@@ -25,7 +25,7 @@ describe('features/css-pseudo-class', () => {
         testStylableCore(`
             /* 
                 @transform-error ${cssPseudoClassDiagnostics.UNKNOWN_STATE_USAGE(
-                    'unknown-p-class'
+                    'unknown-p-class',
                 )} 
                 @rule .entry__root:unknown-p-class
             */
@@ -59,7 +59,7 @@ describe('features/css-pseudo-class', () => {
                     /* 
                         @transform-error ${stCustomStateDiagnostics.NO_PARAM_REQUIRED(
                             'bool',
-                            'unknown-param'
+                            'unknown-param',
                         )}
                         @rule .invalid__root.invalid--bool
                     */
@@ -142,7 +142,7 @@ describe('features/css-pseudo-class', () => {
                     /* 
                         @transform-error(no param) ${stCustomStateDiagnostics.NO_STATE_ARGUMENT_GIVEN(
                             'rgx',
-                            'string'
+                            'string',
                         )} 
                         @rule(no param) .entry__root.entry---rgx-0-
                     */
@@ -151,7 +151,7 @@ describe('features/css-pseudo-class', () => {
                     /* 
                         @transform-error(no param with parans) ${stCustomStateDiagnostics.NO_STATE_ARGUMENT_GIVEN(
                             'rgx',
-                            'string'
+                            'string',
                         )} 
                         @rule(no param with parans) .entry__root.entry---rgx-0-
                     */
@@ -164,9 +164,9 @@ describe('features/css-pseudo-class', () => {
                             [
                                 STCustomState.sysValidationErrors.string.REGEX_VALIDATION_FAILED(
                                     '^user',
-                                    'robot'
+                                    'robot',
                                 ),
-                            ]
+                            ],
                         )} 
                         @rule(regex) .entry__root.entry---rgx-5-robot
                     */
@@ -179,9 +179,9 @@ describe('features/css-pseudo-class', () => {
                             [
                                 STCustomState.sysValidationErrors.string.CONTAINS_VALIDATION_FAILED(
                                     'abc',
-                                    'xyz'
+                                    'xyz',
                                 ),
-                            ]
+                            ],
                         )} 
                         @rule(contains) .entry__root.entry---cont-3-xyz
                     */
@@ -194,13 +194,13 @@ describe('features/css-pseudo-class', () => {
                             [
                                 STCustomState.sysValidationErrors.string.MIN_LENGTH_VALIDATION_FAILED(
                                     '10',
-                                    '12345'
+                                    '12345',
                                 ),
                                 STCustomState.sysValidationErrors.string.MAX_LENGTH_VALIDATION_FAILED(
                                     '2',
-                                    '12345'
+                                    '12345',
                                 ),
-                            ]
+                            ],
                         )} 
                         @rule(multi) .entry__root.entry---multi-5-12345
                     */
@@ -274,7 +274,7 @@ describe('features/css-pseudo-class', () => {
                     /* 
                         @transform-error(no param) ${stCustomStateDiagnostics.NO_STATE_ARGUMENT_GIVEN(
                             'base',
-                            'number'
+                            'number',
                         )} 
                         @rule(no param) .entry__root.entry---base-0-
                     */
@@ -283,7 +283,7 @@ describe('features/css-pseudo-class', () => {
                     /* 
                         @transform-error(no param with parans) ${stCustomStateDiagnostics.NO_STATE_ARGUMENT_GIVEN(
                             'base',
-                            'number'
+                            'number',
                         )} 
                         @rule(no param with parans) .entry__root.entry---base-0-
                     */
@@ -295,9 +295,9 @@ describe('features/css-pseudo-class', () => {
                             'text',
                             [
                                 STCustomState.sysValidationErrors.number.NUMBER_TYPE_VALIDATION_FAILED(
-                                    'text'
+                                    'text',
                                 ),
-                            ]
+                            ],
                         )} 
                         @rule(base) .entry__root.entry---base-4-text
                     */
@@ -310,9 +310,9 @@ describe('features/css-pseudo-class', () => {
                             [
                                 STCustomState.sysValidationErrors.number.MIN_VALIDATION_FAILED(
                                     '4',
-                                    '5'
+                                    '5',
                                 ),
-                            ]
+                            ],
                         )} 
                         @rule(min) .entry__root.entry---minFive-1-4
                     */
@@ -325,9 +325,9 @@ describe('features/css-pseudo-class', () => {
                             [
                                 STCustomState.sysValidationErrors.number.MAX_VALIDATION_FAILED(
                                     '6',
-                                    '5'
+                                    '5',
                                 ),
-                            ]
+                            ],
                         )} 
                         @rule(max) .entry__root.entry---maxFive-1-6
                     */
@@ -340,9 +340,9 @@ describe('features/css-pseudo-class', () => {
                             [
                                 STCustomState.sysValidationErrors.number.MULTIPLE_OF_VALIDATION_FAILED(
                                     '4',
-                                    '3'
+                                    '3',
                                 ),
-                            ]
+                            ],
                         )} 
                         @rule(multipleOf) .entry__root.entry---multipleOfThree-1-4
                     */
@@ -355,13 +355,13 @@ describe('features/css-pseudo-class', () => {
                             [
                                 STCustomState.sysValidationErrors.number.MIN_VALIDATION_FAILED(
                                     '7',
-                                    '10'
+                                    '10',
                                 ),
                                 STCustomState.sysValidationErrors.number.MULTIPLE_OF_VALIDATION_FAILED(
                                     '7',
-                                    '2'
+                                    '2',
                                 ),
-                            ]
+                            ],
                         )} 
                         @rule(multi validations) .entry__root.entry---multi-1-7
                     */
@@ -396,7 +396,7 @@ describe('features/css-pseudo-class', () => {
                     /* 
                         @transform-error(no param) ${stCustomStateDiagnostics.NO_STATE_ARGUMENT_GIVEN(
                             'size',
-                            'enum'
+                            'enum',
                         )} 
                         @rule(no param) .entry__root.entry---size-0-
                     */
@@ -405,7 +405,7 @@ describe('features/css-pseudo-class', () => {
                     /* 
                         @transform-error(no param with parans) ${stCustomStateDiagnostics.NO_STATE_ARGUMENT_GIVEN(
                             'size',
-                            'enum'
+                            'enum',
                         )} 
                         @rule(no param with parans) .entry__root.entry---size-0-
                     */
@@ -418,9 +418,9 @@ describe('features/css-pseudo-class', () => {
                             [
                                 STCustomState.sysValidationErrors.enum.ENUM_TYPE_VALIDATION_FAILED(
                                     'huge',
-                                    ['small', 'large']
+                                    ['small', 'large'],
                                 ),
-                            ]
+                            ],
                         )} 
                         @rule .entry__root.entry---size-4-huge
                     */
@@ -452,7 +452,7 @@ describe('features/css-pseudo-class', () => {
                     /* 
                         @transform-error ${stCustomStateDiagnostics.NO_PARAM_REQUIRED(
                             'static',
-                            'unknown-param'
+                            'unknown-param',
                         )}
                         @rule .entry__root[y]
                     */
@@ -465,7 +465,7 @@ describe('features/css-pseudo-class', () => {
                         /* 
                             @analyze-error(not-compound) ${stCustomStateDiagnostics.UNSUPPORTED_COMPLEX_SELECTOR(
                                 'notCompound',
-                                '.x .y'
+                                '.x .y',
                             )}
                         */
                         -st-states: notCompound(".x .y");
@@ -474,7 +474,7 @@ describe('features/css-pseudo-class', () => {
                         /* 
                             @analyze-error(multi) ${stCustomStateDiagnostics.UNSUPPORTED_MULTI_SELECTOR(
                                 'multi',
-                                '.x, .y'
+                                '.x, .y',
                             )}
                         */
                         -st-states: multi(".x, .y");
@@ -483,7 +483,7 @@ describe('features/css-pseudo-class', () => {
                         /* 
                             @analyze-error(invalid) ${stCustomStateDiagnostics.INVALID_SELECTOR(
                                 'invalid',
-                                ':unclosed('
+                                ':unclosed(',
                             )}
                         */
                         -st-states: invalid(":unclosed(");
@@ -492,11 +492,11 @@ describe('features/css-pseudo-class', () => {
                         /* 
                             @analyze-error(invalidStart) ${stCustomStateDiagnostics.UNSUPPORTED_INITIAL_SELECTOR(
                                 'invalidStartElement',
-                                'div.x'
+                                'div.x',
                             )}
                             @analyze-error(invalidStart) ${stCustomStateDiagnostics.UNSUPPORTED_INITIAL_SELECTOR(
                                 'invalidStartWildcard',
-                                '*.x'
+                                '*.x',
                             )}
                         */
                         -st-states: invalidStartElement("div.x"), invalidStartWildcard("*.x");
@@ -571,7 +571,7 @@ describe('features/css-pseudo-class', () => {
                     /* 
                         @transform-error(multi) ${stCustomStateDiagnostics.UNSUPPORTED_MULTI_SELECTOR(
                             'classAndThenParam',
-                            '.x.a,.b'
+                            '.x.a,.b',
                         )}
                         @rule(multi) .entry__root:classAndThenParam(.a,.b) 
                     */
@@ -580,7 +580,7 @@ describe('features/css-pseudo-class', () => {
                     /* 
                         @transform-error(complex) ${stCustomStateDiagnostics.UNSUPPORTED_COMPLEX_SELECTOR(
                             'classAndThenParam',
-                            '.x.a .b'
+                            '.x.a .b',
                         )}
                         @rule(complex) .entry__root:classAndThenParam(.a .b) 
                     */
@@ -589,7 +589,7 @@ describe('features/css-pseudo-class', () => {
                     /* 
                         @transform-error(invalid) ${stCustomStateDiagnostics.INVALID_SELECTOR(
                             'classAndThenParam',
-                            '.x:unclosed('
+                            '.x:unclosed(',
                         )}
                         @rule(invalid) .entry__root:classAndThenParam(":unclosed(") 
                     */
@@ -598,7 +598,7 @@ describe('features/css-pseudo-class', () => {
                     /* 
                         @transform-error(invalid start) ${stCustomStateDiagnostics.UNSUPPORTED_INITIAL_SELECTOR(
                             'paramAndThenClass',
-                            'div.x'
+                            'div.x',
                         )}
                         @rule(invalid start) .entry__root:paramAndThenClass(div) 
                     */
@@ -607,7 +607,7 @@ describe('features/css-pseudo-class', () => {
                     /* 
                         @transform-error(invalid start2) ${stCustomStateDiagnostics.UNSUPPORTED_INITIAL_SELECTOR(
                             'paramAndThenClass',
-                            '*.x'
+                            '*.x',
                         )}
                         @rule(invalid start2) .entry__root:paramAndThenClass(*) 
                     */
@@ -619,9 +619,9 @@ describe('features/css-pseudo-class', () => {
                             'text',
                             [
                                 STCustomState.sysValidationErrors.number.NUMBER_TYPE_VALIDATION_FAILED(
-                                    'text'
+                                    'text',
                                 ),
-                            ]
+                            ],
                         )} 
                         @rule(param validation) .entry__root[size='text']
                     */
@@ -661,7 +661,7 @@ describe('features/css-pseudo-class', () => {
                             return namespace + '.';
                         },
                     },
-                }
+                },
             );
 
             const { meta } = sheets['/entry.st.css'];
@@ -710,7 +710,7 @@ describe('features/css-pseudo-class', () => {
 
             const ruleWithComment = meta.targetAst?.nodes[9] as postcss.Rule;
             expect(ruleWithComment.selector, 'compound+nested+comment').to.eql(
-                '.entry__a/**/:is(.entry__b, .entry__c).entry--shared'
+                '.entry__a/**/:is(.entry__b, .entry__c).entry--shared',
             );
 
             shouldReportNoDiagnostics(meta);
@@ -725,7 +725,7 @@ describe('features/css-pseudo-class', () => {
 
                         /* 
                             @transform-error(compound missing) word(shared) ${cssPseudoClassDiagnostics.UNKNOWN_STATE_USAGE(
-                                'shared'
+                                'shared',
                             )} 
                             @rule(compound missing) .entry__x:is(.entry__a, .entry__b):shared 
                         */
@@ -733,14 +733,14 @@ describe('features/css-pseudo-class', () => {
 
                         /* 
                             @transform-error(compound+nested+comment) word(shared) ${cssPseudoClassDiagnostics.UNKNOWN_STATE_USAGE(
-                                'shared'
+                                'shared',
                             )} 
                         */
                         .x/**/:is(.a, .b):shared {}
 
                         /* 
                             @transform-error(state type differ) word(shared) ${cssPseudoClassDiagnostics.UNKNOWN_STATE_USAGE(
-                                'shared'
+                                'shared',
                             )} 
                             @rule(compound missing) .entry__y:is(.entry__a, .entry__b):shared 
                         */
@@ -752,7 +752,7 @@ describe('features/css-pseudo-class', () => {
 
             const ruleWithComment = meta.targetAst?.nodes[7] as postcss.Rule;
             expect(ruleWithComment.selector, 'compound+nested+comment').to.eql(
-                '.entry__x/**/:is(.entry__a, .entry__b):shared'
+                '.entry__x/**/:is(.entry__a, .entry__b):shared',
             );
         });
         it('should infer complex states', () => {
@@ -767,7 +767,7 @@ describe('features/css-pseudo-class', () => {
 
                         /* 
                             @transform-error(compound missing) word(shared) ${cssPseudoClassDiagnostics.UNKNOWN_STATE_USAGE(
-                                'shared'
+                                'shared',
                             )} 
                             @rule(match) .entry__a:is(.entry__x):shared(x123x)
                         */
@@ -944,7 +944,7 @@ describe('features/css-pseudo-class', () => {
         
                     /* 
                         @transform-error(unique) word(unique) ${cssPseudoClassDiagnostics.UNKNOWN_STATE_USAGE(
-                            'unique'
+                            'unique',
                         )} 
                         @rule(unique) .entry__root .a__root:unique,.entry__root .b__root:unique 
                     */
@@ -952,7 +952,7 @@ describe('features/css-pseudo-class', () => {
 
                     /* 
                         @transform-error(only in 1) word(onlyInA) ${cssPseudoClassDiagnostics.UNKNOWN_STATE_USAGE(
-                            'onlyInA'
+                            'onlyInA',
                         )} 
                         @rule(only in 1) .entry__root .a__root:onlyInA,.entry__root .b__root:onlyInA 
                     */

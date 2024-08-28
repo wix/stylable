@@ -111,7 +111,7 @@ export const stylablePlugin = (initialPluginOptions: ESBuildOptions = {}): Plugi
         const configFromFile = resolveConfig(
             projectRoot,
             fs,
-            typeof configFile === 'string' ? configFile : undefined
+            typeof configFile === 'string' ? configFile : undefined,
         );
         const stConfig = stylableConfig(
             {
@@ -124,7 +124,7 @@ export const stylablePlugin = (initialPluginOptions: ESBuildOptions = {}): Plugi
                     configFromFile?.config?.defaultConfig?.resolveNamespace ?? resolveNamespaceNode,
                 resolveModule: configFromFile?.config?.defaultConfig?.resolveModule,
             },
-            build
+            build,
         );
         let onLoadCalled = false;
         const stylable = new Stylable(stConfig);
@@ -141,7 +141,7 @@ export const stylablePlugin = (initialPluginOptions: ESBuildOptions = {}): Plugi
                     path: args.path.replace(namespaces.unused + `:`, ''),
                     namespace: namespaces.unused,
                 };
-            })
+            }),
         );
 
         /**
@@ -164,7 +164,7 @@ export const stylablePlugin = (initialPluginOptions: ESBuildOptions = {}): Plugi
                     namespace: cssInjection === 'css' ? namespaces.nativeCss : namespaces.jsModule,
                     pluginData: args.pluginData,
                 };
-            })
+            }),
         );
 
         /**
@@ -177,7 +177,7 @@ export const stylablePlugin = (initialPluginOptions: ESBuildOptions = {}): Plugi
                     path: stylable.resolvePath(args.resolveDir, args.path),
                     namespace: namespaces.jsModule,
                 };
-            })
+            }),
         );
 
         /**
@@ -250,7 +250,7 @@ export const stylablePlugin = (initialPluginOptions: ESBuildOptions = {}): Plugi
                               runtimeId: 'esbuild',
                               id: getModuleId(),
                           }
-                        : undefined
+                        : undefined,
                 );
                 return addToCache(args.path, {
                     errors,
@@ -260,7 +260,7 @@ export const stylablePlugin = (initialPluginOptions: ESBuildOptions = {}): Plugi
                     contents: cssInjection === 'js' ? processAssetsStubs(moduleCode) : moduleCode,
                     pluginData: { stylableResults: res },
                 });
-            })
+            }),
         );
 
         /**
@@ -272,7 +272,7 @@ export const stylablePlugin = (initialPluginOptions: ESBuildOptions = {}): Plugi
                 return {
                     contents: `/* unused ${JSON.stringify(args.path)} */`,
                 };
-            })
+            }),
         );
 
         /**
@@ -298,11 +298,11 @@ export const stylablePlugin = (initialPluginOptions: ESBuildOptions = {}): Plugi
                     contents: wrapWithDepthMarkers(
                         res.meta.targetAst!.toString(),
                         cssDepth,
-                        pathId
+                        pathId,
                     ),
                     loader: 'css',
                 });
-            })
+            }),
         );
 
         /**
@@ -319,7 +319,7 @@ export const stylablePlugin = (initialPluginOptions: ESBuildOptions = {}): Plugi
                     contents: wrapWithDepthMarkers(meta.targetAst!.toString(), cssDepth, pathId),
                     loader: 'css',
                 };
-            })
+            }),
         );
 
         /**
@@ -388,14 +388,14 @@ export const stylablePlugin = (initialPluginOptions: ESBuildOptions = {}): Plugi
                                 fs.readFileSync(distFilePath, 'utf8'),
                                 stylable,
                                 idForPath,
-                                optimize.removeUnusedComponents ? mapping : {}
-                            )
+                                optimize.removeUnusedComponents ? mapping : {},
+                            ),
                         );
                     }
                 }
                 lazyClearCaches(stylable);
                 lazyDebugPrint();
-            })
+            }),
         );
     },
 });

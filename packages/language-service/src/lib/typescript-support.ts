@@ -18,7 +18,7 @@ export function typescriptSupport(fileSystem: IFileSystemSync) {
             module: ts.ModuleKind.CommonJS,
             typeRoots: ['./node_modules/@types'],
         }),
-        ''
+        '',
     );
     const tsLanguageService = ts.createLanguageService(tsLanguageServiceHost);
     const wrappedTs: ExtendedTsLanguageService = {

@@ -81,15 +81,24 @@ export interface LangServicePlugin {
 }
 
 export class ProviderPosition {
-    constructor(public line: number, public character: number) {}
+    constructor(
+        public line: number,
+        public character: number,
+    ) {}
 }
 
 export class ProviderRange {
-    constructor(public start: ProviderPosition, public end: ProviderPosition) {}
+    constructor(
+        public start: ProviderPosition,
+        public end: ProviderPosition,
+    ) {}
 }
 
 export class ProviderLocation {
-    constructor(public uri: string, public range: ProviderRange) {}
+    constructor(
+        public uri: string,
+        public range: ProviderRange,
+    ) {}
 }
 
 const cssPseudoClasses = [
@@ -147,14 +156,14 @@ const cssPseudoClasses = [
 export function createRange(startLine: number, startPos: number, endline: number, endPos: number) {
     return new ProviderRange(
         new ProviderPosition(startLine, startPos),
-        new ProviderPosition(endline, endPos)
+        new ProviderPosition(endline, endPos),
     );
 }
 
 function createDirectiveRange(
     position: ProviderPosition,
     fullLineText: string,
-    lineChunkAtCursor: string
+    lineChunkAtCursor: string,
 ): ProviderRange {
     return new ProviderRange(
         new ProviderPosition(
@@ -164,10 +173,10 @@ function createDirectiveRange(
                 position.character -
                     (topLevelDirectives.customSelector.startsWith(fullLineText)
                         ? fullLineText.length
-                        : lineChunkAtCursor.length)
-            )
+                        : lineChunkAtCursor.length),
+            ),
         ),
-        position
+        position,
     );
 }
 
@@ -207,15 +216,15 @@ export const ImportInternalDirectivesPlugin: LangServicePlugin = {
                 if (
                     parentSelector.nodes.every(
                         (n: any) =>
-                            (isDeclaration(n) && importDirectives[name] !== n.prop) || isComment(n)
+                            (isDeclaration(n) && importDirectives[name] !== n.prop) || isComment(n),
                     ) &&
                     importDirectives[name].startsWith(fullLineText.trim())
                 ) {
                     res.push(
                         importInternalDirective(
                             name,
-                            createDirectiveRange(position, fullLineText, lineChunkAtCursor)
-                        )
+                            createDirectiveRange(position, fullLineText, lineChunkAtCursor),
+                        ),
                     );
                 }
             });
@@ -247,15 +256,15 @@ export const RulesetInternalDirectivesPlugin: LangServicePlugin & {
             if (
                 parentSelector.nodes.every(
                     (n: any) =>
-                        (isDeclaration(n) && rulesetDirectives.mixin !== n.prop) || isComment(n)
+                        (isDeclaration(n) && rulesetDirectives.mixin !== n.prop) || isComment(n),
                 ) &&
                 rulesetDirectives.mixin.startsWith(fullLineText.trim())
             ) {
                 res.push(
                     rulesetInternalDirective(
                         'mixin',
-                        createDirectiveRange(position, fullLineText, lineChunkAtCursor)
-                    )
+                        createDirectiveRange(position, fullLineText, lineChunkAtCursor),
+                    ),
                 );
             }
             if (this.isSimpleSelector(parentSelector.selector) && !isMediaQuery) {
@@ -266,15 +275,15 @@ export const RulesetInternalDirectivesPlugin: LangServicePlugin & {
                             parentSelector.nodes.every(
                                 (n) =>
                                     (isDeclaration(n) && rulesetDirectives[name] !== n.prop) ||
-                                    isComment(n)
+                                    isComment(n),
                             ) &&
                             rulesetDirectives[name].startsWith(fullLineText.trim())
                         ) {
                             res.push(
                                 rulesetInternalDirective(
                                     name,
-                                    createDirectiveRange(position, fullLineText, lineChunkAtCursor)
-                                )
+                                    createDirectiveRange(position, fullLineText, lineChunkAtCursor),
+                                ),
                             );
                         }
                     });
@@ -313,21 +322,21 @@ export const TopLevelDirectivePlugin: LangServicePlugin = {
                     .filter(
                         (d) =>
                             !meta.sourceAst.source!.input.css.includes(
-                                topLevelDirectives.namespace
-                            ) || d !== 'namespace'
+                                topLevelDirectives.namespace,
+                            ) || d !== 'namespace',
                     )
                     .filter((d) => topLevelDirectives[d].startsWith(fullLineText.trim()))
                     .map((d) =>
                         topLevelDirective(
                             d,
-                            createDirectiveRange(position, fullLineText, lineChunkAtCursor)
-                        )
+                            createDirectiveRange(position, fullLineText, lineChunkAtCursor),
+                        ),
                     );
             } else {
                 return [
                     topLevelDirective(
                         'root',
-                        createDirectiveRange(position, fullLineText, lineChunkAtCursor)
+                        createDirectiveRange(position, fullLineText, lineChunkAtCursor),
                     ),
                 ];
             }
@@ -356,7 +365,7 @@ export const ValueDirectivePlugin: LangServicePlugin & {
             fullLineText.includes(':')
         ) {
             const parsed = postcssValueParser(
-                fullLineText.slice(fullLineText.indexOf(':') + 1)
+                fullLineText.slice(fullLineText.indexOf(':') + 1),
             ).nodes;
             const node = parsed[parsed.length - 1];
             if (
@@ -373,10 +382,10 @@ export const ValueDirectivePlugin: LangServicePlugin & {
                                 position.line,
                                 ~fullLineText.indexOf(',')
                                     ? fullLineText.lastIndexOf(',') + 1
-                                    : fullLineText.indexOf(':') + 1
+                                    : fullLineText.indexOf(':') + 1,
                             ),
-                            position
-                        )
+                            position,
+                        ),
                     ),
                 ];
             } else {
@@ -427,7 +436,7 @@ export const GlobalCompletionPlugin: LangServicePlugin = {
             if (fullLineText.lastIndexOf(':') !== -1) {
                 if (
                     ':global()'.startsWith(
-                        lineChunkAtCursor.slice(lineChunkAtCursor.lastIndexOf(':'))
+                        lineChunkAtCursor.slice(lineChunkAtCursor.lastIndexOf(':')),
                     )
                 ) {
                     offset = lineChunkAtCursor.slice(lineChunkAtCursor.lastIndexOf(':')).length;
@@ -437,8 +446,8 @@ export const GlobalCompletionPlugin: LangServicePlugin = {
                 globalCompletion(
                     new ProviderRange(
                         new ProviderPosition(position.line, position.character - offset),
-                        position
-                    )
+                        position,
+                    ),
                 ),
             ];
         } else {
@@ -471,14 +480,15 @@ export const SelectorCompletionPlugin: LangServicePlugin = {
             comps.push(
                 ...Object.keys(meta.getAllClasses())
                     .filter(
-                        (c) => c !== 'root' && fakes.findIndex((f) => f.selector === '.' + c) === -1
+                        (c) =>
+                            c !== 'root' && fakes.findIndex((f) => f.selector === '.' + c) === -1,
                     )
                     .map((c) =>
                         classCompletion(
                             c,
-                            createDirectiveRange(position, fullLineText, lineChunkAtCursor)
-                        )
-                    )
+                            createDirectiveRange(position, fullLineText, lineChunkAtCursor),
+                        ),
+                    ),
             );
             // adds inline custom selector (e.g. ":--custom")
             comps.push(
@@ -486,9 +496,9 @@ export const SelectorCompletionPlugin: LangServicePlugin = {
                     classCompletion(
                         c,
                         createDirectiveRange(position, fullLineText, lineChunkAtCursor),
-                        true
-                    )
-                )
+                        true,
+                    ),
+                ),
             );
             const moreComps = meta
                 .getImportStatements()
@@ -499,8 +509,8 @@ export const SelectorCompletionPlugin: LangServicePlugin = {
                             classCompletion(
                                 imp.defaultExport,
                                 createDirectiveRange(position, fullLineText, lineChunkAtCursor),
-                                true
-                            )
+                                true,
+                            ),
                         );
                     }
                     Object.keys(imp.named).forEach((exp) => {
@@ -515,8 +525,8 @@ export const SelectorCompletionPlugin: LangServicePlugin = {
                             acc.push(
                                 classCompletion(
                                     imp.named[exp],
-                                    createDirectiveRange(position, fullLineText, lineChunkAtCursor)
-                                )
+                                    createDirectiveRange(position, fullLineText, lineChunkAtCursor),
+                                ),
                             );
                         }
                     });
@@ -546,7 +556,7 @@ export const ExtendCompletionPlugin: LangServicePlugin = {
             comps.push(
                 ...Object.keys(meta.getAllClasses())
                     .filter((s) => s.startsWith(str))
-                    .map((s) => [s, 'Local file'])
+                    .map((s) => [s, 'Local file']),
             );
             meta.getImportStatements().forEach((i) => {
                 if (
@@ -570,8 +580,8 @@ export const ExtendCompletionPlugin: LangServicePlugin = {
                             );
                         })
                         .filter((s) => s.startsWith(str))
-                        .map((s) => [s, i.request])
-                )
+                        .map((s) => [s, i.request]),
+                ),
             );
             return comps
                 .slice(1)
@@ -581,9 +591,9 @@ export const ExtendCompletionPlugin: LangServicePlugin = {
                         c[1],
                         new ProviderRange(
                             new ProviderPosition(position.line, position.character - str.length),
-                            position
-                        )
-                    )
+                            position,
+                        ),
+                    ),
                 );
         } else {
             return [];
@@ -621,11 +631,13 @@ export const CssMixinCompletionPlugin: LangServicePlugin = {
                         new ProviderRange(
                             new ProviderPosition(
                                 position.line,
-                                position.character - lastName.length
+                                position.character - lastName.length,
                             ),
-                            position
+                            position,
                         ),
-                        importSymbol._kind === 'import' ? importSymbol.import.request : 'Local file'
+                        importSymbol._kind === 'import'
+                            ? importSymbol.import.request
+                            : 'Local file',
                     );
                 });
         } else {
@@ -731,7 +743,7 @@ export const NamedCompletionPlugin: LangServicePlugin & {
     resolveImport: (
         importName: string,
         stylable: Stylable,
-        meta: StylableMeta
+        meta: StylableMeta,
     ) => StylableMeta | null;
 } = {
     onCompletion({
@@ -754,7 +766,7 @@ export const NamedCompletionPlugin: LangServicePlugin & {
             ) {
                 importName = (
                     (astAtCursor as postcss.Rule).nodes.find(
-                        (n) => (n as postcss.Declaration).prop === `-st-from`
+                        (n) => (n as postcss.Declaration).prop === `-st-from`,
                     ) as postcss.Declaration
                 ).value.replace(/'|"/g, '');
             } else if (
@@ -777,7 +789,7 @@ export const NamedCompletionPlugin: LangServicePlugin & {
                 const resolvedImport: StylableMeta | null = this.resolveImport(
                     importName,
                     stylable,
-                    meta
+                    meta,
                 );
                 if (resolvedImport) {
                     const { lastName } = getExistingNames(fullLineText, position);
@@ -787,7 +799,7 @@ export const NamedCompletionPlugin: LangServicePlugin & {
                         resolvedImport,
                         lastName,
                         namedValues,
-                        meta
+                        meta,
                     );
 
                     return comps
@@ -798,20 +810,20 @@ export const NamedCompletionPlugin: LangServicePlugin & {
                                 new ProviderRange(
                                     new ProviderPosition(
                                         position.line,
-                                        position.character - lastName.length
+                                        position.character - lastName.length,
                                     ),
-                                    new ProviderPosition(position.line, position.character)
+                                    new ProviderPosition(position.line, position.character),
                                 ),
                                 c[1],
-                                c[2]
-                            )
+                                c[2],
+                            ),
                         );
                 }
             } else if (importName.endsWith('.js')) {
                 let req: any;
                 try {
                     req = (stylable as any).requireModule(
-                        path.join(path.dirname(meta.source), importName)
+                        path.join(path.dirname(meta.source), importName),
                     );
                 } catch {
                     return [];
@@ -831,13 +843,13 @@ export const NamedCompletionPlugin: LangServicePlugin & {
                             new ProviderRange(
                                 new ProviderPosition(
                                     position.line,
-                                    position.character - lastName.length
+                                    position.character - lastName.length,
                                 ),
-                                new ProviderPosition(position.line, position.character)
+                                new ProviderPosition(position.line, position.character),
                             ),
                             c[1],
-                            c[2]
-                        )
+                            c[2],
+                        ),
                     );
             }
         }
@@ -853,7 +865,7 @@ function isNamedDirective(line: string) {
 }
 function getNamedValues(
     src: string,
-    lineIndex: number
+    lineIndex: number,
 ): { isNamedValueLine: boolean; namedValues: string[] } {
     const lines = src.split('\n');
     let isNamedValueLine = false;
@@ -889,14 +901,14 @@ function getNamedValues(
 function maybeResolveImport(
     importName: string,
     stylable: Stylable,
-    meta: StylableMeta
+    meta: StylableMeta,
 ): StylableMeta | null {
     let resolvedImport: StylableMeta | null = null;
     if (importName && importName.endsWith('.css')) {
         try {
             const imported = meta.getImportStatements().find((i) => i.request === importName)!;
             resolvedImport = stylable.fileProcessor.process(
-                stylable.resolvePath(imported.context, imported.request)
+                stylable.resolvePath(imported.context, imported.request),
             );
         } catch {
             /**/
@@ -974,12 +986,12 @@ export const PseudoElementCompletionPlugin: LangServicePlugin = {
                                 new ProviderRange(
                                     new ProviderPosition(
                                         position.line,
-                                        position.character - (filter ? filter.length + 2 : colons)
+                                        position.character - (filter ? filter.length + 2 : colons),
                                     ),
-                                    new ProviderPosition(position.line, position.character)
-                                )
+                                    new ProviderPosition(position.line, position.character),
+                                ),
                             );
-                        })
+                        }),
                 );
             });
 
@@ -1005,7 +1017,7 @@ export const PseudoElementCompletionPlugin: LangServicePlugin = {
                             .map((c) => {
                                 let relPath = path.relative(
                                     path.dirname(meta.source),
-                                    res.meta.source
+                                    res.meta.source,
                                 );
                                 if (!relPath.startsWith('.')) {
                                     relPath = './' + relPath;
@@ -1018,12 +1030,12 @@ export const PseudoElementCompletionPlugin: LangServicePlugin = {
                                         new ProviderPosition(
                                             position.line,
                                             position.character -
-                                                (filter ? filter.length + 2 : colons)
+                                                (filter ? filter.length + 2 : colons),
                                         ),
-                                        new ProviderPosition(position.line, position.character)
-                                    )
+                                        new ProviderPosition(position.line, position.character),
+                                    ),
                                 );
-                            })
+                            }),
                     );
                 });
             }
@@ -1038,7 +1050,7 @@ function getNamedCSSImports(
     resolvedImport: StylableMeta,
     lastName: string,
     namedValues: string[],
-    meta: StylableMeta
+    meta: StylableMeta,
 ) {
     const namedSet = new Set(namedValues);
     for (const [symbolName, symbol] of Object.entries(resolvedImport.getAllSymbols())) {
@@ -1062,7 +1074,7 @@ function getNamedCSSImports(
     function addCompletion(
         symbolName: string,
         meta: StylableMeta,
-        symbol: VarSymbol | ClassSymbol | ElementSymbol | CSSVarSymbol
+        symbol: VarSymbol | ClassSymbol | ElementSymbol | CSSVarSymbol,
     ) {
         if (symbolName.slice(0, -1).startsWith(lastName) && !namedSet.has(symbolName)) {
             comps.push([
@@ -1146,7 +1158,7 @@ export const StateTypeCompletionPlugin: LangServicePlugin = {
                             const validatorNames = Object.keys(validators);
 
                             let relevantValidators = validatorNames.filter((t) =>
-                                t.startsWith(input)
+                                t.startsWith(input),
                             );
                             relevantValidators = relevantValidators.length
                                 ? relevantValidators
@@ -1160,11 +1172,11 @@ export const StateTypeCompletionPlugin: LangServicePlugin = {
                                         new ProviderRange(
                                             new ProviderPosition(
                                                 position.line,
-                                                position.character - input.length
+                                                position.character - input.length,
                                             ),
-                                            position
-                                        )
-                                    )
+                                            position,
+                                        ),
+                                    ),
                                 );
                             });
                         }
@@ -1181,11 +1193,11 @@ export const StateTypeCompletionPlugin: LangServicePlugin = {
                                     new ProviderRange(
                                         new ProviderPosition(
                                             position.line,
-                                            position.character - input.length
+                                            position.character - input.length,
                                         ),
-                                        position
-                                    )
-                                )
+                                        position,
+                                    ),
+                                ),
                             );
                         });
                     }
@@ -1216,7 +1228,7 @@ export const ValueCompletionPlugin: LangServicePlugin = {
                 .slice(
                     fullLineText
                         .slice(0, fullLineText.indexOf(')', position.character) + 1)
-                        .lastIndexOf('(')
+                        .lastIndexOf('('),
                 )
                 .replace('(', '')
                 .replace(')', '')
@@ -1234,11 +1246,11 @@ export const ValueCompletionPlugin: LangServicePlugin = {
                             new ProviderRange(
                                 new ProviderPosition(
                                     position.line,
-                                    position.character - inner.length
+                                    position.character - inner.length,
                                 ),
-                                position
-                            )
-                        )
+                                position,
+                            ),
+                        ),
                     );
                 }
             });
@@ -1248,14 +1260,14 @@ export const ValueCompletionPlugin: LangServicePlugin = {
                 try {
                     const resolvedPath = stylable.resolvePath(dirname(meta.source), imp.request);
                     Object.values(
-                        stylable.fileProcessor.process(resolvedPath).getAllStVars()
+                        stylable.fileProcessor.process(resolvedPath).getAllStVars(),
                     ).forEach((v) =>
                         importVars.push({
                             name: v.name,
                             value: v.text,
                             from: imp.request,
                             node: v.node,
-                        })
+                        }),
                     );
                 } catch {
                     /**/
@@ -1278,11 +1290,11 @@ export const ValueCompletionPlugin: LangServicePlugin = {
                             new ProviderRange(
                                 new ProviderPosition(
                                     position.line,
-                                    position.character - inner.length
+                                    position.character - inner.length,
                                 ),
-                                position
-                            )
-                        )
+                                position,
+                            ),
+                        ),
                     );
                 }
             });
@@ -1314,7 +1326,7 @@ function createCodeMixinCompletion(
     name: string,
     lastName: string,
     position: ProviderPosition,
-    meta: StylableMeta
+    meta: StylableMeta,
 ) {
     const importSymbol = meta.getSymbol(name);
     if (!importSymbol || importSymbol._kind !== 'import') {
@@ -1325,9 +1337,9 @@ function createCodeMixinCompletion(
         name,
         new ProviderRange(
             new ProviderPosition(position.line, position.character - lastName.length),
-            position
+            position,
         ),
-        importSymbol.import.request
+        importSymbol.import.request,
     );
 }
 
@@ -1335,7 +1347,7 @@ function isMixin(
     name: string,
     meta: StylableMeta,
     fs: IFileSystem,
-    tsLangService: ExtendedTsLanguageService
+    tsLangService: ExtendedTsLanguageService,
 ) {
     const importSymbol = meta.getSymbol(name)!;
 
@@ -1345,7 +1357,7 @@ function isMixin(
                 importSymbol.import.from,
                 name,
                 importSymbol.type === 'default',
-                tsLangService
+                tsLangService,
             );
             if (!sig || !sig.declaration) {
                 return false;
@@ -1359,7 +1371,7 @@ function isMixin(
             return (
                 extractJsModifierReturnType(
                     name,
-                    fs.readFileSync(importSymbol.import.from, 'utf8')
+                    fs.readFileSync(importSymbol.import.from, 'utf8'),
                 ) === 'object'
             );
         }

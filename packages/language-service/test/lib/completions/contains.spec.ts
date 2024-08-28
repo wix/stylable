@@ -17,7 +17,7 @@ describe('CSS contains', () => {
                     }
                 `),
             },
-            filePath
+            filePath,
         );
 
         expect(diagnostics).to.eql([]);

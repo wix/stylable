@@ -45,7 +45,7 @@ export function createCliTester() {
         return timeoutPromise(
             runSteps(),
             timeout,
-            () => `${JSON.stringify(found, null, 3)}\n\n${output()}`
+            () => `${JSON.stringify(found, null, 3)}\n\n${output()}`,
         );
 
         async function runSteps() {

@@ -8,7 +8,7 @@ import { AMBIGUITY, ParseForEditingResult } from './edit-time-parser';
 // ToDo: move to tokey
 function walkValue(
     valueList: CSSValue.BaseAstNode[],
-    visit: (node: CSSValue.BaseAstNode) => number | undefined
+    visit: (node: CSSValue.BaseAstNode) => number | undefined,
 ) {
     for (const node of valueList) {
         const changeWalk = visit(node);
@@ -139,7 +139,7 @@ interface CheckContext {
 function checkRuleSelector(
     node: postcss.AnyNode,
     { baseNodeOffset, targetOffset, result }: CheckContext,
-    parseData: ParseForEditingResult
+    parseData: ParseForEditingResult,
 ) {
     const isInRule = isRule(node);
     if (

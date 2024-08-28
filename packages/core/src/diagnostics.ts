@@ -35,7 +35,7 @@ export class Diagnostics {
 export function createDiagnosticReporter<T extends any[]>(
     code: string,
     severity: DiagnosticSeverity,
-    message: (...args: T) => string
+    message: (...args: T) => string,
 ) {
     const func = (...args: T): DiagnosticBase => {
         return { code, severity, message: message(...args) };

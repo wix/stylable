@@ -72,7 +72,7 @@ export class StylableManifestPlugin {
         });
 
         compiler.hooks.done.tap(this.constructor.name + ' stylable.initCache', () =>
-            stylable.initCache()
+            stylable.initCache(),
         );
 
         let metadataList: MetadataList;
@@ -82,7 +82,7 @@ export class StylableManifestPlugin {
             });
 
             compilation.hooks.processAssets.tap(this.constructor.name, () =>
-                this.emitManifest(metadataList, compilation)
+                this.emitManifest(metadataList, compilation),
             );
         });
     }
@@ -96,7 +96,7 @@ export class StylableManifestPlugin {
                 Object.assign(manifest.namespaceMapping, metadata.namespaceMapping);
                 manifest.componentsEntries[compId] = metadata.entry;
                 manifest.componentsIndex += `:import{-st-from: ${JSON.stringify(
-                    metadata.entry
+                    metadata.entry,
                 )};-st-default: ${compId};${
                     cssVars ? `-st-named:${cssVars};` : ``
                 }} .root ${compId}{}${EOL}`;
@@ -109,13 +109,13 @@ export class StylableManifestPlugin {
                 componentsEntries: {},
                 stylesheetMapping: {},
                 namespaceMapping: {},
-            }
+            },
         );
 
         if (this.options.outputType === 'fs-manifest') {
             this.emitJSONAsset(
                 convertToFsMetadata(manifest, this.options.packageAlias),
-                compilation
+                compilation,
             );
         } else {
             this.emitJSONAsset(manifest, compilation);
@@ -128,14 +128,14 @@ export class StylableManifestPlugin {
         const contentHash = hashContent(manifestContent, this.options.contentHashLength);
         compilation.emitAsset(
             this.options.getOutputFileName(contentHash),
-            new compilation.compiler.webpack.sources.RawSource(manifestContent, false)
+            new compilation.compiler.webpack.sources.RawSource(manifestContent, false),
         );
     }
 
     private createModulesMetadata(
         compiler: Compiler,
         stylable: Stylable,
-        modules: Module[]
+        modules: Module[],
     ): MetadataList {
         const stylableComps = modules
             .filter((module) => {
@@ -160,7 +160,7 @@ export class StylableManifestPlugin {
                     source,
                     resource,
                     this.options.exposeNamespaceMapping,
-                    meta
+                    meta,
                 ),
             };
         });
@@ -170,7 +170,7 @@ export class StylableManifestPlugin {
 /* This supports the output of previous version of the metadata plugin */
 const convertToFsMetadata = (
     manifest: Manifest,
-    packages: Record<string, string>
+    packages: Record<string, string>,
 ): ComponentsMetadata => {
     const pkg = { name: manifest.name, version: manifest.version };
 

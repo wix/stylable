@@ -12,32 +12,32 @@ export const diagnostics = {
     INVALID_NAMESPACE_DEF: createDiagnosticReporter(
         '11007',
         'error',
-        () => 'invalid @st-namespace'
+        () => 'invalid @st-namespace',
     ),
     EMPTY_NAMESPACE_DEF: createDiagnosticReporter(
         '11008',
         'error',
-        () => '@st-namespace must contain at least one character or digit'
+        () => '@st-namespace must contain at least one character or digit',
     ),
     EXTRA_DEFINITION: createDiagnosticReporter(
         '11012',
         'error',
-        () => '@st-namespace must contain a single string definition'
+        () => '@st-namespace must contain a single string definition',
     ),
     INVALID_NAMESPACE_VALUE: createDiagnosticReporter(
         '11013',
         'error',
-        () => '@st-namespace must contain only letters, numbers or dashes'
+        () => '@st-namespace must contain only letters, numbers or dashes',
     ),
     INVALID_NAMESPACE_REFERENCE: createDiagnosticReporter(
         '11010',
         'error',
-        () => 'st-namespace-reference dose not have any value'
+        () => 'st-namespace-reference dose not have any value',
     ),
     NATIVE_OVERRIDE_DEPRECATION: createDiagnosticReporter(
         '11014',
         'info',
-        () => '@namespace will stop working in version 6, use @st-namespace instead'
+        () => '@namespace will stop working in version 6, use @st-namespace instead',
     ),
 };
 
@@ -185,7 +185,7 @@ export function defaultProcessNamespace(namespace: string, origin: string, _sour
 
 export function setMetaNamespace(
     context: FeatureContext,
-    resolveNamespace: typeof defaultProcessNamespace
+    resolveNamespace: typeof defaultProcessNamespace,
 ): void {
     const meta = context.meta;
     // resolve namespace
@@ -213,6 +213,6 @@ export function setMetaNamespace(
     meta.namespace = resolveNamespace(
         namespace,
         pathToSource ? path.resolve(path.dirname(meta.source), pathToSource) : meta.source,
-        meta.source
+        meta.source,
     );
 }

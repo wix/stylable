@@ -40,7 +40,7 @@ export class LangServiceContext {
         public fs: IFileSystem,
         public stylable: Stylable,
         private fileData: StylableFile,
-        private offset: number
+        private offset: number,
     ) {
         const parseResult = parseForEditing(fileData.content, {
             from: fileData.path,
@@ -50,13 +50,13 @@ export class LangServiceContext {
         this.location = getAstNodeAt(parseResult, offset);
         this.meta = new StylableProcessor(
             new Diagnostics(),
-            this.stylable.resolveNamespace
+            this.stylable.resolveNamespace,
         ).process(parseResult.ast);
         this.document = TextDocument.create(
             URI.file(this.meta.source).toString(),
             'stylable',
             this.fileData.stat.mtime.getTime(),
-            this.fileData.content
+            this.fileData.content,
         );
     }
     public getPosition(offset: number = this.offset) {
@@ -92,7 +92,7 @@ export class LangServiceContext {
                 selector as SelectorList, // doesn't mutate due to `selectorContext.transform = false`
                 postcss.rule({ selector: selectorStr }),
                 selectorStr,
-                inferredSelectorNest
+                inferredSelectorNest,
             );
             selectorContext.transform = false;
             selectorContext.selectorAstResolveMap = selectorAstResolveMap;
@@ -109,7 +109,7 @@ export class LangServiceContext {
                           symbol: CSSType.createSymbol({ name: '*' }),
                       },
                   ])
-                : this.stylable.resolver.resolveExtends(this.meta, 'root')
+                : this.stylable.resolver.resolveExtends(this.meta, 'root'),
         );
         // reference interest points
         const locationSelector = this.location.selector;
@@ -117,7 +117,7 @@ export class LangServiceContext {
         const resolvedSelectorChain = this.aggregateResolvedChain(
             nestedSelectors,
             selectorAstResolveMap,
-            inferredSelectorContext
+            inferredSelectorContext,
         );
         return {
             inferredSelectorContext,
@@ -128,7 +128,7 @@ export class LangServiceContext {
             fullSelectorAtCursor: nodeAtCursor
                 ? stringifySelectorAst(nestedSelectors[nestedSelectors.length - 1]).slice(
                       0,
-                      nodeAtCursor.start + locationSelector.offsetInNode
+                      nodeAtCursor.start + locationSelector.offsetInNode,
                   )
                 : '',
             selectorAstResolveMap,
@@ -143,7 +143,7 @@ export class LangServiceContext {
     private aggregateResolvedChain(
         nestedSelectors: ImmutableSelectorList[],
         selectorAstResolveMap: Map<ImmutableSelectorNode, InferredSelector>,
-        inferredSelectorContext: InferredSelector
+        inferredSelectorContext: InferredSelector,
     ) {
         const resolvedChain: ResolveChainItem[] = [];
 
@@ -213,7 +213,7 @@ export class LangServiceContext {
         if (this.location.selector) {
             // caret is on an existing selector
             let selectorWithCaret = this.location.selector.parents.find(
-                (node) => node.type === 'selector'
+                (node) => node.type === 'selector',
             );
             if (!selectorWithCaret && this.location.selector.node.type === 'selector') {
                 selectorWithCaret = this.location.selector.node;

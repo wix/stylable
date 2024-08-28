@@ -33,7 +33,7 @@ export class StylableProcessor implements FeatureContext {
     constructor(
         public diagnostics = new Diagnostics(),
         private resolveNamespace = STNamespace.defaultProcessNamespace,
-        public flags: FeatureFlags = { ...defaultFeatureFlags }
+        public flags: FeatureFlags = { ...defaultFeatureFlags },
     ) {}
     public process(root: postcss.Root): StylableMeta {
         this.meta = new StylableMeta(root, this.diagnostics, this.flags);
@@ -77,7 +77,7 @@ export class StylableProcessor implements FeatureContext {
             {
                 isScoped,
                 originalNode,
-            }: { isScoped: boolean; originalNode: postcss.AtRule | postcss.Rule }
+            }: { isScoped: boolean; originalNode: postcss.AtRule | postcss.Rule },
         ) => {
             return this.handleRule(rule, {
                 isScoped,
@@ -178,7 +178,7 @@ export class StylableProcessor implements FeatureContext {
                     this.meta.urls.push(node.url);
                 }
             },
-            false
+            false,
         );
     }
     protected handleRule(
@@ -191,7 +191,7 @@ export class StylableProcessor implements FeatureContext {
             isScoped: boolean;
             reportUnscoped: boolean;
             originalNode?: postcss.AtRule | postcss.Rule;
-        }
+        },
     ) {
         const selectorAst = parseSelectorWithCache(rule.selector);
 
@@ -292,7 +292,7 @@ export class StylableProcessor implements FeatureContext {
                         {
                             node: rule,
                             word: stringifySelector(node),
-                        }
+                        },
                     );
                 }
             } else if (node.type === `attribute`) {
@@ -300,12 +300,12 @@ export class StylableProcessor implements FeatureContext {
                     this.diagnostics.report(
                         generalDiagnostics.INVALID_FUNCTIONAL_SELECTOR(
                             `[${node.value}]`,
-                            `attribute`
+                            `attribute`,
                         ),
                         {
                             node: rule,
                             word: stringifySelector(node),
-                        }
+                        },
                     );
                 }
             } else if (node.type === `nesting`) {
@@ -315,7 +315,7 @@ export class StylableProcessor implements FeatureContext {
                         {
                             node: rule,
                             word: stringifySelector(node),
-                        }
+                        },
                     );
                 }
             }

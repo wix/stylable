@@ -21,7 +21,7 @@ export function cachedProcessFile<T = any>(
     processor: processFn<T>,
     readFileSync: MinimalFS['readFileSync'],
     postProcessors: Array<(value: T, path: string) => T> = [],
-    cache: { [key: string]: CacheItem<T> } = {}
+    cache: { [key: string]: CacheItem<T> } = {},
 ): FileProcessor<T> {
     function process(filePath: string, invalidateCache = false) {
         const content = readFileSync(filePath, 'utf8');
@@ -38,7 +38,7 @@ export function cachedProcessFile<T = any>(
     function processContent(content: string, filePath: string): T {
         return postProcessors.reduce<T>(
             (value, postProcessor) => postProcessor(value, filePath),
-            processor(filePath, content)
+            processor(filePath, content),
         );
     }
 

@@ -50,7 +50,7 @@ export class StylableEvaluator {
     }
     evaluateValue(
         context: Omit<FeatureTransformContext, 'getResolvedSymbols'>,
-        data: Omit<EvalValueData, 'passedThrough' | 'valueHook'>
+        data: Omit<EvalValueData, 'passedThrough' | 'valueHook'>,
     ) {
         return processDeclarationValue(
             context.resolver,
@@ -64,7 +64,7 @@ export class StylableEvaluator {
             context.passedThrough,
             data.args,
             data.rootArgument,
-            data.initialNode
+            data.initialNode,
         );
     }
 }
@@ -76,12 +76,12 @@ export const functionDiagnostics = {
         '15001',
         'error',
         (resolvedValue: string, message: string) =>
-            `failed to execute formatter "${resolvedValue}" with error: "${message}"`
+            `failed to execute formatter "${resolvedValue}" with error: "${message}"`,
     ),
     UNKNOWN_FORMATTER: createDiagnosticReporter(
         '15002',
         'error',
-        (name: string) => `cannot find native function or custom formatter called ${name}`
+        (name: string) => `cannot find native function or custom formatter called ${name}`,
     ),
 };
 
@@ -92,7 +92,7 @@ export function resolveArgumentsValue(
     diagnostics: Diagnostics,
     node: postcss.Node,
     variableOverride?: Record<string, string>,
-    path?: string[]
+    path?: string[],
 ) {
     const resolvedArgs = {} as Record<string, string>;
     for (const k in options) {
@@ -105,7 +105,7 @@ export function resolveArgumentsValue(
             transformer.replaceValueHook,
             diagnostics,
             path,
-            undefined
+            undefined,
         );
     }
     return resolvedArgs;
@@ -123,7 +123,7 @@ export function processDeclarationValue(
     passedThrough: string[] = [],
     args: string[] = [],
     rootArgument?: string,
-    initialNode?: postcss.Node
+    initialNode?: postcss.Node,
 ): EvalValueResult {
     const evaluator = new StylableEvaluator({
         stVarOverride: variableOverride,
@@ -169,8 +169,8 @@ export function processDeclarationValue(
                     url.value = assureRelativeUrlPrefix(
                         relative(
                             sourceDir,
-                            resolver.resolvePath(sourceDir, url.value.slice(1))
-                        ).replace(/\\/gm, '/')
+                            resolver.resolvePath(sourceDir, url.value.slice(1)),
+                        ).replace(/\\/gm, '/'),
                     );
                 }
             } else if (value === 'format') {
@@ -182,14 +182,14 @@ export function processDeclarationValue(
                 try {
                     // ToDo: check if function instead of calling on a non function
                     parsedNode.resolvedValue = (formatter.symbol as (...args: any[]) => any)(
-                        ...formatterArgs
+                        ...formatterArgs,
                     );
                     if (evaluator.valueHook && typeof parsedNode.resolvedValue === 'string') {
                         parsedNode.resolvedValue = evaluator.valueHook(
                             parsedNode.resolvedValue,
                             { name: parsedNode.value, args: formatterArgs },
                             true,
-                            passedThrough
+                            passedThrough,
                         );
                     }
                 } catch (error) {
@@ -198,12 +198,12 @@ export function processDeclarationValue(
                         diagnostics.report(
                             functionDiagnostics.FAIL_TO_EXECUTE_FORMATTER(
                                 parsedNode.resolvedValue,
-                                (error as Error)?.message
+                                (error as Error)?.message,
                             ),
                             {
                                 node,
                                 word: (node as postcss.Declaration).value,
-                            }
+                            },
                         );
                     }
                 }
@@ -258,7 +258,7 @@ export function processDeclarationValue(
                             args,
                             topLevelType,
                             n,
-                            resolvedSymbols.customValues
+                            resolvedSymbols.customValues,
                         );
                     } catch (error) {
                         if (error instanceof CustomValueError) {
@@ -275,12 +275,12 @@ export function processDeclarationValue(
                     if (invalidNode) {
                         diagnostics.report(
                             STVar.diagnostics.COULD_NOT_RESOLVE_VALUE(
-                                [...(rootArgument ? [rootArgument] : []), ...args].join(', ')
+                                [...(rootArgument ? [rootArgument] : []), ...args].join(', '),
                             ),
                             {
                                 node: invalidNode,
                                 word: value,
-                            }
+                            },
                         );
                     } else {
                         // TODO: catch broken variable resolutions without a node
@@ -308,8 +308,8 @@ export function evalDeclarationValue(
     args: string[] = [],
     getResolvedSymbols: (meta: StylableMeta) => MetaResolvedSymbols = createSymbolResolverWithCache(
         resolver,
-        diagnostics || new Diagnostics()
-    )
+        diagnostics || new Diagnostics(),
+    ),
 ): string {
     return processDeclarationValue(
         resolver,
@@ -321,6 +321,6 @@ export function evalDeclarationValue(
         valueHook,
         diagnostics,
         passedThrough,
-        args
+        args,
     ).outputValue;
 }

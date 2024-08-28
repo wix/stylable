@@ -482,7 +482,7 @@ describe('Stylable CLI config multiple projects', function () {
                 .to.be.lessThan(stylableError)
                 .and.lessThan(secondError);
             expect(stdout.match(STVar.diagnostics.UNKNOWN_VAR('unknown').message)?.length).to.eql(
-                1
+                1,
             );
         });
 
@@ -551,7 +551,7 @@ describe('Stylable CLI config multiple projects', function () {
 
             expect(stdout, 'has diagnostic error').not.to.match(/error/i);
             expect(stderr).to.match(
-                new RegExp(`Error: Stylable CLI config can not have a duplicate project requests`)
+                new RegExp(`Error: Stylable CLI config can not have a duplicate project requests`),
             );
         });
 
@@ -586,8 +586,8 @@ describe('Stylable CLI config multiple projects', function () {
             expect(stdout, 'has diagnostic error').not.to.match(/error/i);
             expect(stderr).to.match(
                 new RegExp(
-                    `Error: Stylable CLI config can not resolve project request "packages/project-b"`
-                )
+                    `Error: Stylable CLI config can not resolve project request "packages/project-b"`,
+                ),
             );
         });
 
@@ -700,7 +700,7 @@ describe('Stylable CLI config multiple projects', function () {
 
             expect(stdout, 'has diagnostic error').not.to.match(/error/i);
             expect(stderr, 'has cli error').to.include(
-                'Error: "packages/*" options - "dtsSourceMap" requires turning on "dts"'
+                'Error: "packages/*" options - "dtsSourceMap" requires turning on "dts"',
             );
         });
     });

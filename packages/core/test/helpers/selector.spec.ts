@@ -129,7 +129,7 @@ describe(`helpers/selector`, () => {
             test(`apply "${scope}" on "${nested}" should output "${expected}"`, () => {
                 const { selector } = scopeNestedSelector(
                     parseSelector(scope),
-                    parseSelector(nested)
+                    parseSelector(nested),
                 );
                 expect(selector).to.equal(expected);
             });
@@ -260,7 +260,7 @@ describe(`helpers/selector`, () => {
                     parseSelector(scope),
                     parseSelector(nested),
                     false,
-                    (node) => node.type === 'pseudo_class' && node.value === 'xxx'
+                    (node) => node.type === 'pseudo_class' && node.value === 'xxx',
                 );
                 expect(selector).to.equal(expected);
             });

@@ -54,7 +54,7 @@ describe('Stylable', () => {
                     stylableConfig: {
                         resolveModule: { alias: { '@abc': '/abc.js' } },
                     },
-                }
+                },
             );
 
             expect(stylable.resolvePath('/', '@abc')).to.equal('/abc.js');
@@ -79,13 +79,13 @@ describe('Stylable', () => {
 
             expect(
                 deindent(defaultTransform.meta.targetAst!.toString()),
-                `default output CSS`
+                `default output CSS`,
             ).to.eql(
                 deindent(`
                     .entry__a {
                         prop: red;
                     }
-                `)
+                `),
             );
             expect(defaultTransform.exports.classes.a, `JS export`).to.eql(`entry__a`);
             expect(defaultTransform.exports.stVars.varA, `default var JS export`).to.eql(`red`);
@@ -97,13 +97,13 @@ describe('Stylable', () => {
 
             expect(
                 deindent(varOverrideTransform.meta.targetAst!.toString()),
-                `override vars output CSS`
+                `override vars output CSS`,
             ).to.eql(
                 deindent(`
                     .entry__a {
                         prop: green;
                     }
-                `)
+                `),
             );
             // ToDo: fix JS export for programmatic override
             // expect(varOverrideTransform.exports.stVars.varA, `override var JS export`).to.eql(
@@ -214,12 +214,12 @@ describe('Stylable', () => {
             const localFromPath = stylable.transformCustomProperty(path, `--local`);
             const localFromMeta = stylable.transformCustomProperty(
                 stylable.analyze(path),
-                `--local`
+                `--local`,
             );
             const importedFromPath = stylable.transformCustomProperty(path, `--imported`);
             const importedFromMeta = stylable.transformCustomProperty(
                 stylable.analyze(path),
-                `--imported`
+                `--imported`,
             );
 
             expect(localFromPath, `local by path`).to.eql(`--entry-local`);
@@ -252,7 +252,7 @@ describe('Stylable', () => {
                     -st-extends: bar;
                 }
 
-                `
+                `,
             );
 
             // invalidate cache
@@ -266,7 +266,7 @@ describe('Stylable', () => {
             });
             expect(
                 res.meta.transformDiagnostics!.reports,
-                'no diagnostics reported for foo import'
+                'no diagnostics reported for foo import',
             ).to.eql([]);
         });
 
@@ -282,7 +282,7 @@ describe('Stylable', () => {
                           .root .foo .bar { }
                     `,
                 },
-                { resolverCache }
+                { resolverCache },
             );
 
             stylable.transform(stylable.analyze('/entry.st.css'));
@@ -302,7 +302,7 @@ describe('Stylable', () => {
 
             expect(
                 res.meta.transformDiagnostics!.reports,
-                'no diagnostics reported for foo import'
+                'no diagnostics reported for foo import',
             ).to.eql([]);
         });
     });

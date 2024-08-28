@@ -3,7 +3,7 @@ import { pathToFileURL } from 'url';
 
 export function loadStylableConfig<T>(
     context: string,
-    extract: (config: any) => T
+    extract: (config: any) => T,
 ): { path: string; config: T } | undefined {
     const path =
         findConfig('stylable.config.js', { cwd: context }) ??
@@ -14,12 +14,12 @@ export function loadStylableConfig<T>(
             config = require(path);
         } catch (e) {
             throw new Error(
-                `Failed to load "stylable.config.js" from ${path}\n${(e as Error)?.stack}`
+                `Failed to load "stylable.config.js" from ${path}\n${(e as Error)?.stack}`,
             );
         }
         if (!config) {
             throw new Error(
-                `Stylable configuration loaded from ${path} but no exported configuration found`
+                `Stylable configuration loaded from ${path} but no exported configuration found`,
             );
         }
         return {
@@ -36,7 +36,7 @@ const esmImport: (url: URL) => any = eval(`(path) => import(path)`);
 
 export async function loadStylableConfigEsm<T>(
     context: string,
-    extract: (config: any) => T
+    extract: (config: any) => T,
 ): Promise<{ path: string; config: T } | undefined> {
     const path =
         findConfig('stylable.config.js', { cwd: context }) ??
@@ -47,12 +47,12 @@ export async function loadStylableConfigEsm<T>(
             config = await esmImport(pathToFileURL(path));
         } catch (e) {
             throw new Error(
-                `Failed to load "stylable.config.js" from ${path}\n${(e as Error)?.stack}`
+                `Failed to load "stylable.config.js" from ${path}\n${(e as Error)?.stack}`,
             );
         }
         if (!config) {
             throw new Error(
-                `Stylable configuration loaded from ${path} but no exported configuration found`
+                `Stylable configuration loaded from ${path} but no exported configuration found`,
             );
         }
         return {

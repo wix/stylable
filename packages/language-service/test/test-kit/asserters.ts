@@ -46,7 +46,7 @@ export function getPath(fileName: string): postcss.Node[] {
     const proc = createMeta(src, fullPath);
     return pathFromPosition(
         proc.meta!.sourceAst,
-        new ProviderPosition(pos.line + 1, pos.character)
+        new ProviderPosition(pos.line + 1, pos.character),
     );
 }
 
@@ -94,19 +94,19 @@ export function getFormattingEdits(
     options: Parameters<typeof format>[2] = {
         insertSpaces: true,
         tabSize: 4,
-    }
+    },
 ): TextEdit[] {
     return format(
         TextDocument.create('test.st.css', 'stylable', 1, content),
         offsetRange || { start: 0, end: content.length },
-        options
+        options,
     );
 }
 
 export function getDocColorPresentation(
     fileName: string,
     color: Color,
-    range: Range
+    range: Range,
 ): ColorPresentation[] {
     const fullPath = path.join(CASES_PATH, fileName);
     const src: string = fs.readFileSync(fullPath).toString();

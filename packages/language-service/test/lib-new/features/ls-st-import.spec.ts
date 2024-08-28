@@ -43,7 +43,7 @@ describe('LS: st-import', () => {
                     ^beforeSelector^ .x {}
                 `,
             },
-            { testOnNativeFileSystem: tempDir.path }
+            { testOnNativeFileSystem: tempDir.path },
         );
         const aPath = fs.join(tempDir.path, 'a.st.css');
         const bPath = fs.join(tempDir.path, 'b.st.css');
@@ -99,7 +99,7 @@ describe('LS: st-import', () => {
                     .xxx {}
                 `,
             },
-            { testOnNativeFileSystem: tempDir.path }
+            { testOnNativeFileSystem: tempDir.path },
         );
 
         const entryPath = fs.join(tempDir.path, 'entry.st.css');
@@ -158,7 +158,7 @@ describe('LS: st-import', () => {
                         @st-import [classB, --pro^partial^] from './source.st.css';
                     `,
                 },
-                { testOnNativeFileSystem: tempDir.path }
+                { testOnNativeFileSystem: tempDir.path },
             );
             const entryPath = fs.join(tempDir.path, 'entry.st.css');
 
@@ -264,7 +264,7 @@ describe('LS: st-import', () => {
                         ] from './source.st.css';
                     `,
                 },
-                { testOnNativeFileSystem: tempDir.path }
+                { testOnNativeFileSystem: tempDir.path },
             );
             const entryPath = fs.join(tempDir.path, 'entry.st.css');
 
@@ -298,7 +298,7 @@ describe('LS: st-import', () => {
                                 }, [] as string[]),
                             (name) => ({
                                 label: name,
-                            })
+                            }),
                         ),
                     ],
                 }));
@@ -331,7 +331,7 @@ describe('LS: st-import', () => {
                                 }, [] as string[]),
                             (name) => ({
                                 label: name,
-                            })
+                            }),
                         ),
                     ],
                 }));
@@ -362,7 +362,7 @@ describe('LS: st-import', () => {
                         ] from './code.js';
                     `,
                 },
-                { testOnNativeFileSystem: tempDir.path }
+                { testOnNativeFileSystem: tempDir.path },
             );
             const entryPath = fs.join(tempDir.path, 'entry.st.css');
 
@@ -395,7 +395,7 @@ describe('LS: st-import', () => {
                     // all except layer
                     ...completion(
                         [...supportedTypes.filter((type) => type !== 'layer')],
-                        (type) => ({ label: type + '()' })
+                        (type) => ({ label: type + '()' }),
                     ),
                 ],
             }));
@@ -415,7 +415,7 @@ describe('LS: st-import', () => {
                     // all except container
                     ...completion(
                         [...supportedTypes.filter((type) => type !== 'container')],
-                        (type) => ({ label: type + '()' })
+                        (type) => ({ label: type + '()' }),
                     ),
                 ],
             }));
@@ -474,7 +474,7 @@ describe('LS: st-import', () => {
                         @st-import [^topEmpty^] from './proxy.st.css';
                     `,
                 },
-                { testOnNativeFileSystem: tempDir.path }
+                { testOnNativeFileSystem: tempDir.path },
             );
             const entryPath = fs.join(tempDir.path, 'entry.st.css');
 
@@ -539,7 +539,7 @@ describe('LS: st-import', () => {
                         ] from './source.st.css';
                     `,
                 },
-                { testOnNativeFileSystem: tempDir.path }
+                { testOnNativeFileSystem: tempDir.path },
             );
             const entryPath = fs.join(tempDir.path, 'entry.st.css');
 
@@ -625,7 +625,7 @@ describe('LS: st-import', () => {
                     // that cannot run in memory-fs on windows. once the code is refactor this test
                     // should remove the "testOnNativeFileSystem" flag
                     testOnNativeFileSystem: tempDir.path,
-                }
+                },
             );
             const entryPath = fs.join(tempDir.path, 'entry.st.css');
 
@@ -679,7 +679,7 @@ describe('LS: st-import', () => {
                         @st-import [mix^partial^] from './code.js';
                     `,
                 },
-                { testOnNativeFileSystem: tempDir.path }
+                { testOnNativeFileSystem: tempDir.path },
             );
             const entryPath = fs.join(tempDir.path, 'entry.st.css');
 
@@ -789,7 +789,7 @@ describe('LS: st-import', () => {
                 },
                 {
                     testOnNativeFileSystem: tempDir.path,
-                }
+                },
             );
             const entryPath = fs.join(tempDir.path, 'src', 'entry.st.css');
 
@@ -857,7 +857,7 @@ describe('LS: st-import', () => {
                 },
                 {
                     testOnNativeFileSystem: tempDir.path,
-                }
+                },
             );
             const entryPath = fs.join(tempDir.path, 'entry.st.css');
 
@@ -905,7 +905,7 @@ describe('LS: st-import', () => {
                             `,
                         },
                     },
-                    { testOnNativeFileSystem: tempDir.path }
+                    { testOnNativeFileSystem: tempDir.path },
                 );
                 const entryPath = fs.join(tempDir.path, 'src/entry.st.css');
 
@@ -992,7 +992,7 @@ describe('LS: st-import', () => {
                             @st-import from 'flat-package/esm/fi^flatInternal^';
                         `,
                     },
-                    { testOnNativeFileSystem: tempDir.path }
+                    { testOnNativeFileSystem: tempDir.path },
                 );
                 const entryPath = fs.join(tempDir.path, 'entry.st.css');
 
@@ -1059,7 +1059,7 @@ describe('LS: st-import', () => {
                             `,
                         },
                     },
-                    { testOnNativeFileSystem: tempDir.path }
+                    { testOnNativeFileSystem: tempDir.path },
                 );
                 const entryPath = fs.join(tempDir.path, 'src', 'entry.st.css');
 
@@ -1108,7 +1108,7 @@ describe('LS: st-import', () => {
                             @st-import from 'x/wild/internal^internal^';
                         `,
                     },
-                    { testOnNativeFileSystem: tempDir.path }
+                    { testOnNativeFileSystem: tempDir.path },
                 );
                 const entryPath = fs.join(tempDir.path, 'entry.st.css');
 
@@ -1221,7 +1221,7 @@ describe('LS: st-import', () => {
                             @st-import from 'nestedConditions/give-me/^nestedSubpathConditions^';
                         `,
                     },
-                    { testOnNativeFileSystem: tempDir.path }
+                    { testOnNativeFileSystem: tempDir.path },
                 );
                 const entryPath = fs.join(tempDir.path, 'entry.st.css');
 
@@ -1278,14 +1278,14 @@ describe('LS: st-import', () => {
                                         fs.join(
                                             tempDir.path,
                                             'src/mapped',
-                                            ...specifier.split('/')
+                                            ...specifier.split('/'),
                                         ) + (specifier.endsWith('/') ? fs.sep : '')
                                     );
                                 }
                                 return defaultResolveModule(contextPath, specifier);
                             },
                         },
-                    }
+                    },
                 );
                 const defaultResolveModule = createDefaultResolver({ fs });
                 const entryPath = fs.join(tempDir.path, 'src', 'entry.st.css');

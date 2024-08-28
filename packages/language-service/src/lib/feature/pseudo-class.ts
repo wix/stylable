@@ -20,7 +20,7 @@ import type { ProviderPosition } from '../completion-providers';
 // args - TODO: should return validator function information
 export function resolveStateTypeOrValidator(
     pos: ProviderPosition,
-    line: string
+    line: string,
 ): string | boolean | null {
     const valueStartChar = line.indexOf(':') + 1;
     const value = line.slice(valueStartChar);
@@ -40,7 +40,7 @@ export function resolveStateTypeOrValidator(
             ({ length, requiredHinting } = resolvePosInState(
                 pos.character,
                 length,
-                statePart.before
+                statePart.before,
             ));
             if (requiredHinting || stateTypeValidatorToHint) {
                 continue;
@@ -52,7 +52,7 @@ export function resolveStateTypeOrValidator(
                 requiredHinting,
                 pos,
                 validator,
-                stateTypeValidatorToHint
+                stateTypeValidatorToHint,
             ));
 
             if (requiredHinting || stateTypeValidatorToHint) {
@@ -61,7 +61,7 @@ export function resolveStateTypeOrValidator(
                 ({ length, requiredHinting } = resolvePosInState(
                     pos.character,
                     length,
-                    statePart.after
+                    statePart.after,
                 ));
             }
 
@@ -85,7 +85,7 @@ function resolveStateType(
     requiredHinting: boolean,
     pos: ProviderPosition,
     validator: { length: number; requiredHinting: boolean },
-    stateTypeValidatorToHint: string | null
+    stateTypeValidatorToHint: string | null,
 ) {
     for (const typeNode of stateNodes) {
         ({ length, requiredHinting } = resolvePosInState(pos.character, length, typeNode.value));
@@ -96,7 +96,7 @@ function resolveStateType(
             stateTypeValidatorToHint = isValidatorsHintingRequired(
                 validator.requiredHinting,
                 stateTypeValidatorToHint,
-                typeNode.value
+                typeNode.value,
             );
             length = validator.length;
             typeNode.nodes.forEach((valNode) => {
@@ -105,14 +105,14 @@ function resolveStateType(
                     length,
                     valNode,
                     stateTypeValidatorToHint,
-                    typeNode
+                    typeNode,
                 ));
             });
             validator = resolvePosInState(pos.character, length, typeNode.after);
             stateTypeValidatorToHint = isValidatorsHintingRequired(
                 validator.requiredHinting,
                 stateTypeValidatorToHint,
-                typeNode.value
+                typeNode.value,
             );
             length = validator.length;
             length++; // closing type parenthesis
@@ -127,13 +127,13 @@ function resolveStateValidator(
     length: number,
     valNode: postcssValueParser.Node,
     stateTypeValidatorToHint: string | null,
-    typeNode: any
+    typeNode: any,
 ) {
     const validator = resolvePosInState(pos.character, length, valNode.value);
     stateTypeValidatorToHint = isValidatorsHintingRequired(
         validator.requiredHinting,
         stateTypeValidatorToHint,
-        typeNode.value
+        typeNode.value,
     );
     if (valNode.type === 'function') {
         length++; // opening arg parenthesis
@@ -152,7 +152,7 @@ function resolveStateValidator(
 function isValidatorsHintingRequired(
     requiredHinting: boolean,
     stateTypeValidatorToHint: string | null,
-    type: string
+    type: string,
 ) {
     return requiredHinting ? type : stateTypeValidatorToHint;
 }

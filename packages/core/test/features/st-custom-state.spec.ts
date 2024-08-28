@@ -168,7 +168,7 @@ describe('features/st-custom-state', () => {
                 .a {
                     /* @analyze-error ${stCustomStateDiagnostics.UNKNOWN_STATE_TYPE(
                         's1',
-                        'unknown'
+                        'unknown',
                     )} */
                     -st-states: s1(unknown);
                 }
@@ -187,7 +187,7 @@ describe('features/st-custom-state', () => {
                     /* @transform-error ${stCustomStateDiagnostics.DEFAULT_PARAM_FAILS_VALIDATION(
                         'e1',
                         '',
-                        [STCustomState.sysValidationErrors.enum.NO_OPTIONS_DEFINED()]
+                        [STCustomState.sysValidationErrors.enum.NO_OPTIONS_DEFINED()],
                     )} */
                     -st-states: e1(enum());
                 }
@@ -198,26 +198,26 @@ describe('features/st-custom-state', () => {
                 .a {
                     /* @analyze-warn(missing placeholder) word(.no-placeholder) ${stCustomStateDiagnostics.TEMPLATE_MISSING_PLACEHOLDER(
                         's1',
-                        '.no-placeholder'
+                        '.no-placeholder',
                     )} */
                     -st-states: s1('.no-placeholder', string);
                 }
                 .b {
                     /* @analyze-error(unexpected param definition) word('.y')  ${stCustomStateDiagnostics.UNKNOWN_STATE_TYPE(
                         's1 parameter',
-                        "'.y'"
+                        "'.y'",
                     )} */
                     -st-states: s1('.b$0', '.y');
                 }
                 .c {
                     /* @analyze-error(missing param definition) ${stCustomStateDiagnostics.TEMPLATE_MISSING_PARAMETER(
-                        's1'
+                        's1',
                     )} */
                     -st-states: s1('.c$0', ,);
                 }
                 .d {
                     /* @analyze-error(multiple parameters) ${stCustomStateDiagnostics.TEMPLATE_MULTI_PARAMETERS(
-                        's1'
+                        's1',
                     )} */
                     -st-states: s1('.c$0', string, number);
                 }
@@ -231,7 +231,7 @@ describe('features/st-custom-state', () => {
                 .a {
                     /* @analyze-error(multi types) ${stCustomStateDiagnostics.TOO_MANY_STATE_TYPES(
                         's1',
-                        ['string', 'number']
+                        ['string', 'number'],
                     )} */
                     -st-states: s1(string, number);
                 }
@@ -239,7 +239,7 @@ describe('features/st-custom-state', () => {
                     /* @analyze-error(multi validation args) ${stCustomStateDiagnostics.TOO_MANY_ARGS_IN_VALIDATOR(
                         's2',
                         'contains',
-                        ['x', 'y']
+                        ['x', 'y'],
                     )} */
                     -st-states: s2(string(contains(x, y)));
                 }
@@ -247,7 +247,7 @@ describe('features/st-custom-state', () => {
                     /* @transform-error(unknown str validator) ${stCustomStateDiagnostics.DEFAULT_PARAM_FAILS_VALIDATION(
                         's3',
                         '',
-                        [STCustomState.sysValidationErrors.string.UKNOWN_VALIDATOR('unknown')]
+                        [STCustomState.sysValidationErrors.string.UKNOWN_VALIDATOR('unknown')],
                     )} */
                     -st-states: s3(string(unknown()));
                 }
@@ -255,7 +255,7 @@ describe('features/st-custom-state', () => {
                     /* @transform-error(unknown num validator) ${stCustomStateDiagnostics.DEFAULT_PARAM_FAILS_VALIDATION(
                         's4',
                         '',
-                        [STCustomState.sysValidationErrors.number.UKNOWN_VALIDATOR('unknown')]
+                        [STCustomState.sysValidationErrors.number.UKNOWN_VALIDATOR('unknown')],
                     )} */
                     -st-states: s4(number(unknown()));
                 }
@@ -272,9 +272,9 @@ describe('features/st-custom-state', () => {
                         'abc',
                         [
                             STCustomState.sysValidationErrors.number.NUMBER_TYPE_VALIDATION_FAILED(
-                                'abc'
+                                'abc',
                             ),
-                        ]
+                        ],
                     )} */
                     -st-states: n1(number) abc;
                 }
@@ -285,9 +285,9 @@ describe('features/st-custom-state', () => {
                         [
                             STCustomState.sysValidationErrors.enum.ENUM_TYPE_VALIDATION_FAILED(
                                 'huge',
-                                ['small', 'large']
+                                ['small', 'large'],
                             ),
-                        ]
+                        ],
                     )} */
                     -st-states: e1(enum(small, large)) huge;
                 }
@@ -297,9 +297,9 @@ describe('features/st-custom-state', () => {
                         'abc',
                         [
                             STCustomState.sysValidationErrors.number.NUMBER_TYPE_VALIDATION_FAILED(
-                                'abc'
+                                'abc',
                             ),
-                        ]
+                        ],
                     )} */
                     -st-states: tn1('[x=$0]', number abc);
                 }
@@ -310,7 +310,7 @@ describe('features/st-custom-state', () => {
             testStylableCore(`
                 .a {
                     /* @analyze-error ${stCustomStateDiagnostics.STATE_STARTS_WITH_HYPHEN(
-                        '-some-state'
+                        '-some-state',
                     )} */
                     -st-states: -some-state;
                 }

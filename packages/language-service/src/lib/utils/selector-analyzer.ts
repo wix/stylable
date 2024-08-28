@@ -35,7 +35,7 @@ export function createSelectorChunk(value?: Partial<SelectorChunk>): SelectorChu
 }
 
 export function createSelectorInternalChunk(
-    value?: Partial<SelectorInternalChunk>
+    value?: Partial<SelectorInternalChunk>,
 ): SelectorInternalChunk {
     return { name: '', ...createSelectorChunk(value), _type: 'internal-chunk' };
 }
@@ -54,7 +54,7 @@ export function isSelectorInternalChunk(chunk: SelectorQuery): chunk is Selector
 
 export function parseSelector(
     inputSelector: string,
-    cursorIndex = 0
+    cursorIndex = 0,
 ): { selector: SelectorQuery[]; target: CursorPosition; lastSelector: string } {
     const res: SelectorQuery[] = [];
     const textArr: string[] = [];

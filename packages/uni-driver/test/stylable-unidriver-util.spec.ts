@@ -20,5 +20,5 @@ describe(
     contractTest(StylableUnidriverUtil, {
         scopeSelectorTest: false,
         createElement: () => wrapWithMiniUni(minDoc.createElement('div') as any) as any,
-    })
+    }),
 );

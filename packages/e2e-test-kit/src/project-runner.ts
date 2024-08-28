@@ -35,7 +35,7 @@ export class ProjectRunner {
         runnerOptions: Options,
         before: MochaHook,
         afterEach: MochaHook,
-        after: MochaHook
+        after: MochaHook,
     ) {
         const projectRunner = new this(runnerOptions);
 
@@ -121,7 +121,7 @@ export class ProjectRunner {
                     }
                 }
                 this.stats = stats;
-            }
+            },
         );
 
         await firstCompile.promise;
@@ -152,7 +152,7 @@ export class ProjectRunner {
         actionDesc: string,
         action: () => Promise<void> | void,
         validate: (controlledWaitFor: typeof waitFor) => Promise<void> | void = () =>
-            Promise.resolve()
+            Promise.resolve(),
     ) {
         const timeoutMs = 15000;
         const controlledWaitFor: typeof waitFor = (action, options = {}) => {
@@ -166,7 +166,7 @@ export class ProjectRunner {
             await timeout(
                 validate(controlledWaitFor) || Promise.resolve(),
                 timeoutMs + 100, // allow inner timeout to fail first
-                `[timeout after ${timeoutMs + 100}ms] "${actionDesc}"`
+                `[timeout after ${timeoutMs + 100}ms] "${actionDesc}"`,
             );
         } catch (e) {
             if (e) {
@@ -180,7 +180,7 @@ export class ProjectRunner {
             if (process.env.PLAYWRIGHT_SERVER) {
                 this.browser = await playwright.chromium.connect(
                     process.env.PLAYWRIGHT_SERVER,
-                    this.options.launchOptions
+                    this.options.launchOptions,
                 );
             } else {
                 this.browser = await playwright.chromium.launch(this.options.launchOptions);
@@ -236,7 +236,7 @@ export class ProjectRunner {
     public getBuildAsset(assetPath: string) {
         return nodeFs.readFileSync(
             join(this.stats?.compilation.options.output.path || '', normalize(assetPath)),
-            'utf-8'
+            'utf-8',
         );
     }
     public getBuildAssets(): Assets {
@@ -244,7 +244,7 @@ export class ProjectRunner {
             acc[assetPath] = {
                 distPath: join(
                     this.stats?.compilation.options.output.path || '',
-                    normalize(assetPath)
+                    normalize(assetPath),
                 ),
                 source() {
                     return nodeFs.readFileSync(this.distPath, 'utf8');
@@ -264,14 +264,14 @@ export class ProjectRunner {
             'exports',
             '__webpack_public_path__',
             'define',
-            source
+            source,
         );
         moduleFactory(
             _module,
             _module.exports,
             publicPath,
             (factory: any) =>
-                (_module.exports = typeof factory === 'function' ? factory() : factory)
+                (_module.exports = typeof factory === 'function' ? factory() : factory),
         );
         return _module.exports;
     }
@@ -282,7 +282,7 @@ export class ProjectRunner {
             const names = [];
             const modules = compilation.chunkGraph.getChunkModulesIterableBySourceType(
                 chunk,
-                'javascript'
+                'javascript',
             );
             if (modules) {
                 for (const module of modules) {
@@ -348,7 +348,7 @@ export class ProjectRunner {
                         ...this.options.webpackOptions?.output,
                         path: join(
                             this.outputDir,
-                            loadedConfig[Symbol.for('TestRunnerInternalPath')] ?? `output_${i + 1}`
+                            loadedConfig[Symbol.for('TestRunnerInternalPath')] ?? `output_${i + 1}`,
                         ),
                     },
                 };
@@ -380,7 +380,7 @@ export class ProjectRunner {
             symlinkSync(
                 join(__dirname, '../../../node_modules'), // #1
                 join(tempPath, 'node_modules'),
-                'junction'
+                'junction',
             );
             this.tempPath = tempPath;
             this.testDir = tempProjectPath;

@@ -4,7 +4,7 @@ import { dirname } from 'path';
 
 const project = 'stc-config';
 const projectDir = dirname(
-    require.resolve(`@stylable/webpack-plugin/test/e2e/projects/${project}/webpack.config`)
+    require.resolve(`@stylable/webpack-plugin/test/e2e/projects/${project}/webpack.config`),
 );
 
 describe(`(${project})`, () => {
@@ -17,7 +17,7 @@ describe(`(${project})`, () => {
         },
         before,
         afterEach,
-        after
+        after,
     );
 
     it('run "stc" when the plugin finds stylable config file with "stc" options', () => {

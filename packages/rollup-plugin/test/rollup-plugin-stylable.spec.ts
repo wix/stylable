@@ -10,7 +10,7 @@ const imageBase64 = `url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABoAAAAd
 
 const getElementsStyles = () => {
     const { backgroundImage, backgroundColor, fontSize, fontFamily } = getComputedStyle(
-        document.body
+        document.body,
     );
     const {
         backgroundImage: partBackgroundImage,

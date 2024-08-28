@@ -83,14 +83,14 @@ export class StylableLanguageService {
                 URI.file(filePath).toString(),
                 'stylable',
                 stylableFile.stat.mtime.getTime(),
-                stylableFile.content
+                stylableFile.content,
             );
 
             const res = this.provider.getDefinitionLocation(
                 stylableFile.content,
                 doc.positionAt(offset),
                 stylableFile.path,
-                this.fs
+                this.fs,
             );
 
             return res.map((loc) => Location.create(URI.file(loc.uri).toString(), loc.range));
@@ -107,7 +107,7 @@ export class StylableLanguageService {
                 URI.file(filePath).toString(),
                 'stylable',
                 stylableFile.stat.mtime.getTime(),
-                stylableFile.content
+                stylableFile.content,
             );
 
             return this.cssService.doHover(doc, doc.positionAt(offset), settings);
@@ -124,7 +124,7 @@ export class StylableLanguageService {
                 URI.file(filePath).toString(),
                 'stylable',
                 stylableFile.stat.mtime.getTime(),
-                stylableFile.content
+                stylableFile.content,
             );
 
             const position = doc.positionAt(offset);
@@ -148,7 +148,7 @@ export class StylableLanguageService {
                 URI.file(filePath).toString(),
                 'stylable',
                 stylableFile.stat.mtime.getTime(),
-                stylableFile.content
+                stylableFile.content,
             );
             return resolveDocumentColors(this.stylable, this.cssService, doc, this.fs);
         }
@@ -159,7 +159,7 @@ export class StylableLanguageService {
     public onColorPresentation(
         filePath: string,
         offset: { start: number; end: number },
-        color: Color
+        color: Color,
     ): ColorPresentation[] {
         const stylableFile = this.readStylableFile(filePath);
 
@@ -168,7 +168,7 @@ export class StylableLanguageService {
                 URI.file(filePath).toString(),
                 'stylable',
                 stylableFile.stat.mtime.getTime(),
-                stylableFile.content
+                stylableFile.content,
             );
 
             const range: Range = {
@@ -180,7 +180,7 @@ export class StylableLanguageService {
                 this.cssService,
                 doc,
                 { color, range, textDocument: doc },
-                this.fs
+                this.fs,
             );
         }
 
@@ -196,18 +196,21 @@ export class StylableLanguageService {
                 URI.file(filePath).toString(),
                 'stylable',
                 stylableFile.stat.mtime.getTime(),
-                stylableFile.content
+                stylableFile.content,
             );
 
-            getRenameRefs(stylableFile.path, doc.positionAt(offset), this.fs, this.stylable).forEach(
-                (ref) => {
-                    if (edit.changes![ref.uri]) {
-                        edit.changes![ref.uri].push({ range: ref.range, newText: newName });
-                    } else {
-                        edit.changes![ref.uri] = [{ range: ref.range, newText: newName }];
-                    }
+            getRenameRefs(
+                stylableFile.path,
+                doc.positionAt(offset),
+                this.fs,
+                this.stylable,
+            ).forEach((ref) => {
+                if (edit.changes![ref.uri]) {
+                    edit.changes![ref.uri].push({ range: ref.range, newText: newName });
+                } else {
+                    edit.changes![ref.uri] = [{ range: ref.range, newText: newName }];
                 }
-            );
+            });
         }
 
         return edit;
@@ -221,7 +224,7 @@ export class StylableLanguageService {
                 URI.file(filePath).toString(),
                 'stylable',
                 stylableFile.stat.mtime.getTime(),
-                stylableFile.content
+                stylableFile.content,
             );
 
             const sig = this.provider.getSignatureHelp(
@@ -229,7 +232,7 @@ export class StylableLanguageService {
                 doc.positionAt(offset),
                 filePath,
                 this.fs,
-                ParameterInformation
+                ParameterInformation,
             );
 
             return sig;
@@ -240,35 +243,35 @@ export class StylableLanguageService {
 
     public onDocumentFormatting(
         filePath: string,
-        options: StylableLangServiceFormattingOptions
+        options: StylableLangServiceFormattingOptions,
     ): TextEdit[] {
         const srcText = this.fs.readFileSync(filePath, 'utf8');
 
         return this.getDocumentFormatting(
             TextDocument.create(URI.file(filePath).toString(), 'stylable', 1, srcText),
             { start: 0, end: srcText.length },
-            options
+            options,
         );
     }
 
     public onDocumentRangeFormatting(
         filePath: string,
         offset: { start: number; end: number },
-        options: StylableLangServiceFormattingOptions
+        options: StylableLangServiceFormattingOptions,
     ): TextEdit[] {
         const srcText = this.fs.readFileSync(filePath, 'utf8');
 
         return this.getDocumentFormatting(
             TextDocument.create(URI.file(filePath).toString(), 'stylable', 1, srcText),
             offset,
-            options
+            options,
         );
     }
 
     public getDocumentFormatting(
         doc: TextDocument,
         offset: { start: number; end: number },
-        options: StylableLangServiceFormattingOptions
+        options: StylableLangServiceFormattingOptions,
     ) {
         return format(doc, offset, options);
     }
@@ -288,7 +291,7 @@ export class StylableLanguageService {
         const cleanDocument = this.cssService.createSanitizedDocument(
             ast,
             filePath,
-            context.document.version
+            context.document.version,
         );
 
         const groupedCompletions = new Map<string, CompletionItem>();
@@ -307,9 +310,11 @@ export class StylableLanguageService {
                     ? stComp.range
                     : new ProviderRange(
                           new ProviderPosition(position.line, Math.max(position.character - 1, 0)),
-                          position
+                          position,
                       ),
-                typeof stComp.insertText === 'string' ? stComp.insertText : stComp.insertText.source
+                typeof stComp.insertText === 'string'
+                    ? stComp.insertText
+                    : stComp.insertText.source,
             );
             lspCompletion.insertTextFormat = 2;
             lspCompletion.detail = stComp.detail;
@@ -324,12 +329,12 @@ export class StylableLanguageService {
             if (stComp.additionalCompletions) {
                 lspCompletion.command = Command.create(
                     'additional',
-                    'editor.action.triggerSuggest'
+                    'editor.action.triggerSuggest',
                 );
             } else if (stComp.triggerSignature) {
                 lspCompletion.command = Command.create(
                     'additional',
-                    'editor.action.triggerParameterHints'
+                    'editor.action.triggerParameterHints',
                 );
             }
         }
@@ -352,12 +357,7 @@ export class StylableLanguageService {
 
     public getDefinitionLocation(src: string, position: ProviderPosition, filePath: string) {
         const realFilePath = this.fs.realpathSync.native(filePath);
-        const defs = this.provider.getDefinitionLocation(
-            src,
-            position,
-            realFilePath,
-            this.fs
-        );
+        const defs = this.provider.getDefinitionLocation(src, position, realFilePath, this.fs);
         return defs.map((loc) => Location.create(URI.file(loc.uri).fsPath, loc.range));
     }
 
@@ -365,7 +365,7 @@ export class StylableLanguageService {
         src: string,
         pos: Position,
         filePath: string,
-        paramInfo: typeof ParameterInformation
+        paramInfo: typeof ParameterInformation,
     ) {
         return this.provider.getSignatureHelp(src, pos, filePath, this.fs, paramInfo);
     }
@@ -391,7 +391,7 @@ export class StylableLanguageService {
                 stylableFile.stat.mtime.getTime(),
                 stylableFile.path,
                 this.stylable,
-                this.cssService
+                this.cssService,
             );
         }
 
@@ -439,7 +439,7 @@ wrapAndCatchErrors(
         onDocumentRangeFormatting: () => [],
         onRenameRequest: () => ({ changes: {} }),
     },
-    StylableLanguageService
+    StylableLanguageService,
 );
 
 export interface StylableFile {

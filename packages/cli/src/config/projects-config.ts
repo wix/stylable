@@ -32,12 +32,12 @@ export async function projectsConfig(
     rootDir: string,
     overrideBuildOptions: Partial<BuildOptions>,
     defaultOptions: BuildOptions = createDefaultOptions(),
-    config?: StylableRuntimeConfigs
+    config?: StylableRuntimeConfigs,
 ): Promise<STCProjects> {
     const topLevelOptions = mergeBuildOptions(
         defaultOptions,
         config?.stcConfig?.options,
-        overrideBuildOptions
+        overrideBuildOptions,
     );
 
     validateOptions(topLevelOptions);
@@ -92,7 +92,7 @@ function resolveConfigValue(config: any, fs?: IFileSystem) {
             defaultConfig:
                 typeof config.defaultConfig === 'function' ? config.defaultConfig(fs) : undefined,
         }),
-        'Failed to evaluate Stylable config'
+        'Failed to evaluate Stylable config',
     );
 }
 
@@ -105,7 +105,7 @@ function isSTCConfig(config: any): config is { stcConfig: Configuration | Config
 }
 
 function isMultipleConfigProject(
-    config: any
+    config: any,
 ): config is { stcConfig: MultipleProjectsConfig<string> } {
     return Boolean(config?.stcConfig?.projects);
 }

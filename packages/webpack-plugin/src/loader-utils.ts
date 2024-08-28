@@ -26,7 +26,7 @@ export function getImports(
     projectRoot: string,
     assetFilter: (url: string, context: string) => boolean,
     assetsMode: 'url' | 'loader',
-    includeGlobalSideEffects: boolean
+    includeGlobalSideEffects: boolean,
 ) {
     const urls = processUrlDependencies({
         meta,

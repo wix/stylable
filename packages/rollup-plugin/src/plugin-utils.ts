@@ -11,7 +11,7 @@ export function generateCssString(
     meta: StylableMeta,
     minify: boolean,
     stylable: Stylable,
-    assetsIds: string[]
+    assetsIds: string[],
 ) {
     const css = meta
         .targetAst!.toString()
@@ -28,7 +28,7 @@ export function emitAssets(
     stylable: Stylable,
     meta: StylableMeta,
     emittedAssets: Map<string, string>,
-    inlineAssets: StylableRollupPluginOptions['inlineAssets']
+    inlineAssets: StylableRollupPluginOptions['inlineAssets'],
 ): string[] {
     const assets = processUrlDependencies({
         meta,

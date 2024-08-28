@@ -27,43 +27,43 @@ export const diagnostics = {
     UNEXPECTED_DECL_VALUE: createDiagnosticReporter(
         '20001',
         'error',
-        (value: string) => `unexpected value: ${value}`
+        (value: string) => `unexpected value: ${value}`,
     ),
     UNKNOWN_DECL_TYPE: createDiagnosticReporter(
         '20002',
         'error',
-        (value: string) => `unknown container type: ${value}`
+        (value: string) => `unknown container type: ${value}`,
     ),
     MISSING_DECL_TYPE: createDiagnosticReporter(
         '20003',
         'error',
-        () => `missing container shorthand type`
+        () => `missing container shorthand type`,
     ),
     INVALID_CONTAINER_NAME: createDiagnosticReporter(
         '20004',
         'error',
-        (value: string) => `invalid container name: ${value}`
+        (value: string) => `invalid container name: ${value}`,
     ),
     UNRESOLVED_CONTAINER_NAME: createDiagnosticReporter(
         '20005',
         'error',
-        (value: string) => `unresolved container name: ${value}`
+        (value: string) => `unresolved container name: ${value}`,
     ),
     UNKNOWN_IMPORTED_CONTAINER: createDiagnosticReporter(
         '20006',
         'error',
         (name: string, path: string) =>
-            `cannot resolve imported container name "${name}" from stylesheet "${path}"`
+            `cannot resolve imported container name "${name}" from stylesheet "${path}"`,
     ),
     MISSING_CONTAINER_NAME_INSIDE_GLOBAL: createDiagnosticReporter(
         '20007',
         'warning',
-        () => `Missing container name inside "${GLOBAL_FUNC}()"`
+        () => `Missing container name inside "${GLOBAL_FUNC}()"`,
     ),
     UNEXPECTED_DEFINITION: createDiagnosticReporter(
         '20008',
         'error',
-        (def: string) => `Unexpected value in container definition: "${def}""`
+        (def: string) => `Unexpected value in container definition: "${def}""`,
     ),
 };
 
@@ -218,7 +218,7 @@ export const hooks = createFeature<{
                     {
                         node: symbol.import.rule,
                         word: symbol.name,
-                    }
+                    },
                 );
             }
         }
@@ -282,7 +282,7 @@ export const hooks = createFeature<{
                         CSSCustomProperty.transformPropertyIdent(
                             context.meta,
                             queryNode,
-                            context.getResolvedSymbols
+                            context.getResolvedSymbols,
                         );
                     }
                 }
@@ -443,7 +443,7 @@ export function getAll(meta: StylableMeta): Record<string, ContainerSymbol> {
 }
 export function getDefinition(
     meta: StylableMeta,
-    name: string
+    name: string,
 ): postcss.Declaration | postcss.AtRule | postcss.Rule | undefined {
     const { definitions } = plugableRecord.getUnsafe(meta.data, dataKey);
     return definitions[name];

@@ -6,7 +6,7 @@ import { getSheetContentAndHash } from './utils';
 
 const project = 'manifest-plugin';
 const projectDir = dirname(
-    require.resolve(`@stylable/webpack-extensions/test/e2e/projects/${project}/webpack.config`)
+    require.resolve(`@stylable/webpack-extensions/test/e2e/projects/${project}/webpack.config`),
 );
 
 describe(`${project} - manifest (e2e)`, () => {
@@ -22,7 +22,7 @@ describe(`${project} - manifest (e2e)`, () => {
         },
         before,
         afterEach,
-        after
+        after,
     );
 
     it('Should generate manifest for the current build', () => {
@@ -32,7 +32,7 @@ describe(`${project} - manifest (e2e)`, () => {
 
         const button = getSheetContentAndHash(join(projectRunner.testDir, 'Button.comp.st.css'));
         const accordion = getSheetContentAndHash(
-            join(projectRunner.testDir, 'Accordion.comp.st.css')
+            join(projectRunner.testDir, 'Accordion.comp.st.css'),
         );
         const common = getSheetContentAndHash(join(projectRunner.testDir, 'common.st.css'));
 
@@ -51,11 +51,11 @@ describe(`${project} - manifest (e2e)`, () => {
             stylesheetMapping: {
                 [`/${button.hash}.st.css`]: button.content.replace(
                     './common.st.css',
-                    `/${common.hash}.st.css`
+                    `/${common.hash}.st.css`,
                 ),
                 [`/${accordion.hash}.st.css`]: button.content.replace(
                     './common.st.css',
-                    `/${common.hash}.st.css`
+                    `/${common.hash}.st.css`,
                 ),
                 [`/${common.hash}.st.css`]: common.content,
             },

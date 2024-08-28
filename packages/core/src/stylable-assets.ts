@@ -39,7 +39,7 @@ export function makeAbsolute(
     },
     resourcePath: string,
     rootContext: string,
-    moduleContext: string
+    moduleContext: string,
 ) {
     const isAbs = host.isAbsolute(resourcePath);
     let abs: string;
@@ -67,13 +67,13 @@ export function fixRelativeUrls(ast: postcss.Root, originPath: string, targetPat
                     const url = path
                         .join(
                             path.relative(path.dirname(targetPath), path.dirname(originPath)),
-                            node.url
+                            node.url,
                         )
                         .replace(/\\/gm, '/');
                     node.url = assureRelativeUrlPrefix(url);
                 }
             },
-            true
+            true,
         );
     });
 }

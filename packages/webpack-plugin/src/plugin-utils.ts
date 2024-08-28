@@ -28,7 +28,7 @@ import { ReExt } from './re-ext-plugin';
 export function* uniqueFilterMap<T, O = T>(
     iter: Iterable<T>,
     map = (item: T): O => item as unknown as O,
-    filter = (item: O): item is NonNullable<O> => item !== undefined && item !== null
+    filter = (item: O): item is NonNullable<O> => item !== undefined && item !== null,
 ) {
     const s = new Set();
     for (const item of iter) {
@@ -53,7 +53,7 @@ export function isStylableModule(module: any): module is NormalModule {
 }
 export function isLoadedNativeCSSModule(
     module: any,
-    moduleGraph: ModuleGraph
+    moduleGraph: ModuleGraph,
 ): module is NormalModule {
     return module.resource?.endsWith('.css') && isStylableModule(moduleGraph.getIssuer(module));
 }
@@ -77,10 +77,10 @@ export function getStaticPublicPath(compilation: Compilation) {
 export function replaceCSSAssetPlaceholders(
     { css, urls }: BuildData,
     publicPath: string,
-    getAssetOutputPath: (resourcePath: string, publicPath: string) => string
+    getAssetOutputPath: (resourcePath: string, publicPath: string) => string,
 ) {
     return css.replace(/__stylable_url_asset_(\d+?)__/g, (_match, index) =>
-        getAssetOutputPath(urls[Number(index)], publicPath)
+        getAssetOutputPath(urls[Number(index)], publicPath),
     );
 }
 
@@ -135,13 +135,13 @@ export function replaceMappedCSSAssetPlaceholders({
                 if (assetModule.buildInfo.dataUrl) {
                     // Investigate using the data map from getData currently there is an unknown in term from escaping keeping extractDataUrlFromAssetModuleSource
                     return extractDataUrlFromAssetModuleSource(
-                        assetModuleSource.source().toString()
+                        assetModuleSource.source().toString(),
                     );
                 }
 
                 return publicPath + assetModule.buildInfo.filename;
             }
-        }
+        },
     );
 }
 
@@ -179,7 +179,7 @@ type AssetNormalModule = NormalModule & { loaders: [{ loader: 'file-loader' | 'u
 export function isLoadedWithKnownAssetLoader(module: Module): module is AssetNormalModule {
     if ('loaders' in module) {
         return (module as import('webpack').NormalModule).loaders.some(({ loader }) =>
-            /[\\/](file-loader)|(url-loader)[\\/]/.test(loader)
+            /[\\/](file-loader)|(url-loader)[\\/]/.test(loader),
         );
     }
     return false;
@@ -188,7 +188,7 @@ export function isLoadedWithKnownAssetLoader(module: Module): module is AssetNor
 export function outputOptionsAwareHashContent(
     createHash: WebpackCreateHash,
     outputOptions: WebpackOutputOptions,
-    content: string
+    content: string,
 ) {
     const hash = createHash(outputOptions.hashFunction || 'md4');
     if (outputOptions.hashSalt) {
@@ -268,7 +268,7 @@ export function staticCSSWith(
     moduleGraph: ModuleGraph,
     runtime: string,
     runtimeTemplate: RuntimeTemplate,
-    dependencyTemplates: DependencyTemplates
+    dependencyTemplates: DependencyTemplates,
 ) {
     return (stylableModules: Map<Module, BuildData | null>) =>
         createStaticCSS(
@@ -279,7 +279,7 @@ export function staticCSSWith(
             moduleGraph,
             runtime,
             runtimeTemplate,
-            dependencyTemplates
+            dependencyTemplates,
         );
 }
 
@@ -291,7 +291,7 @@ export function createStaticCSS(
     moduleGraph: ModuleGraph,
     runtime: string,
     runtimeTemplate: RuntimeTemplate,
-    dependencyTemplates: DependencyTemplates
+    dependencyTemplates: DependencyTemplates,
 ) {
     const cssChunks = Array.from(stylableModules.keys())
         .filter((m) => getStylableBuildMeta(m).isUsed !== false)
@@ -330,7 +330,7 @@ export function getStylableBuildMeta(module: Module): StylableBuildMeta {
 
 export function getStylableBuildData(
     stylableModules: Map<Module, BuildData | null>,
-    module: Module
+    module: Module,
 ): BuildData {
     const data = stylableModules.get(module);
     if (!data) {
@@ -342,14 +342,14 @@ export function getStylableBuildData(
 export function findIfStylableModuleUsed(
     m: Module,
     compilation: Compilation,
-    UnusedDependency: typeof dependencies.HarmonyImportDependency
+    UnusedDependency: typeof dependencies.HarmonyImportDependency,
 ) {
     const moduleGraph = compilation.moduleGraph;
     const chunkGraph = compilation.chunkGraph;
     const inConnections = uniqueFilterMap(
         moduleGraph.getIncomingConnections(m),
         ({ resolvedOriginModule, dependency }) =>
-            dependency instanceof UnusedDependency ? undefined : resolvedOriginModule
+            dependency instanceof UnusedDependency ? undefined : resolvedOriginModule,
     );
 
     // TODO: check if we can optimize by checking if a module contained in at least one chunk.
@@ -415,7 +415,7 @@ export function getSortedModules(stylableModules: Map<NormalModule, BuildData | 
 export function reportNamespaceCollision(
     namespaceToFileMapping: Map<string, Set<NormalModule>>,
     compilation: Compilation,
-    mode: 'ignore' | 'warnings' | 'errors'
+    mode: 'ignore' | 'warnings' | 'errors',
 ) {
     if (mode === 'ignore') {
         return;
@@ -428,8 +428,8 @@ export function reportNamespaceCollision(
 
             const error = new compilation.compiler.webpack.WebpackError(
                 `Duplicate namespace ${JSON.stringify(
-                    namespace
-                )} found in multiple different resources:\n${resourcesReport}\nThis issue indicates multiple versions of the same library in the compilation, or different paths importing the same stylesheet like: "esm" or "cjs".`
+                    namespace,
+                )} found in multiple different resources:\n${resourcesReport}\nThis issue indicates multiple versions of the same library in the compilation, or different paths importing the same stylesheet like: "esm" or "cjs".`,
             );
             error.hideStack = true;
             compilation[mode].push(error);
@@ -449,7 +449,7 @@ export function normalizeNamespaceCollisionOption(opt?: boolean | 'warn') {
 
 function getModuleRequestPath(
     module: NormalModule,
-    { requestShortener, moduleGraph }: Compilation
+    { requestShortener, moduleGraph }: Compilation,
 ) {
     const visited = new Set<Module>();
     const path = [];
@@ -475,7 +475,7 @@ export interface OptimizationMapping {
 
 export function createOptimizationMapping(
     sortedModules: NormalModule[],
-    optimizer: IStylableOptimizer
+    optimizer: IStylableOptimizer,
 ): OptimizationMapping {
     return sortedModules.reduce<OptimizationMapping>(
         (acc, module) => {
@@ -500,7 +500,7 @@ export function createOptimizationMapping(
             usageMapping: {},
             namespaceMapping: {},
             potentialNamespaceCollision: new Map<string, Set<NormalModule>>(),
-        }
+        },
     );
 }
 
@@ -519,7 +519,7 @@ export function createCalcDepthContext(moduleGraph: ModuleGraph): CalcDepthConte
         getImporters: (module) =>
             uniqueFilterMap(
                 moduleGraph.getIncomingConnections(module),
-                ({ originModule }) => originModule
+                ({ originModule }) => originModule,
             ),
         getModulePathNoExt: (module) => {
             if (isStylableModule(module)) {
@@ -541,13 +541,13 @@ export function getCSSViewModuleWebpack(moduleGraph: ModuleGraph) {
  */
 export function provideStylableModules(
     compilation: Compilation,
-    stylableModules: Map<NormalModule, BuildData | null>
+    stylableModules: Map<NormalModule, BuildData | null>,
 ) {
     (compilation as any)[Symbol.for('stylableModules')] = stylableModules;
 }
 
 export function getStylableModules(
-    compilation: Compilation
+    compilation: Compilation,
 ): Map<NormalModule, BuildData | null> | undefined {
     return (compilation as any)[Symbol.for('stylableModules')];
 }
@@ -563,12 +563,12 @@ export function emitCSSFile(
     cssSource: string,
     filenameTemplate: string,
     createHash: WebpackCreateHash,
-    chunk?: Chunk
+    chunk?: Chunk,
 ) {
     const contentHash = outputOptionsAwareHashContent(
         createHash,
         compilation.runtimeTemplate.outputOptions,
-        cssSource
+        cssSource,
     );
 
     const filename = getFileName(filenameTemplate, {
@@ -579,7 +579,7 @@ export function emitCSSFile(
 
     compilation.emitAsset(
         filename,
-        new compilation.compiler.webpack.sources.RawSource(cssSource, false)
+        new compilation.compiler.webpack.sources.RawSource(cssSource, false),
     );
 
     return filename;
@@ -588,7 +588,7 @@ export function emitCSSFile(
 export function getEntryPointModules(
     entryPoint: EntryPoint,
     chunkGraph: ChunkGraph,
-    onModule: (module: Module) => void
+    onModule: (module: Module) => void,
 ) {
     for (const chunk of entryPoint.getEntrypointChunk().getAllReferencedChunks()) {
         for (const module of chunkGraph.getChunkModulesIterable(chunk)) {

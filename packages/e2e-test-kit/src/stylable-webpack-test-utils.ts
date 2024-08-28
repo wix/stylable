@@ -15,7 +15,7 @@ export interface MinimalStylableModule extends MinimalModule {
 
 export function findModule(modules: MinimalModule[], contextPath: string) {
     return modules.find(
-        (module) => module.type === 'stylable' && normalizeModuleResource(module) === contextPath
+        (module) => module.type === 'stylable' && normalizeModuleResource(module) === contextPath,
     );
 }
 
@@ -34,7 +34,7 @@ export function evalAssetModule(assetModule: MinimalModule, publicPath = ''): an
 
 export function evalStylableModule(
     stylableModule: MinimalStylableModule,
-    requireFunction: (id: string) => any
+    requireFunction: (id: string) => any,
 ) {
     const code = (stylableModule as any)._cachedSource.source();
     // const assets = stylableModule.dependencies.filter(
@@ -55,7 +55,7 @@ export function evalStylableModule(
         }
         if (!requireFunction) {
             throw new Error(
-                `evalStylableModule("${id}"): requireFunction missing in test with javascript files or assets`
+                `evalStylableModule("${id}"): requireFunction missing in test with javascript files or assets`,
             );
         }
         return requireFunction(id);

@@ -5,7 +5,7 @@ export function matchRuleAndDeclaration(
     selectorIndex: number,
     selector: string,
     decl: string,
-    msg?: string
+    msg?: string,
 ) {
     if (!parent.nodes) {
         throw new Error(`${msg ? msg + ' ' : ''}expected nested nodes`);
@@ -15,7 +15,7 @@ export function matchRuleAndDeclaration(
         throw new Error(
             `${msg ? msg + ' ' : ''}selector ${selectorIndex}\nactual: ${
                 rule.selector
-            }\nexpected: ${selector}`
+            }\nexpected: ${selector}`,
         );
     }
     // expect(rule.selector, `${msg ? msg + ' ' : ''}selector ${selectorIndex}`).to.equal(selector);
@@ -24,7 +24,7 @@ export function matchRuleAndDeclaration(
         throw new Error(
             `${
                 msg ? msg + ' ' : ''
-            }selector ${selectorIndex} declaration\nactual: ${actualDecl}\nexpected: ${decl}`
+            }selector ${selectorIndex} declaration\nactual: ${actualDecl}\nexpected: ${decl}`,
         );
     }
 }
@@ -33,7 +33,7 @@ export function matchAllRulesAndDeclarations(
     parent: postcss.Container,
     all: string[][],
     msg?: string,
-    offset = 0
+    offset = 0,
 ) {
     all.forEach((_, i) => matchRuleAndDeclaration(parent, i + offset, _[0], _[1], msg));
 }

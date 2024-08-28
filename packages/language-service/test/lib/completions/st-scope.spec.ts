@@ -28,20 +28,20 @@ describe('completion inside @st-scope', () => {
                 it('Local variables should be completed, with prefix ' + prefix + ' ', () => {
                     const asserter = asserters.getCompletions(
                         'st-scope/inside-value-local-vars.st.css',
-                        prefix
+                        prefix,
                     );
                     asserter.suggested([
                         asserters.valueCompletion(
                             str1,
                             createRange(9, 31, 9, 31 + i),
                             'red',
-                            'Local variable'
+                            'Local variable',
                         ),
                         asserters.valueCompletion(
                             str2,
                             createRange(9, 31, 9, 31 + i),
                             'blue',
-                            'Local variable'
+                            'Local variable',
                         ),
                     ]);
                 });
@@ -100,7 +100,7 @@ describe('completion inside @st-scope', () => {
                     const exp: Array<Partial<Completion>> = [];
                     exp.push(asserters.globalCompletion(rng));
                     asserter.notSuggested(exp);
-                }
+                },
             );
         });
     });

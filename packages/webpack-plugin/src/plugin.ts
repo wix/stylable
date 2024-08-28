@@ -165,7 +165,7 @@ const defaultOptimizations = (isProd: boolean): Required<OptimizeOptions> => ({
 
 const defaultOptions = (
     userOptions: StylableWebpackPluginOptions,
-    isProd: boolean
+    isProd: boolean,
 ): Required<StylableWebpackPluginOptions> => ({
     filename: userOptions.filename ?? 'stylable.css',
     cssInjection: userOptions.cssInjection ?? (isProd ? 'css' : 'js'),
@@ -197,7 +197,7 @@ export class StylableWebpackPlugin {
 
     constructor(
         private userOptions: StylableWebpackPluginOptions = {},
-        private injectConfigHooks = true
+        private injectConfigHooks = true,
     ) {}
     apply(compiler: Compiler) {
         /**
@@ -232,7 +232,7 @@ export class StylableWebpackPlugin {
                     ...(compiler.modifiedFiles ?? []),
                     ...(compiler.removedFiles ?? []),
                 ]);
-            }
+            },
         );
 
         compiler.hooks.thisCompilation.tap(StylableWebpackPlugin.name, (compilation) => {
@@ -257,7 +257,7 @@ export class StylableWebpackPlugin {
                         emitWarning: (w) => logger.warn(w),
                     },
                     this.options.diagnosticsMode,
-                    true
+                    true,
                 );
             }
         });
@@ -282,7 +282,7 @@ export class StylableWebpackPlugin {
                     compiler.webpack,
                     compilation,
                     stylableModules,
-                    assetsModules
+                    assetsModules,
                 );
 
                 /**
@@ -294,7 +294,7 @@ export class StylableWebpackPlugin {
                     staticPublicPath,
                     stylableModules,
                     assetsModules,
-                    this.options.experimentalAttachCssToContainingChunks
+                    this.options.experimentalAttachCssToContainingChunks,
                 );
 
                 /**
@@ -305,9 +305,9 @@ export class StylableWebpackPlugin {
                     normalModuleFactory,
                     staticPublicPath,
                     stylableModules,
-                    assetsModules
+                    assetsModules,
                 );
-            }
+            },
         );
     }
     private processOptions(compiler: Compiler) {
@@ -326,7 +326,7 @@ export class StylableWebpackPlugin {
         const configuration = resolveStcConfig(
             compiler.context,
             getTopLevelInputFilesystem(compiler),
-            typeof this.options.stcConfig === 'string' ? this.options.stcConfig : undefined
+            typeof this.options.stcConfig === 'string' ? this.options.stcConfig : undefined,
         );
 
         return configuration;
@@ -396,15 +396,15 @@ export class StylableWebpackPlugin {
                      */
                     ...stylableConfig?.defaultConfig,
                 },
-                compiler
-            )
+                compiler,
+            ),
         );
     }
     private modulesIntegration(
         webpack: Compiler['webpack'],
         compilation: Compilation,
         stylableModules: Map<NormalModule, BuildData | null>,
-        assetsModules: Map<string, NormalModule>
+        assetsModules: Map<string, NormalModule>,
     ) {
         const { moduleGraph } = compilation;
 
@@ -440,7 +440,7 @@ export class StylableWebpackPlugin {
                          */
                         for (const resolvedAbsPath of stylableBuildMeta.unusedImports) {
                             module.addDependency(
-                                new this.entities.UnusedDependency(resolvedAbsPath, 0)
+                                new this.entities.UnusedDependency(resolvedAbsPath, 0),
                             );
                         }
 
@@ -450,7 +450,7 @@ export class StylableWebpackPlugin {
                         if (this.options.assetsMode === 'url') {
                             for (const resourcePath of stylableBuildMeta.urls) {
                                 module.addDependency(
-                                    new this.entities.CSSURLDependency(resourcePath)
+                                    new this.entities.CSSURLDependency(resourcePath),
                                 );
                             }
                         }
@@ -458,7 +458,7 @@ export class StylableWebpackPlugin {
                          * This dependency is responsible for injecting the runtime to the main chunk and each module
                          */
                         module.addDependency(
-                            new this.entities.StylableRuntimeDependency(stylableBuildMeta)
+                            new this.entities.StylableRuntimeDependency(stylableBuildMeta),
                         );
 
                         /**
@@ -489,13 +489,13 @@ export class StylableWebpackPlugin {
                                     sourceFilePath,
                                     loaderContext,
                                     this.options.diagnosticsMode,
-                                    true
+                                    true,
                                 );
                             }
                         }
                     };
                 }
-            }
+            },
         );
 
         /**
@@ -559,7 +559,7 @@ export class StylableWebpackPlugin {
                 stylableBuildMeta.isUsed = findIfStylableModuleUsed(
                     module,
                     compilation,
-                    this.entities.UnusedDependency
+                    this.entities.UnusedDependency,
                 );
                 /** legacy flow */
 
@@ -586,7 +586,7 @@ export class StylableWebpackPlugin {
             const sortedModules = sortModulesByDepth(
                 Array.from(stylableModules.keys()),
                 (m) => getStylableBuildMeta(m).depth,
-                (m) => m.resource
+                (m) => m.resource,
             );
 
             const { usageMapping, namespaceMapping, potentialNamespaceCollision } =
@@ -596,8 +596,8 @@ export class StylableWebpackPlugin {
                 potentialNamespaceCollision,
                 compilation,
                 normalizeNamespaceCollisionOption(
-                    this.options.unsafeMuteDiagnostics.DUPLICATE_MODULE_NAMESPACE
-                )
+                    this.options.unsafeMuteDiagnostics.DUPLICATE_MODULE_NAMESPACE,
+                ),
             );
 
             for (const module of sortedModules) {
@@ -614,7 +614,7 @@ export class StylableWebpackPlugin {
                             ast,
                             usageMapping,
                             buildData.exports,
-                            globals
+                            globals,
                         );
 
                         cssOutput = ast.toString();
@@ -640,7 +640,7 @@ export class StylableWebpackPlugin {
         staticPublicPath: string,
         stylableModules: Map<NormalModule, BuildData | null>,
         assetsModules: Map<string, NormalModule>,
-        experimentalAttachCssToContainingChunks: boolean
+        experimentalAttachCssToContainingChunks: boolean,
     ) {
         /**
          * As a work around unknown behavior
@@ -655,7 +655,7 @@ export class StylableWebpackPlugin {
                     compilation.moduleGraph,
                     'CSS' /*runtime*/,
                     compilation.runtimeTemplate,
-                    compilation.dependencyTemplates
+                    compilation.dependencyTemplates,
                 );
 
                 if (this.options.extractMode === 'entries') {
@@ -695,11 +695,11 @@ export class StylableWebpackPlugin {
                                         createStaticCSS(modules).join('\n'),
                                         this.options.filename,
                                         webpack.util.createHash,
-                                        entryChunk
-                                    )
+                                        entryChunk,
+                                    ),
                                 );
                             }
-                        }
+                        },
                     );
                 } else if (this.options.extractMode === 'single') {
                     compilation.hooks.processAssets.tap(
@@ -718,7 +718,7 @@ export class StylableWebpackPlugin {
                                 cssSource,
                                 this.options.filename,
                                 webpack.util.createHash,
-                                chunk
+                                chunk,
                             );
 
                             if (!experimentalAttachCssToContainingChunks) {
@@ -738,7 +738,7 @@ export class StylableWebpackPlugin {
                                     }
                                 }
                             }
-                        }
+                        },
                     );
                 }
             } else if (this.options.cssInjection === 'mini-css') {
@@ -747,7 +747,7 @@ export class StylableWebpackPlugin {
                     compilation,
                     staticPublicPath,
                     stylableModules,
-                    assetsModules
+                    assetsModules,
                 );
             }
         }
@@ -757,7 +757,7 @@ export class StylableWebpackPlugin {
         normalModuleFactory: NormalModuleFactory,
         staticPublicPath: string,
         stylableModules: Map<NormalModule, BuildData | null>,
-        assetsModules: Map<string, NormalModule>
+        assetsModules: Map<string, NormalModule>,
     ) {
         const {
             StylableRuntimeDependency,
@@ -776,8 +776,8 @@ export class StylableWebpackPlugin {
                 assetsModules,
                 this.options.runtimeStylesheetId,
                 this.options.runtimeId,
-                this.options.cssInjection
-            )
+                this.options.cssInjection,
+            ),
         );
         dependencyFactories.set(CSSURLDependency, normalModuleFactory);
         dependencyTemplates.set(CSSURLDependency, new NoopTemplate());
@@ -795,7 +795,7 @@ function isWebpackConfigProcessor(config: any): config is {
     webpackPlugin: (
         options: Required<StylableWebpackPluginOptions>,
         compiler: Compiler,
-        fs: unknown
+        fs: unknown,
     ) => Required<StylableWebpackPluginOptions>;
 } {
     return typeof config === 'object' && typeof config.webpackPlugin === 'function';

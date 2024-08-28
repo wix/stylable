@@ -24,7 +24,7 @@ describe('Custom Selectors', () => {
                     const rng = createRange(10, 0, 10, 0 + i);
                     const asserter = asserters.getCompletions(
                         'custom-selectors/local-selector.st.css',
-                        prefix
+                        prefix,
                     );
                     const exp: Array<Partial<Completion>> = [];
                     const notExp: Array<Partial<Completion>> = [];
@@ -42,7 +42,7 @@ describe('Custom Selectors', () => {
                     const rng = createRange(10, 11, 10, 11 + i);
                     const asserter = asserters.getCompletions(
                         'custom-selectors/local-selector-complex.st.css',
-                        prefix
+                        prefix,
                     );
                     const exp: Array<Partial<Completion>> = [];
                     const notExp: Array<Partial<Completion>> = [];
@@ -69,7 +69,7 @@ describe('Custom Selectors', () => {
                         const rng = createRange(16, 8, 16, 8 + i);
                         const asserter = asserters.getCompletions(
                             'custom-selectors/local-selector-inner-2.st.css',
-                            prefix
+                            prefix,
                         );
                         const exp: Array<Partial<Completion>> = [];
                         const notExp: Array<Partial<Completion>> = [];
@@ -81,7 +81,7 @@ describe('Custom Selectors', () => {
                         }
                         asserter.suggested(exp);
                         asserter.notSuggested(notExp);
-                    }
+                    },
                 );
             });
         });
@@ -97,7 +97,7 @@ describe('Custom Selectors', () => {
                         const rng = createRange(16, 8, 16, 8 + i);
                         const asserter = asserters.getCompletions(
                             'custom-selectors/local-selector-inner.st.css',
-                            prefix
+                            prefix,
                         );
                         const exp: Array<Partial<Completion>> = [];
                         const notExp: Array<Partial<Completion>> = [];
@@ -109,7 +109,7 @@ describe('Custom Selectors', () => {
                         }
                         asserter.suggested(exp);
                         asserter.notSuggested(notExp);
-                    }
+                    },
                 );
             });
         });
@@ -131,7 +131,7 @@ describe('Custom Selectors', () => {
                     const rng = createRange(10, 8, 10, 8 + i);
                     const asserter = asserters.getCompletions(
                         'pseudo-elements/custom-selector-local.st.css',
-                        prefix
+                        prefix,
                     );
                     const exp: Array<Partial<Completion>> = [];
                     const notExp: Array<Partial<Completion>> = [];
@@ -157,7 +157,7 @@ describe('Custom Selectors', () => {
                     const rng = createRange(10, 8, 10, 8 + i);
                     const asserter = asserters.getCompletions(
                         'pseudo-elements/custom-selector-local.st.css',
-                        prefix
+                        prefix,
                     );
                     const exp: Array<Partial<Completion>> = [];
                     const notExp: Array<Partial<Completion>> = [];
@@ -196,7 +196,7 @@ describe('Custom Selectors', () => {
                         const rng = createRange(9, 5, 9, 5 + i);
                         const asserter = asserters.getCompletions(
                             'custom-selectors/imported-selector-extended.st.css',
-                            prefix
+                            prefix,
                         );
                         const exp: Array<Partial<Completion>> = [];
                         const notExp: Array<Partial<Completion>> = [];
@@ -208,7 +208,7 @@ describe('Custom Selectors', () => {
                         }
                         asserter.suggested(exp);
                         asserter.notSuggested(notExp);
-                    }
+                    },
                 );
 
                 it(
@@ -219,7 +219,7 @@ describe('Custom Selectors', () => {
                         const rng = createRange(9, 5, 9, 5 + i);
                         const asserter = asserters.getCompletions(
                             'custom-selectors/imported-selector-extended-on-root.st.css',
-                            prefix
+                            prefix,
                         );
                         const exp: Array<Partial<Completion>> = [];
                         const notExp: Array<Partial<Completion>> = [];
@@ -231,7 +231,7 @@ describe('Custom Selectors', () => {
                         }
                         asserter.suggested(exp);
                         asserter.notSuggested(notExp);
-                    }
+                    },
                 );
 
                 it(
@@ -242,7 +242,7 @@ describe('Custom Selectors', () => {
                         const rng = createRange(9, 4, 9, 4 + i);
                         const asserter = asserters.getCompletions(
                             'custom-selectors/imported-selector-as-tag.st.css',
-                            prefix
+                            prefix,
                         );
                         const exp: Array<Partial<Completion>> = [];
                         const notExp: Array<Partial<Completion>> = [];
@@ -254,7 +254,7 @@ describe('Custom Selectors', () => {
                         }
                         asserter.suggested(exp);
                         asserter.notSuggested(notExp);
-                    }
+                    },
                 );
             });
         });
@@ -269,7 +269,7 @@ describe('Custom Selectors', () => {
                     const rng = createRange(9, 12, 9, 12 + i);
                     const asserter = asserters.getCompletions(
                         'custom-selectors/imported-selector-inner.st.css',
-                        prefix
+                        prefix,
                     );
                     const exp: Array<Partial<Completion>> = [];
                     const notExp: Array<Partial<Completion>> = [];
@@ -287,7 +287,7 @@ describe('Custom Selectors', () => {
                     const rng = createRange(9, 12, 9, 12 + i);
                     const asserter = asserters.getCompletions(
                         'custom-selectors/imported-selector-on-root-inner.st.css',
-                        prefix
+                        prefix,
                     );
                     const exp: Array<Partial<Completion>> = [];
                     const notExp: Array<Partial<Completion>> = [];
@@ -308,7 +308,7 @@ describe('Custom Selectors', () => {
                         const rng = createRange(9, 12, 9, 12 + i);
                         const asserter = asserters.getCompletions(
                             'custom-selectors/imported-selector-grouped.st.css',
-                            prefix
+                            prefix,
                         );
                         const exp: Array<Partial<Completion>> = [];
                         const notExp: Array<Partial<Completion>> = [];
@@ -324,7 +324,7 @@ describe('Custom Selectors', () => {
                         }
 
                         asserter.suggested(exp);
-                    }
+                    },
                 );
             });
         });
@@ -339,7 +339,7 @@ describe('Custom Selectors', () => {
                     const rng = createRange(9, 12, 9, 12 + i);
                     const asserter = asserters.getCompletions(
                         'custom-selectors/imported-selector-inner.st.css',
-                        prefix
+                        prefix,
                     );
                     const exp: Array<Partial<Completion>> = [];
                     const notExp: Array<Partial<Completion>> = [];
@@ -359,7 +359,7 @@ describe('Custom Selectors', () => {
                         const rng = createRange(9, 12, 9, 12 + i);
                         const asserter = asserters.getCompletions(
                             'custom-selectors/imported-selector-on-root-inner.st.css',
-                            prefix
+                            prefix,
                         );
                         const exp: Array<Partial<Completion>> = [];
                         const notExp: Array<Partial<Completion>> = [];
@@ -371,7 +371,7 @@ describe('Custom Selectors', () => {
                         }
                         asserter.suggested(exp);
                         asserter.notSuggested(notExp);
-                    }
+                    },
                 );
 
                 it(
@@ -382,7 +382,7 @@ describe('Custom Selectors', () => {
                         const rng = createRange(9, 12, 9, 12 + i);
                         const asserter = asserters.getCompletions(
                             'custom-selectors/imported-selector-grouped.st.css',
-                            prefix
+                            prefix,
                         );
                         const exp: Array<Partial<Completion>> = [];
                         const notExp: Array<Partial<Completion>> = [];
@@ -398,7 +398,7 @@ describe('Custom Selectors', () => {
                         }
                         asserter.suggested(exp);
                         asserter.notSuggested(notExp);
-                    }
+                    },
                 );
             });
         });

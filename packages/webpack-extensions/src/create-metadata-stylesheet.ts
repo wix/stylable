@@ -8,7 +8,7 @@ export function createMetadataForStylesheet(
     content: string,
     resourcePath: string,
     exposeNamespaceMapping = true,
-    meta = stylable.fileProcessor.processContent(content, resourcePath)
+    meta = stylable.fileProcessor.processContent(content, resourcePath),
 ): Metadata {
     const usedMeta = collectDependenciesDeep(stylable, meta);
 
@@ -28,7 +28,7 @@ export function createMetadataForStylesheet(
 
 function createNamespaceMapping(
     usedMeta: Map<StylableMeta, ResolvedImport[]>,
-    hashes: Map<StylableMeta, string>
+    hashes: Map<StylableMeta, string>,
 ) {
     const namespaceMapping: Record<string, string> = {};
     for (const [meta] of usedMeta) {
@@ -39,7 +39,7 @@ function createNamespaceMapping(
 
 function rewriteImports(
     usedMeta: Map<StylableMeta, ResolvedImport[]>,
-    hashes: Map<StylableMeta, string>
+    hashes: Map<StylableMeta, string>,
 ) {
     const sourcesByHash: Record<string, string> = {};
     for (const [meta, resolvedImports] of usedMeta.entries()) {
@@ -53,21 +53,21 @@ function rewriteImports(
                         'Could not find source node for ' +
                             stImport.rule.toString() +
                             ' at ' +
-                            meta.source
+                            meta.source,
                     );
                 }
                 if (rawRule.type === 'rule') {
                     rawRule.nodes.forEach((decl) => {
                         if (decl.type === 'decl' && decl.prop === `-st-from`) {
                             decl.value = JSON.stringify(
-                                `/${ensureHash(resolved.meta, hashes)}.st.css`
+                                `/${ensureHash(resolved.meta, hashes)}.st.css`,
                             );
                         }
                     });
                 } else if (rawRule.type === 'atrule') {
                     rawRule.params = rawRule.params.replace(
                         stImport.request,
-                        `/${ensureHash(resolved.meta, hashes)}.st.css`
+                        `/${ensureHash(resolved.meta, hashes)}.st.css`,
                     );
                 } else {
                     throw new Error('Unknown import rule ' + rawRule.toString());
@@ -111,7 +111,7 @@ function createContentHashPerMeta(usedMeta: Iterable<StylableMeta>) {
 function collectDependenciesDeep(
     stylable: Stylable,
     meta: StylableMeta,
-    out = new Map<StylableMeta, ResolvedImport[]>()
+    out = new Map<StylableMeta, ResolvedImport[]>(),
 ) {
     if (out.has(meta)) {
         return out;

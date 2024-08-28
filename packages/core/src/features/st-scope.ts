@@ -30,7 +30,7 @@ export const hooks = createFeature<{ IMMUTABLE_SELECTOR: ImmutablePseudoClass }>
             {
                 isScoped: true,
                 originalNode: atRule,
-            }
+            },
         );
         context.meta.scopes.push(atRule);
     },
@@ -49,7 +49,7 @@ export const hooks = createFeature<{ IMMUTABLE_SELECTOR: ImmutablePseudoClass }>
                 atRule.params,
                 atRule,
                 undefined,
-                inferredSelectorMixin
+                inferredSelectorMixin,
             );
             // transform selector in params
             atRule.params = selector;
@@ -90,7 +90,7 @@ function flattenScope(atRule: postcss.AtRule) {
         atRule.walkRules((rule) => {
             rule.selector = scopeNestedSelector(
                 parseSelectorWithCache(scopeSelector),
-                parseSelectorWithCache(rule.selector)
+                parseSelectorWithCache(rule.selector),
             ).selector;
             (rule as SRule).stScopeSelector = atRule.params;
         });

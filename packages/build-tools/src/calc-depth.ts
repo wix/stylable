@@ -9,7 +9,7 @@ export function calcDepth<T>(
     module: T,
     context: CalcDepthContext<T>,
     path: T[] = [],
-    cache = new Map<T, number>()
+    cache = new Map<T, number>(),
 ): number {
     let cssDepth = 0;
     if (cache.has(module)) {
@@ -57,7 +57,7 @@ export function getCSSViewModule<T>(module: T, context: CalcDepthContext<T>) {
 
         if (parentViewsList.length > 1) {
             throw new Error(
-                `Stylable Component Conflict:\n${module} has multiple components entries [${parentViewsList}] `
+                `Stylable Component Conflict:\n${module} has multiple components entries [${parentViewsList}] `,
             );
         }
         return parentViewsList[0];

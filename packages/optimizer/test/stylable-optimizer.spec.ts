@@ -67,6 +67,8 @@ describe('StylableOptimizer', () => {
         };
         const { meta } = generateStylableResult({ entry: index, files });
         const output = new StylableOptimizer().minifyCSS(meta.targetAst!.toString());
-        expect(output).to.equal(`.${meta.namespace}__x{color:red}.${meta.namespace}__y{& .${meta.namespace}__z{color:green}}`);
+        expect(output).to.equal(
+            `.${meta.namespace}__x{color:red}.${meta.namespace}__y{& .${meta.namespace}__z{color:green}}`,
+        );
     }).timeout(25000);
 });

@@ -67,7 +67,7 @@ export default createRule({
                 }
 
                 const namedImports = node.specifiers.filter(
-                    (sp) => sp.type === AST_NODE_TYPES.ImportSpecifier
+                    (sp) => sp.type === AST_NODE_TYPES.ImportSpecifier,
                 );
 
                 namedImports.forEach(({ imported, local }) => {
@@ -147,7 +147,7 @@ function getStylableRequest(importStatement: esTree.ImportDeclaration) {
 function getMemberAccessor(
     // eslint-disable-next-line @typescript-eslint/no-redundant-type-constituents
     property: esTree.PrivateIdentifier | esTree.Expression,
-    isComputed: boolean
+    isComputed: boolean,
 ) {
     if (isIdentifier(property) && !isComputed) {
         return property.name;

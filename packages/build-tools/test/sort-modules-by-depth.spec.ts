@@ -11,7 +11,7 @@ describe('sort-modules-by-depth', () => {
                 { id: 'a1', depth: 1 },
             ],
             ({ depth }) => depth,
-            ({ id }) => id
+            ({ id }) => id,
         );
 
         expect(sorted).to.eql([
@@ -31,7 +31,7 @@ describe('sort-modules-by-depth', () => {
                 { id: 'a1', depth: 1 },
             ],
             ({ depth }) => depth,
-            ({ id }) => id
+            ({ id }) => id,
         );
 
         expect(sorted).to.eql([
@@ -51,7 +51,7 @@ describe('sort-modules-by-depth', () => {
                 { id: 'a0', depth: 0 },
             ],
             ({ depth }) => depth,
-            ({ id }) => id
+            ({ id }) => id,
         );
 
         expect(sorted).to.eql([
@@ -72,7 +72,7 @@ describe('sort-modules-by-depth', () => {
             ],
             ({ depth }) => depth,
             ({ id }) => id,
-            -1
+            -1,
         );
 
         expect(sorted).to.eql([

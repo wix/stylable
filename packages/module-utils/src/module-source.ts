@@ -14,7 +14,7 @@ export function generateModuleSource(
     depth: string,
     exportsArgument: string,
     afterModule: string,
-    renderableOnly = false
+    renderableOnly = false,
 ): string {
     const { exports, meta } = stylableResult;
     const localsExports = JSON.stringify(exports);
@@ -47,7 +47,7 @@ export function createModuleSource(
     depth: string | number = '-1',
     staticRequests: string[] = [],
     runtimeRequest = '@stylable/runtime',
-    afterModule: string[] = []
+    afterModule: string[] = [],
 ) {
     // TODO: calc depth for node as well
     depth = typeof depth === 'number' ? depth.toString() : depth;
@@ -80,7 +80,7 @@ export function createModuleSource(
                     `export { classes, keyframes, vars, stVars, cssStates, style, st, $depth, $id, $css };`,
                     ...afterModule,
                 ].join('\n'),
-                renderableOnly
+                renderableOnly,
             );
         }
         case 'cjs':
@@ -98,7 +98,7 @@ export function createModuleSource(
                 depth,
                 'module.exports',
                 afterModule.join('\n'),
-                renderableOnly
+                renderableOnly,
             );
     }
     throw new Error('Unknown module format ' + moduleFormat);

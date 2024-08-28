@@ -27,7 +27,6 @@ export class DTSKit {
             resolveNamespace(ns) {
                 return ns;
             },
-
         });
     }
 
@@ -61,7 +60,7 @@ export class DTSKit {
 
         if (syntacticDiagnostics.length) {
             throw new Error(
-                `Syntax error found: ${syntacticDiagnostics.map((e) => e.messageText).join(' ')}`
+                `Syntax error found: ${syntacticDiagnostics.map((e) => e.messageText).join(' ')}`,
             );
         }
 
@@ -97,13 +96,13 @@ export class DTSKit {
         fs.symlinkSync(
             join(__dirname, '../../../node_modules'),
             join(this.tmp.path, 'node_modules'),
-            'junction'
+            'junction',
         );
     }
 
     private genDTS(internalPath: string) {
         const results = this.stylable.transform(
-            this.stylable.analyze(this.sourcePath(internalPath))
+            this.stylable.analyze(this.sourcePath(internalPath)),
         );
         this.write(internalPath + '.d.ts', generateDTSContent(results));
     }

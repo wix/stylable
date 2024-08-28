@@ -54,13 +54,13 @@ export const diagnostics = {
     NO_VARS_DEF_IN_ST_SCOPE: createDiagnosticReporter(
         '07002',
         'error',
-        () => `cannot define ":vars" inside of "@st-scope"`
+        () => `cannot define ":vars" inside of "@st-scope"`,
     ),
     DEPRECATED_ST_FUNCTION_NAME: createDiagnosticReporter(
         '07003',
         'info',
         (name: string, alternativeName: string) =>
-            `"${name}" is deprecated, use "${alternativeName}"`
+            `"${name}" is deprecated, use "${alternativeName}"`,
     ),
     CYCLIC_VALUE: createDiagnosticReporter(
         '07004',
@@ -68,39 +68,39 @@ export const diagnostics = {
         (cyclicChain: string[]) =>
             `Cyclic value definition detected: "${cyclicChain
                 .map((s, i) => (i === cyclicChain.length - 1 ? '↻ ' : i === 0 ? '→ ' : '↪ ') + s)
-                .join('\n')}"`
+                .join('\n')}"`,
     ),
     MISSING_VAR_IN_VALUE: createDiagnosticReporter(
         '07005',
         'error',
-        () => `invalid value() with no var identifier`
+        () => `invalid value() with no var identifier`,
     ),
     COULD_NOT_RESOLVE_VALUE: createDiagnosticReporter(
         '07006',
         'error',
         (args?: string) =>
-            `cannot resolve value function${args ? ` using the arguments provided: "${args}"` : ''}`
+            `cannot resolve value function${args ? ` using the arguments provided: "${args}"` : ''}`,
     ),
     MULTI_ARGS_IN_VALUE: createDiagnosticReporter(
         '07007',
         'error',
-        (args: string) => `value function accepts only a single argument: "value(${args})"`
+        (args: string) => `value function accepts only a single argument: "value(${args})"`,
     ),
     CANNOT_USE_AS_VALUE: createDiagnosticReporter(
         '07008',
         'error',
-        (type: string, varName: string) => `${type} "${varName}" cannot be used as a variable`
+        (type: string, varName: string) => `${type} "${varName}" cannot be used as a variable`,
     ),
     CANNOT_USE_JS_AS_VALUE: createDiagnosticReporter(
         '07009',
         'error',
         (type: string, varName: string) =>
-            `JavaScript ${type} import "${varName}" cannot be used as a variable`
+            `JavaScript ${type} import "${varName}" cannot be used as a variable`,
     ),
     UNKNOWN_VAR: createDiagnosticReporter(
         '07010',
         'error',
-        (name: string) => `unknown var "${name}"`
+        (name: string) => `unknown var "${name}"`,
     ),
 };
 
@@ -187,7 +187,7 @@ export class StylablePublicApi {
         const topLevelDiagnostics = new Diagnostics();
         const getResolvedSymbols = createSymbolResolverWithCache(
             this.stylable.resolver,
-            topLevelDiagnostics
+            topLevelDiagnostics,
         );
         const evaluator = new StylableEvaluator({ getResolvedSymbols });
 
@@ -208,7 +208,7 @@ export class StylablePublicApi {
                     meta: resolvedVar.meta,
                     value: stripQuotation(resolvedVar.symbol.text),
                     node: resolvedVar.symbol.node,
-                }
+                },
             );
 
             const computedStVar: ComputedStVar = {
@@ -257,8 +257,8 @@ export class StylablePublicApi {
                     ...this.flatSingle(
                         typeof innerInput === 'string' ? boxString(innerInput) : innerInput,
                         [...path, key],
-                        source
-                    )
+                        source,
+                    ),
                 );
             }
         }
@@ -328,18 +328,18 @@ function warnOnDeprecatedCustomValues(context: FeatureContext, decl: postcss.Dec
                     {
                         node: decl,
                         word: node.name,
-                    }
+                    },
                 );
             }
         },
-        false
+        false,
     );
 }
 
 function evaluateValueCall(
     context: FeatureTransformContext,
     parsedNode: ParsedValue,
-    data: EvalValueData
+    data: EvalValueData,
 ): void {
     const { stVarOverride, value, node } = data;
     const passedThrough = context.passedThrough || [];
@@ -384,7 +384,7 @@ function evaluateValueCall(
                     meta: resolvedVar.meta,
                     rootArgument: varName,
                     initialNode: node,
-                }
+                },
             );
             // report errors
             if (node) {
@@ -416,7 +416,7 @@ function evaluateValueCall(
                         {
                             node,
                             word: varName,
-                        }
+                        },
                     );
                 }
             } else if (type) {
@@ -453,7 +453,7 @@ function evaluateValueCall(
 
 export function resolveReferencedVarNames(
     context: Pick<FeatureTransformContext, 'meta' | 'resolver'>,
-    initialName: string
+    initialName: string,
 ) {
     const refNames = new Set<string>();
     const varsToCheck: { meta: StylableMeta; name: string }[] = [
@@ -473,7 +473,7 @@ export function resolveReferencedVarNames(
                         varsToCheck.push({
                             meta,
                             name: refName,
-                        })
+                        }),
                     );
                     break;
                 case 'import': {
@@ -493,7 +493,7 @@ function reportUnsupportedSymbolInValue(
     context: FeatureTransformContext,
     name: string,
     resolve: CSSResolve,
-    node: postcss.Node | undefined
+    node: postcss.Node | undefined,
 ) {
     const symbol = resolve.symbol;
     const errorKind = symbol._kind === 'class' && symbol[`-st-root`] ? 'stylesheet' : symbol._kind;
@@ -511,7 +511,7 @@ function handleCyclicValues(
     refUniqID: string,
     node: postcss.Node | undefined,
     value: string,
-    parsedNode: ParsedValue
+    parsedNode: ParsedValue,
 ) {
     if (node) {
         const cyclicChain = passedThrough.map((variable) => variable || '');

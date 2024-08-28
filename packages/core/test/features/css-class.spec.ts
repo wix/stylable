@@ -32,18 +32,18 @@ describe(`features/css-class`, () => {
         expect(CSSClass.get(autoResult.meta, `root`), `auto root symbol`).to.deep.contain(
             CSSClass.createSymbol({
                 name: 'root',
-            })
+            }),
         );
         expect(CSSClass.get(explicitResult.meta, `root`), `explicit root symbol`).to.deep.contain(
             CSSClass.createSymbol({
                 name: 'root',
-            })
+            }),
         );
 
         // JS exports
         expect(autoResult.exports.classes.root, `auto root JS export`).to.eql(`auto__root`);
         expect(explicitResult.exports.classes.root, `explicit root JS export`).to.eql(
-            `explicit__root`
+            `explicit__root`,
         );
     });
     it(`should process css class selectors`, () => {
@@ -235,7 +235,7 @@ describe(`features/css-class`, () => {
                         return namespace + `.`;
                     },
                 },
-            }
+            },
         );
 
         const { meta, exports } = sheets['/entry.st.css'];
@@ -246,7 +246,7 @@ describe(`features/css-class`, () => {
         expect(CSSClass.get(meta, `a\\.`), `symbol`).to.deep.contain(
             CSSClass.createSymbol({
                 name: 'a\\.',
-            })
+            }),
         );
 
         // JS exports - ToDo: remove escape from key
@@ -291,7 +291,7 @@ describe(`features/css-class`, () => {
                 @rule(functional class) .entry__a()
                 @analyze-error(functional class) ${classDiagnostics.INVALID_FUNCTIONAL_SELECTOR(
                     `.a`,
-                    `class`
+                    `class`,
                 )}
             */
             .a() {}
@@ -303,7 +303,7 @@ describe(`features/css-class`, () => {
         expect(CSSClass.get(meta, `a`), `symbol`).to.deep.contain(
             CSSClass.createSymbol({
                 name: 'a',
-            })
+            }),
         );
 
         // JS exports
@@ -389,7 +389,7 @@ describe(`features/css-class`, () => {
                 'deep.st.css',
                 '.root',
                 '.entry__root',
-                'entry.st.css'
+                'entry.st.css',
             )
                 .toString()
                 .replace('!important\n', '!important;\n')
@@ -416,7 +416,7 @@ describe(`features/css-class`, () => {
                 },
                 {
                     stylableConfig: { mode: 'development' },
-                }
+                },
             );
 
             const { meta } = sheets['/entry.st.css'];
@@ -441,7 +441,7 @@ describe(`features/css-class`, () => {
                 },
                 {
                     stylableConfig: { mode: 'development' },
-                }
+                },
             );
 
             const { meta } = sheets['/entry.st.css'];
@@ -453,7 +453,7 @@ describe(`features/css-class`, () => {
                 'x.st.css',
                 '.root',
                 '.entry__root',
-                'entry.st.css'
+                'entry.st.css',
             )
                 .toString()
                 .replace('!important\n', '!important;\n')
@@ -552,7 +552,7 @@ describe(`features/css-class`, () => {
             testStylableCore(`
                 .a {
                     /* @analyze-warn ${stCustomStateDiagnostics.NO_STATE_TYPE_GIVEN(
-                        'state-with-param'
+                        'state-with-param',
                     )} */
                     -st-states: state-with-param();
                 }
@@ -586,13 +586,13 @@ describe(`features/css-class`, () => {
                 CSSClass.createSymbol({
                     name: 'before',
                     alias: STImport.createImportSymbol(importDef, `named`, `before`, `/`),
-                })
+                }),
             );
             expect(CSSClass.get(meta, `after`), `after symbol`).to.eql(
                 CSSClass.createSymbol({
                     name: 'after',
                     alias: STImport.createImportSymbol(importDef, `named`, `after`, `/`),
-                })
+                }),
             );
             expect(CSSClass.get(meta, `unused`), `unused symbol`).to.eql(undefined);
         });
@@ -605,7 +605,7 @@ describe(`features/css-class`, () => {
                     /* 
                         @rule .entry__unknown
                         @transform-error(unresolved alias) word(unknown) ${classDiagnostics.UNKNOWN_IMPORT_ALIAS(
-                            `unknown`
+                            `unknown`,
                         )} 
                     */
                     .unknown {}
@@ -620,7 +620,7 @@ describe(`features/css-class`, () => {
                 CSSClass.createSymbol({
                     name: 'unknown',
                     alias: STImport.createImportSymbol(importDef, `named`, `unknown`, `/`),
-                })
+                }),
             );
         });
         it(`should resolve deep imported alias classes`, () => {
@@ -650,7 +650,7 @@ describe(`features/css-class`, () => {
                 CSSClass.createSymbol({
                     name: 'imported-part',
                     alias: STImport.createImportSymbol(importDef, `named`, `imported-part`, `/`),
-                })
+                }),
             );
         });
         it(`should not override root`, () => {
@@ -673,7 +673,7 @@ describe(`features/css-class`, () => {
                     name: 'root',
                     '-st-root': true,
                     alias: undefined,
-                })
+                }),
             );
             expect(STSymbol.get(meta, `root`), `general`).to.equal(CSSClass.get(meta, `root`));
         });
@@ -690,7 +690,7 @@ describe(`features/css-class`, () => {
                     @st-import [importedPart] from "./classes.st.css";
 
                     /* @analyze-warn word(importedPart) ${classDiagnostics.UNSCOPED_CLASS(
-                        `importedPart`
+                        `importedPart`,
                     )} */
                     .importedPart {}
 
@@ -812,10 +812,10 @@ describe(`features/css-class`, () => {
 
             // JS exports
             expect(exports.classes.root, `root compose JS export`).to.eql(
-                `entry__root classes__imported`
+                `entry__root classes__imported`,
             );
             expect(exports.classes.class, `class compose JS export`).to.eql(
-                `entry__class classes__imported`
+                `entry__class classes__imported`,
             );
         });
         it(`should handle -st-extends of imported root `, () => {
@@ -902,16 +902,16 @@ describe(`features/css-class`, () => {
 
             // JS exports
             expect(extended.exports.classes.root, `root extended`).to.eql(
-                `extended__root middle__importedExtend classes__imported`
+                `extended__root middle__importedExtend classes__imported`,
             );
             expect(extended.exports.classes.class, `class extended`).to.eql(
-                `extended__class middle__importedExtend classes__imported`
+                `extended__class middle__importedExtend classes__imported`,
             );
             expect(aliased.exports.classes.root, `root aliased`).to.eql(
-                `aliased__root classes__imported`
+                `aliased__root classes__imported`,
             );
             expect(aliased.exports.classes.class, `class aliased`).to.eql(
-                `aliased__class classes__imported`
+                `aliased__class classes__imported`,
             );
         });
         it(`should handle -st-extends of deep imported root`, () => {
@@ -960,10 +960,10 @@ describe(`features/css-class`, () => {
 
             // JS exports
             expect(extended.exports.classes.root, `root extended`).to.eql(
-                `extended__root middle__deepExtend`
+                `extended__root middle__deepExtend`,
             );
             expect(extended.exports.classes.class, `class extended`).to.eql(
-                `extended__class middle__deepExtend`
+                `extended__class middle__deepExtend`,
             );
             expect(aliased.exports.classes.root, `root aliased`).to.eql(`aliased__root`);
             expect(aliased.exports.classes.class, `class aliased`).to.eql(`aliased__class`);
@@ -987,7 +987,7 @@ describe(`features/css-class`, () => {
                     
                     .b {
                         /* @transform-error(unresolved named) word(unknown) ${classDiagnostics.CANNOT_EXTEND_UNKNOWN_SYMBOL(
-                            `unknown`
+                            `unknown`,
                         )} */
                         -st-extends: unknown;
                     }
@@ -1037,7 +1037,7 @@ describe(`features/css-class`, () => {
                 body {
                 }
                 html body {}
-            `)
+            `),
             );
         });
     });
@@ -1187,14 +1187,14 @@ describe(`features/css-class`, () => {
             shouldReportNoDiagnostics(meta);
 
             expect(nativeMeta.targetAst?.toString().trim(), 'no native transform').to.eql(
-                '.name {}'
+                '.name {}',
             );
 
             // symbols
             expect(CSSClass.get(meta, 'name'), 'imported symbol').to.deep.contain(
                 CSSClass.createSymbol({
                     name: 'name',
-                })
+                }),
             );
 
             // JS exports
@@ -1208,14 +1208,14 @@ describe(`features/css-class`, () => {
                 '/entry.st.css': `
                     /* @transform-error(no root) word(root) ${stImportDiagnostics.UNKNOWN_IMPORTED_SYMBOL(
                         `root`,
-                        `./native.css`
+                        `./native.css`,
                     )} */
                     @st-import [root as nativeRoot] from './native.css';
 
                     /*
                         @rule .entry__root .entry__nativeRoot
                         @transform-error(unresolved alias) word(nativeRoot) ${classDiagnostics.UNKNOWN_IMPORT_ALIAS(
-                            `nativeRoot`
+                            `nativeRoot`,
                         )}
                     */
                     .root .nativeRoot {}
@@ -1230,7 +1230,7 @@ describe(`features/css-class`, () => {
                 `,
                 '/entry.st.css': `
                     /* @transform-error(no export) word(Native) ${stImportDiagnostics.NO_DEFAULT_EXPORT(
-                        `./native.css`
+                        `./native.css`,
                     )} */
                     @st-import Native from './native.css';
 
@@ -1300,7 +1300,7 @@ describe(`features/css-class`, () => {
             expect(api.transformIntoSelector(meta, 'ext-x'), 'imported class').to.eql('.other__x');
             // expect(api.transformIntoSelector(meta, 'ext-y'), 'imported global class').to.eql('.y');
             expect(api.transformIntoSelector(meta, 'ext-z'), 'imported mapped class').to.eql(
-                '[attr=z]'
+                '[attr=z]',
             );
         });
         it(`should not modify globals when transforming external selector`, () => {

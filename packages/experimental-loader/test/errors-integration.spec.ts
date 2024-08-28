@@ -10,7 +10,7 @@ const parseImportDiagnostics = diagnosticBankReportToStrings(parseImportMessages
 
 const project = 'errors-integration';
 const projectDir = dirname(
-    require.resolve(`@stylable/experimental-loader/test/projects/${project}/webpack.config`)
+    require.resolve(`@stylable/experimental-loader/test/projects/${project}/webpack.config`),
 );
 
 describe(`(${project})`, () => {
@@ -24,7 +24,7 @@ describe(`(${project})`, () => {
         },
         before,
         afterEach,
-        after
+        after,
     );
 
     it('emit errors and warnings from loader', () => {

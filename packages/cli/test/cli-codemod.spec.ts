@@ -88,7 +88,7 @@ describe('Stylable Cli Code Mods', () => {
 
         expect(dirContent['style.st.css']).equal(`.root{}`);
         expect(stdout, 'Summery contains the skipped file prefixed with "−"').to.match(
-            /Summery:\n\[CodeMod\] − .*?style\.st\.css/
+            /Summery:\n\[CodeMod\] − .*?style\.st\.css/,
         );
     });
 

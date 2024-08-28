@@ -88,11 +88,11 @@ export function buildSingleFile({
 
     let content: string = tryRun(
         () => fs.readFileSync(filePath, 'utf8'),
-        `Read File Error: ${filePath}`
+        `Read File Error: ${filePath}`,
     );
     const res = tryRun(
         () => stylable.transform(stylable.analyze(filePath)),
-        errorMessages.STYLABLE_PROCESS(filePath)
+        errorMessages.STYLABLE_PROCESS(filePath),
     );
 
     const optimizer = new StylableOptimizer();
@@ -105,7 +105,7 @@ export function buildSingleFile({
                 removeUnusedComponents: false,
             },
             res,
-            {}
+            {},
         );
     }
 
@@ -129,7 +129,7 @@ export function buildSingleFile({
         if (useNamespaceReference && !content.includes('st-namespace-reference')) {
             const relativePathToSource = relative(dirname(targetFilePath), filePath).replace(
                 /\\/gm,
-                '/'
+                '/',
             );
             const srcNamespaceAnnotation = `\n/* st-namespace-reference="${relativePathToSource}" */`;
             content += srcNamespaceAnnotation;
@@ -138,14 +138,14 @@ export function buildSingleFile({
         outputLogs.push(`.st.css source`);
         tryRun(
             () => fs.writeFileSync(targetFilePath, content),
-            `Write File Error: ${targetFilePath}`
+            `Write File Error: ${targetFilePath}`,
         );
     }
     // st.css.js
     const ast = includeCSSInJS
         ? tryRun(
               () => inlineAssetsForJsModule(res, stylable, fs),
-              `Inline assets failed for: ${filePath}`
+              `Inline assets failed for: ${filePath}`,
           )
         : res.meta.targetAst!;
 
@@ -174,7 +174,7 @@ export function buildSingleFile({
                       id: res.meta.namespace,
                       runtimeId: format,
                   }
-                : undefined
+                : undefined,
         );
         const outFilePath = targetFilePath + ext;
         generated.add(outFilePath);
@@ -190,7 +190,7 @@ export function buildSingleFile({
         outputLogs.push('transpiled css');
         tryRun(
             () => fs.writeFileSync(cssAssetOutPath, cssCode),
-            `Write File Error: ${cssAssetOutPath}`
+            `Write File Error: ${cssAssetOutPath}`,
         );
     }
     // .d.ts
@@ -289,7 +289,7 @@ export function buildDTS({
     outputLogs.push('output .d.ts');
     tryRun(
         () => mkdirSync?.(dirname(dtsPath), { recursive: true }),
-        `Ensure directory: ${dirname(dtsPath)}`
+        `Ensure directory: ${dirname(dtsPath)}`,
     );
     tryRun(() => writeFileSync(dtsPath, dtsContent), `Write File Error: ${dtsPath}`);
 
@@ -298,7 +298,7 @@ export function buildDTS({
     if (dtsSourceMap !== false) {
         const relativeTargetFilePath = relative(
             dirname(targetFilePath),
-            sourceFilePath || targetFilePath
+            sourceFilePath || targetFilePath,
         );
 
         const dtsMappingContent = generateDTSSourceMap(
@@ -307,7 +307,7 @@ export function buildDTS({
             // `relativeTargetFilePath` could be an absolute path in windows (e.g. unc path)
             isAbsolute(relativeTargetFilePath)
                 ? relativeTargetFilePath
-                : relativeTargetFilePath.replace(/\\/g, '/')
+                : relativeTargetFilePath.replace(/\\/g, '/'),
         );
 
         const dtsMapPath = targetFilePath + '.d.ts.map';
@@ -317,7 +317,7 @@ export function buildDTS({
 
         tryRun(
             () => writeFileSync(dtsMapPath, dtsMappingContent),
-            `Write File Error: ${dtsMapPath}`
+            `Write File Error: ${dtsMapPath}`,
         );
     }
 }

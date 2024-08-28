@@ -118,7 +118,7 @@ export function stylableRollupPlugin({
                 configFromFile = resolveStcConfig(
                     stConfig.projectRoot,
                     fs,
-                    typeof stcConfig === 'string' ? stcConfig : undefined
+                    typeof stcConfig === 'string' ? stcConfig : undefined,
                 );
 
                 stylable = new Stylable({
@@ -150,7 +150,7 @@ export function stylableRollupPlugin({
                             emitWarning: (e) => this.warn(e),
                             emitError: (e) => this.error(e),
                         },
-                        diagnosticsMode
+                        diagnosticsMode,
                     );
                 }
             }
@@ -164,7 +164,7 @@ export function stylableRollupPlugin({
                         emitWarning: (e) => this.warn(e),
                         emitError: (e) => this.error(e),
                     },
-                    diagnosticsMode
+                    diagnosticsMode,
                 );
             }
         },
@@ -210,7 +210,7 @@ export function stylableRollupPlugin({
                     try {
                         resolved = stylable.resolver.resolvePath(
                             imported.context,
-                            imported.request
+                            imported.request,
                         );
                     } catch {
                         // fallback to request
@@ -244,7 +244,7 @@ export function stylableRollupPlugin({
                         emitError: (e: Error) => this.error(e),
                     },
                     meta,
-                    diagnosticsMode
+                    diagnosticsMode,
                 );
             }
 
@@ -289,7 +289,7 @@ export function stylableRollupPlugin({
                 modules,
                 (m) => m.depth,
                 (m) => m.path,
-                PRINT_ORDER
+                PRINT_ORDER,
             );
 
             outputCSS = '';

@@ -16,7 +16,7 @@ export type TransformCustomSelectorReport = UnknownReport | CircularReport;
 
 export function transformInlineCustomSelectorMap(
     customSelectors: CustomSelectorMap,
-    report: (data: TransformCustomSelectorReport) => void
+    report: (data: TransformCustomSelectorReport) => void,
 ) {
     const result: CustomSelectorMap = {};
     const link = (name: string, path: string[]) => {
@@ -38,7 +38,7 @@ export function transformInlineCustomSelectorMap(
                 }
                 return result[nestedName];
             },
-            ({ type, unknown }) => report({ type, origin: name, unknown })
+            ({ type, unknown }) => report({ type, origin: name, unknown }),
         );
     };
     for (const name of Object.keys(customSelectors)) {
@@ -61,7 +61,7 @@ function isCustomSelectorNode(node: SelectorNode): node is PseudoClass {
 export function transformInlineCustomSelectors(
     inputSelectors: SelectorList,
     getCustomSelector: (name: string) => SelectorList | undefined,
-    report: (data: UnknownReport) => void
+    report: (data: UnknownReport) => void,
 ): SelectorList {
     const result: SelectorList = [];
     for (const selector of inputSelectors) {
@@ -73,7 +73,7 @@ export function transformInlineCustomSelectors(
 function transformInlineCustomSelector(
     inputSelector: Selector,
     getCustomSelector: (name: string) => SelectorList | undefined,
-    report: (data: UnknownReport) => void
+    report: (data: UnknownReport) => void,
 ): SelectorList {
     const insertions: InsertionIter[] = [];
     // get insertion points

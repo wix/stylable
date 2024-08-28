@@ -14,7 +14,7 @@ describe('jest process', () => {
 
         const module = nodeEval(
             transformer.process(content, filename).code,
-            filename
+            filename,
         ) as RuntimeStylesheet;
 
         expect(module.classes.root).to.equal(`${module.namespace}__root`);
@@ -30,7 +30,7 @@ describe('jest process', () => {
 
         const module = nodeEval(
             transformer.process(content, filename).code,
-            filename
+            filename,
         ) as RuntimeStylesheet;
 
         expect(module.classes.root).to.equal(`test-custom__root`);
@@ -39,7 +39,7 @@ describe('jest process', () => {
 
     it('should resolve default config from stylable.config.js and use the provided resolver', () => {
         const filename = require.resolve(
-            '@stylable/jest/test/fixtures/default-config/index.st.css'
+            '@stylable/jest/test/fixtures/default-config/index.st.css',
         );
         const content = fs.readFileSync(filename, 'utf8');
         const transformer = stylableTransformer.createTransformer({
@@ -49,7 +49,7 @@ describe('jest process', () => {
 
         const module = nodeEval(
             transformer.process(content, filename).code,
-            filename
+            filename,
         ) as RuntimeStylesheet;
 
         expect(module.classes.root).to.equal(`index-custom__root wp-a-custom__test`);
@@ -57,7 +57,7 @@ describe('jest process', () => {
 
     it('should use inline resolver over default config one', () => {
         const filename = require.resolve(
-            '@stylable/jest/test/fixtures/default-config/index.st.css'
+            '@stylable/jest/test/fixtures/default-config/index.st.css',
         );
         const content = fs.readFileSync(filename, 'utf8');
         const transformer = stylableTransformer.createTransformer({
@@ -75,7 +75,7 @@ describe('jest process', () => {
 
         const module = nodeEval(
             transformer.process(content, filename).code,
-            filename
+            filename,
         ) as RuntimeStylesheet;
 
         expect(module.classes.root).to.equal(`index-custom__root wp-b-custom__test`);
@@ -83,7 +83,7 @@ describe('jest process', () => {
 
     it('should emit diagnostics when not able to load stylable config file', () => {
         const filename = require.resolve(
-            '@stylable/jest/test/fixtures/default-config/index.st.css'
+            '@stylable/jest/test/fixtures/default-config/index.st.css',
         );
         const content = fs.readFileSync(filename, 'utf8');
         let foundError = false;

@@ -126,7 +126,7 @@ describe(`features/st-var`, () => {
             }
 
             /* @analyze-error(complex selector) ${stVarDiagnostics.FORBIDDEN_DEF_IN_COMPLEX_SELECTOR(
-                `:vars`
+                `:vars`,
             )} */
             .root:vars {}
         `);
@@ -210,7 +210,7 @@ describe(`features/st-var`, () => {
                     @decl(non var symbol) prop: value(part)
                     @transform-error(non var symbol) word(part) ${stVarDiagnostics.CANNOT_USE_AS_VALUE(
                         'class',
-                        `part`
+                        `part`,
                     )} 
                 */
                 prop: value(part);
@@ -218,7 +218,7 @@ describe(`features/st-var`, () => {
                 /* 
                     @decl(unknown 2nd arg) prop: green
                     @transform-error(unknown 2nd arg) ${stVarDiagnostics.MULTI_ARGS_IN_VALUE(
-                        'varA, invalidSecondArgument'
+                        'varA, invalidSecondArgument',
                     )} 
                 */
                 prop: value(varA, invalidSecondArgument);
@@ -228,14 +228,14 @@ describe(`features/st-var`, () => {
         // checks reports words that contain parenthesis (inline test cannot)
         expect(
             meta.transformDiagnostics!.reports[0],
-            `missing var diagnostic word 1`
+            `missing var diagnostic word 1`,
         ).to.deep.contain({
             message: stVarDiagnostics.MISSING_VAR_IN_VALUE(),
             word: `value()`,
         });
         expect(
             meta.transformDiagnostics!.reports[1],
-            `missing var diagnostic word 2`
+            `missing var diagnostic word 2`,
         ).to.deep.contain({
             message: stVarDiagnostics.MISSING_VAR_IN_VALUE(),
             word: `value(, path)`,
@@ -611,10 +611,10 @@ describe(`features/st-var`, () => {
                     /* 
                     @decl(success despite internal path error) prop: deep-value
                     @transform-error(index un-required path) ${stVarDiagnostics.MULTI_ARGS_IN_VALUE(
-                        'arr-key, no-path'
+                        'arr-key, no-path',
                     )} 
                     @transform-error(key un-required path) ${stVarDiagnostics.MULTI_ARGS_IN_VALUE(
-                        'map-key, no-path'
+                        'map-key, no-path',
                     )} 
                     */
                     prop: value(mixed, value(arr-key, no-path), value(map-key, no-path));
@@ -633,12 +633,12 @@ describe(`features/st-var`, () => {
                 }
                 .root {
                     /* @transform-error(1st level) ${stVarDiagnostics.COULD_NOT_RESOLVE_VALUE(
-                        `myVar, unknown`
+                        `myVar, unknown`,
                     )}*/
                     prop: value(myVar, unknown);
 
                     /* @transform-error(2nd level) ${stVarDiagnostics.COULD_NOT_RESOLVE_VALUE(
-                        `myVar, key2, unknown`
+                        `myVar, key2, unknown`,
                     )}*/
                     prop: value(myVar, key2, unknown);
                 }
@@ -647,7 +647,7 @@ describe(`features/st-var`, () => {
             // check valid multiple arguments to value()
             expect(
                 sheets['/entry.st.css'].meta.transformDiagnostics!.reports.length,
-                `only access reports`
+                `only access reports`,
             ).to.eql(2);
         });
         it(`should report deprecated forms`, () => {
@@ -655,19 +655,19 @@ describe(`features/st-var`, () => {
                 :vars {
                     /* @analyze-info(stMap) word(stMap) ${stVarDiagnostics.DEPRECATED_ST_FUNCTION_NAME(
                         `stMap`,
-                        `st-map`
+                        `st-map`,
                     )}*/
                     varA: stMap(a 1);
                     
                     /* @analyze-info(stArray) word(stArray) ${stVarDiagnostics.DEPRECATED_ST_FUNCTION_NAME(
                         `stArray`,
-                        `st-array`
+                        `st-array`,
                     )}*/
                     varA: stArray(a, b);
                     
                     /* @analyze-info(nested) word(stMap) ${stVarDiagnostics.DEPRECATED_ST_FUNCTION_NAME(
                         `stMap`,
-                        `st-map`
+                        `st-map`,
                     )}*/
                     varA: stArray(
                         a,
@@ -684,7 +684,7 @@ describe(`features/st-var`, () => {
                 :vars {
                     /* @transform-error ${
                         stVarDiagnostics.COULD_NOT_RESOLVE_VALUE(
-                            `keyWithoutValue`
+                            `keyWithoutValue`,
                         ) /** TODO - add custom diagnostic for this case */
                     }*/
                     keyWithoutValueMap: stMap(keyWithoutValue);
@@ -714,7 +714,7 @@ describe(`features/st-var`, () => {
                     path,
                     typeExtension.evalVarAst(valueAst, stTypes),
                     valueAst,
-                    stTypes
+                    stTypes,
                 );
                 const dataStructureExpect = expect(dataStructure, `${label} data structure`);
                 deepIncludeTest
@@ -890,7 +890,7 @@ describe(`features/st-var`, () => {
                             @decl(imported sheet) prop: value(Sheet)
                             @transform-error(imported sheet) word(Sheet) ${stVarDiagnostics.CANNOT_USE_AS_VALUE(
                                 `stylesheet`,
-                                `Sheet`
+                                `Sheet`,
                             )} 
                         */
                         prop: value(Sheet);
@@ -899,7 +899,7 @@ describe(`features/st-var`, () => {
                             @decl(imported-class) prop: value(imported-class)
                             @transform-error(imported-class) word(imported-class) ${stVarDiagnostics.CANNOT_USE_AS_VALUE(
                                 `class`,
-                                `imported-class`
+                                `imported-class`,
                             )} 
                         */
                         prop: value(imported-class);
@@ -907,7 +907,7 @@ describe(`features/st-var`, () => {
                         /* 
                             @decl(unknown) prop: value(unknown)
                             @transform-error(unknown) word(unknown) ${stVarDiagnostics.UNKNOWN_VAR(
-                                `unknown`
+                                `unknown`,
                             )} 
                         */
                         prop: value(unknown);
@@ -916,7 +916,7 @@ describe(`features/st-var`, () => {
                             @decl(JS number) prop: value(jsNum)
                             @transform-error(JS number) word(jsNum) ${stVarDiagnostics.CANNOT_USE_JS_AS_VALUE(
                                 `number`,
-                                `jsNum`
+                                `jsNum`,
                             )} 
                         */
                         prop: value(jsNum);
@@ -925,7 +925,7 @@ describe(`features/st-var`, () => {
                             @decl(JS function) prop: value(jsFunc)
                             @transform-error(JS function) word(jsFunc) ${stVarDiagnostics.CANNOT_USE_JS_AS_VALUE(
                                 `function`,
-                                `jsFunc`
+                                `jsFunc`,
                             )} 
                         */
                         prop: value(jsFunc);
@@ -944,7 +944,7 @@ describe(`features/st-var`, () => {
                 '/entry.st.css': `
                     :vars {
                         /* @analyze-warn(local before) word(before) ${stSymbolDiagnostics.REDECLARE_SYMBOL(
-                            `before`
+                            `before`,
                         )} */
                         before: local-before-val;
                     }
@@ -955,17 +955,17 @@ describe(`features/st-var`, () => {
 
                     /*
                     @analyze-warn(import before) word(before) ${stSymbolDiagnostics.REDECLARE_SYMBOL(
-                        `before`
+                        `before`,
                     )}
                     @analyze-warn(import after) word(after) ${stSymbolDiagnostics.REDECLARE_SYMBOL(
-                        `after`
+                        `after`,
                     )}
                     */
                     @st-import [before, after] from './vars.st.css';
 
                     :vars {
                         /* @analyze-warn(local after) word(after) ${stSymbolDiagnostics.REDECLARE_SYMBOL(
-                            `after`
+                            `after`,
                         )} */
                         after: local-after-val;
                     }
@@ -1204,7 +1204,7 @@ describe(`features/st-var`, () => {
                             },
                         },
                     },
-                }
+                },
             );
 
             const { meta, exports } = sheets['/entry.st.css'];
@@ -1243,7 +1243,7 @@ describe(`features/st-var`, () => {
                             },
                         },
                     },
-                }
+                },
             );
         });
         it(`should override value() passed to mixin"`, () => {
@@ -1304,7 +1304,7 @@ describe(`features/st-var`, () => {
                             },
                         },
                     },
-                }
+                },
             );
         });
     });
@@ -1668,7 +1668,7 @@ describe(`features/st-var`, () => {
                         invalid: invalid-func(imported);
                         validAfter: green;
                     }
-                    `
+                    `,
                 );
 
                 const { meta } = sheets['/entry.st.css'];
@@ -1828,7 +1828,7 @@ describe(`features/st-var`, () => {
                         array: st-array(1px, 2px);
                     }
 
-                    `
+                    `,
                 );
 
                 const meta = sheets['/entry.st.css'].meta;
@@ -1861,7 +1861,7 @@ describe(`features/st-var`, () => {
                         map: st-map(first 1px,second 2px);
                     }
 
-                    `
+                    `,
                 );
 
                 const meta = sheets['/entry.st.css'].meta;
@@ -1948,7 +1948,7 @@ describe(`features/st-var`, () => {
                         );
                     }
 
-                    `
+                    `,
                 );
 
                 const meta = sheets['/entry.st.css'].meta;
@@ -1988,7 +1988,7 @@ describe(`features/st-var`, () => {
                         );
                     }
 
-                    `
+                    `,
                 );
 
                 const meta = sheets['/entry.st.css'].meta;

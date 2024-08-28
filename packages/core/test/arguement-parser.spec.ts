@@ -7,13 +7,13 @@ function test(
     src: string,
     expected: string[],
     allowComments = false,
-    expectedWarnings?: string[]
+    expectedWarnings?: string[],
 ) {
     it(desc, () => {
         const actualWarnings: string[] = [];
         const [firstNode] = postcssValueParser(src).nodes;
         const formatterArgs = getFormatterArgs(firstNode, allowComments, (diag) =>
-            actualWarnings.push(diag.message)
+            actualWarnings.push(diag.message),
         );
         expect(formatterArgs).to.eql(expected);
         if (expectedWarnings) {
@@ -28,19 +28,19 @@ describe('Value argument parsing (split by comma)', () => {
         test(
             'should process comma separated arguments with comments',
             'func(a /*with comment*/, b, c)',
-            ['a', 'b', 'c']
+            ['a', 'b', 'c'],
         );
         test(
             'should process comma separated arguments with comments (output comments)',
             'func(a /*with comment*/, b, c)',
             ['a /*with comment*/', 'b', 'c'],
-            true
+            true,
         );
 
         test(
             'should process comma separated arguments with spaces in the first value',
             'func(a 1 2 3, b, c)',
-            ['a 1 2 3', 'b', 'c']
+            ['a 1 2 3', 'b', 'c'],
         );
         test('should process a function with a single argument', 'func(a)', ['a']);
 
@@ -65,7 +65,7 @@ describe('Value argument parsing (split by comma)', () => {
         test(
             'should process only comments in args',
             'func(/*with comment*/  /*with comment*/, b, c)',
-            ['', 'b', 'c']
+            ['', 'b', 'c'],
         );
         test('should process a function with a empty argument', 'func(a,)', ['a']);
         test('should process a function with too many commas', 'func(a,,)', ['a']);
@@ -78,7 +78,7 @@ describe('Value argument parsing (split by comma)', () => {
             [
                 'func(a,/**/ /**/,): argument at index 1 is empty',
                 'func(a,/**/ /**/,): argument at index 2 is empty',
-            ]
+            ],
         );
     });
 });

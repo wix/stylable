@@ -27,7 +27,7 @@ export const diagnostics = {
     UNSUPPORTED_MULTI_SELECTOR_IN_GLOBAL: createDiagnosticReporter(
         '04001',
         'error',
-        () => `unsupported multi selector in :global()`
+        () => `unsupported multi selector in :global()`,
     ),
 };
 

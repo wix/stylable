@@ -39,7 +39,7 @@ describe('StylableRollupPlugin', function () {
 
         const outputFiles = runner.getOutputFiles();
         expect(outputFiles['index.st.css'], '"stc" watch has been triggered').to.eql(
-            '.root {color: green;}'
+            '.root {color: green;}',
         );
     });
 });

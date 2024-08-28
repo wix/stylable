@@ -6,7 +6,7 @@ export const levels = {
 
 export function createLogger(
     onLog: (level: 'info' | 'debug', ...messages: string[]) => void,
-    onClear: () => void
+    onClear: () => void,
 ) {
     return function log(...messages: any[]) {
         const clear = messages[messages.length - 1] === levels.clear;
@@ -30,6 +30,6 @@ export type Log = (...args: [...any[]]) => void;
 export function createDefaultLogger() {
     return createLogger(
         (level, ...messages) => level === 'info' && console.log(...messages),
-        console.clear
+        console.clear,
     );
 }

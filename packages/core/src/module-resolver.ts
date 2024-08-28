@@ -18,14 +18,15 @@ export function createDefaultResolver(options: IRequestResolverOptions): ModuleR
 
         if (resolvedFile === false) {
             throw new Error(
-                `Stylable does not support browser field 'false' values. ${request} resolved to 'false' from ${directoryPath}`
+                `Stylable does not support browser field 'false' values. ${request} resolved to 'false' from ${directoryPath}`,
             );
         }
         if (typeof resolvedFile !== 'string') {
             throw new Error(
                 `Stylable could not resolve ${JSON.stringify(request)} from ${JSON.stringify(
-                    directoryPath
-                )}` + (visitedPaths.size ? `\nVisited paths:\n${[...visitedPaths].join('\n')}` : '')
+                    directoryPath,
+                )}` +
+                    (visitedPaths.size ? `\nVisited paths:\n${[...visitedPaths].join('\n')}` : ''),
             );
         }
         return resolvedFile;

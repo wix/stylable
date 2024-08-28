@@ -19,7 +19,7 @@ describe('StylableOptimizer className optimizations', () => {
             { namespace: true },
             {},
             false,
-            true
+            true,
         );
         expect(exports, 'exports rewrite').to.eql({
             classname: 's0',
@@ -32,7 +32,7 @@ describe('StylableOptimizer className optimizations', () => {
     it('should not optimize state classes', () => {
         const optimizer = new StylableOptimizer();
         const ast = parse(
-            `.namespace__classname{} .namespace--state{} .namespace---otherState-5-value{} .namespace__thing{} .otherNamespace__imported{} .otherNamespace--state{}`
+            `.namespace__classname{} .namespace--state{} .namespace---otherState-5-value{} .namespace__thing{} .otherNamespace__imported{} .otherNamespace--state{}`,
         );
         const exports = {
             classname: 'namespace__classname',
@@ -50,7 +50,7 @@ describe('StylableOptimizer className optimizations', () => {
             },
             {},
             false,
-            true
+            true,
         );
         expect(exports, 'exports rewrite').to.eql({
             classname: 's0',
@@ -58,7 +58,7 @@ describe('StylableOptimizer className optimizations', () => {
             imported: 's2',
         });
         expect(ast.toString(), 'ast optimized').to.equal(
-            '.s0{} .namespace--state{} .namespace---otherState-5-value{} .s1{} .s2{} .otherNamespace--state{}'
+            '.s0{} .namespace--state{} .namespace---otherState-5-value{} .s1{} .s2{} .otherNamespace--state{}',
         );
     });
     it('should NOT optimize globals', () => {
@@ -78,7 +78,7 @@ describe('StylableOptimizer className optimizations', () => {
             { namespace: true },
             globals,
             false,
-            true
+            true,
         );
         expect(exports, 'exports rewrite').to.eql({
             aaa: 's0',
@@ -101,7 +101,7 @@ describe('StylableOptimizer shortNamespaces', () => {
         .namespace---otherState-5-value{} 
         .otherNamespace__imported{}
         .otherNamespace--state{}
-        `.trim()
+        `.trim(),
         );
         const exports = {
             classname: 'namespace__classname',
@@ -116,7 +116,7 @@ describe('StylableOptimizer shortNamespaces', () => {
             { namespace: true, otherNamespace: true },
             {},
             true,
-            false
+            false,
         );
         expect(exports, 'exports rewrite').to.eql({
             classname: 'o0__classname',
@@ -124,7 +124,7 @@ describe('StylableOptimizer shortNamespaces', () => {
             composed: 'o0__composed o0__classname',
         });
         expect(ast.toString().replace(/[\n\r\s]+/gm, ' '), 'ast optimized').to.equal(
-            `.o0__classname{} .o0__thing{} .o0__composed{} .o0--state{} .o0---otherState-5-value{} .o1__imported{} .o1--state{}`
+            `.o0__classname{} .o0__thing{} .o0__composed{} .o0--state{} .o0---otherState-5-value{} .o1__imported{} .o1--state{}`,
         );
     });
 });

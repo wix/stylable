@@ -18,9 +18,11 @@ async function main() {
     const rootDir = resolve(argv.rootDir);
     const explicitResolveNs =
         namespaceResolver &&
-        require(require.resolve(namespaceResolver, {
-            paths: [rootDir],
-        }));
+        require(
+            require.resolve(namespaceResolver, {
+                paths: [rootDir],
+            }),
+        );
 
     //
     const log = createLogger(
@@ -30,7 +32,7 @@ async function main() {
                 console.log('[Stylable]', `[${currentTime}]`, ...messages);
             }
         },
-        () => !shouldLog && !preserveWatchOutput && console.clear()
+        () => !shouldLog && !preserveWatchOutput && console.clear(),
     );
 
     // execute all require hooks before running the CLI build

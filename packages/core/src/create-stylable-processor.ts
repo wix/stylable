@@ -27,13 +27,13 @@ export function createStylableFileProcessor({
             return new StylableProcessor(
                 createDiagnostics?.(from),
                 resolveNamespace,
-                flags
+                flags,
             ).process(cssParser(content, { from }));
         },
         (resolvedPath: string) => {
             return fileSystem.readFileSync(resolvedPath, 'utf8');
         },
         onProcess && [onProcess],
-        cache
+        cache,
     );
 }

@@ -58,14 +58,14 @@ describe('StylableRollupPlugin - import native CSS', function () {
                 libColor: computedStyle.color,
                 customResolveColor: computedStyle.borderColor,
                 customResolveSideEffect: computedStyle.getPropertyValue(
-                    '--custom-resolved-side-effect'
+                    '--custom-resolved-side-effect',
                 ),
             };
         });
         expect(localSideEffect, 'local side effect').to.eql('from local side-effect');
         expect(libSideEffect, 'lib side effect').to.eql('from lib side-effect');
         expect(customResolveSideEffect, 'custom resolve side effect').to.eql(
-            'from custom resolved side-effect'
+            'from custom resolved side-effect',
         );
         expect(libClass, 'lib class').to.eql('from lib class');
         expect(localColor, 'local import prop').to.eql('rgb(0, 128, 0)');

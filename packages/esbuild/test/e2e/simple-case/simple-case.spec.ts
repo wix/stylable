@@ -50,7 +50,7 @@ describe('Stylable ESBuild plugin', () => {
             await open({}, 'index.html', true),
             stylesInOrder.map(({ path, namespace }) => ({ st_id: `${path}|${namespace}` })),
             `"class extending component '.root => .b__root' in stylesheet 'b.st.css' was set on a node that does not extend '.root => .deep__root' from stylesheet 'deep.st.css'"`,
-            'override-active'
+            'override-active',
         );
     });
 
@@ -63,7 +63,7 @@ describe('Stylable ESBuild plugin', () => {
         const css = read('dist-bundle/index.css');
 
         const matchOrder = new RegExp(
-            stylesInOrder.map(({ fileName }) => escapeRegExp(fileName)).join('[\\s\\S]*?')
+            stylesInOrder.map(({ fileName }) => escapeRegExp(fileName)).join('[\\s\\S]*?'),
         );
 
         expect(css).to.match(matchOrder);
@@ -82,7 +82,7 @@ describe('Stylable ESBuild plugin', () => {
         const css = read('dist-bundle/index.css');
 
         const matchOrder = new RegExp(
-            stylesInOrder.map(({ fileName }) => escapeRegExp(fileName)).join('[\\s\\S]*?')
+            stylesInOrder.map(({ fileName }) => escapeRegExp(fileName)).join('[\\s\\S]*?'),
         );
         expect(css).to.match(matchOrder);
     });
@@ -96,7 +96,7 @@ async function contract(
     { page, responses }: { page: Page; responses?: Array<Response> },
     stylesheets: Array<Record<string, string>>,
     devRuleMatch: string,
-    unusedComponent: string
+    unusedComponent: string,
 ) {
     const { unusedComponentValue, reset, sideEffects, simpleOrderOverride, styles, devRule } =
         await page.evaluate(() => {
@@ -111,14 +111,14 @@ async function contract(
                 sideEffects: getComputedStyle(document.body).getPropertyValue('--side-effects'),
                 reset: getComputedStyle(document.body).getPropertyValue('--reset'),
                 unusedComponentValue: getComputedStyle(
-                    document.querySelector('.deep__root')!
+                    document.querySelector('.deep__root')!,
                 ).getPropertyValue('--unused-deep'),
             };
         });
 
     const assetLoaded = Boolean(responses?.find((r) => r.url().match(/asset-.*?\.png$/)));
     const internalDirAsset = Boolean(
-        responses?.find((r) => r.url().match(/internal-dir-.*?\.png$/))
+        responses?.find((r) => r.url().match(/internal-dir-.*?\.png$/)),
     );
 
     expect(internalDirAsset, 'asset loaded from internal dir').to.eql(true);

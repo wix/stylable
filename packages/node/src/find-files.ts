@@ -9,7 +9,7 @@ export function findFiles(
     rootDirectory: string,
     ext: string,
     blacklist: Set<string>,
-    useRelative = false
+    useRelative = false,
 ) {
     const errors: Error[] = [];
     const result = new Set<string>();
@@ -27,7 +27,7 @@ export function findFiles(
                         folders.push(itemFullPath);
                     } else if (item.isFile() && itemFullPath.endsWith(ext)) {
                         result.add(
-                            useRelative ? relative(rootDirectory, itemFullPath) : itemFullPath
+                            useRelative ? relative(rootDirectory, itemFullPath) : itemFullPath,
                         );
                     }
                 } catch (e) {

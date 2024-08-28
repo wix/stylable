@@ -18,7 +18,7 @@ describe('Selector Parser', () => {
             expect((parsed[0] as SelectorInternalChunk).type).to.equal('div');
             expect((parsed[0] as SelectorInternalChunk).classes).to.eql(i === 0 ? [] : ['simple']);
             expect((parsed[0] as SelectorInternalChunk).states).to.eql(
-                i <= 1 ? [] : i === 2 ? ['withState'] : ['withState', 'andAnother']
+                i <= 1 ? [] : i === 2 ? ['withState'] : ['withState', 'andAnother'],
             );
         });
     });
@@ -36,10 +36,10 @@ describe('Selector Parser', () => {
             expect((parsed[0] as SelectorInternalChunk).customSelectors).to.eql([]);
             expect((parsed[0] as SelectorInternalChunk).type).to.equal('*');
             expect((parsed[0] as SelectorInternalChunk).classes).to.eql(
-                i <= 1 ? ['not-so'] : ['not-so', 'simple']
+                i <= 1 ? ['not-so'] : ['not-so', 'simple'],
             );
             expect((parsed[0] as SelectorInternalChunk).states).to.eql(
-                i <= 2 ? [] : i === 3 ? ['withState'] : ['withState', 'andAnother']
+                i <= 2 ? [] : i === 3 ? ['withState'] : ['withState', 'andAnother'],
             );
         });
     });
@@ -66,7 +66,7 @@ describe('Selector Parser', () => {
                     expect((parsed[1] as SelectorInternalChunk).type).to.equal('second');
                     expect((parsed[1] as SelectorInternalChunk).classes).to.eql([]);
                     expect((parsed[1] as SelectorInternalChunk).states).to.eql(
-                        i === 2 ? [] : ['someState']
+                        i === 2 ? [] : ['someState'],
                     );
                 }
                 if (i === 4) {
@@ -75,7 +75,7 @@ describe('Selector Parser', () => {
                     expect((parsed[2] as SelectorInternalChunk).classes).to.eql([]);
                     expect((parsed[2] as SelectorInternalChunk).states).to.eql([]);
                 }
-            }
+            },
         );
     });
 
@@ -97,7 +97,7 @@ describe('Selector Parser', () => {
                 expect((parsed[0] as SelectorInternalChunk).type).to.equal('*');
                 expect((parsed[0] as SelectorInternalChunk).classes).to.eql([]);
                 expect((parsed[0] as SelectorInternalChunk).states).to.eql(
-                    i === 1 ? [] : ['hover']
+                    i === 1 ? [] : ['hover'],
                 );
 
                 if (i >= 3) {
@@ -112,7 +112,7 @@ describe('Selector Parser', () => {
                     expect((parsed[2] as SelectorInternalChunk).classes).to.eql([]);
                     expect((parsed[2] as SelectorInternalChunk).states).to.eql([]);
                 }
-            }
+            },
         );
     });
 
@@ -138,7 +138,7 @@ describe('Selector Parser', () => {
         it('returns index of correct selector chunk', () => {
             const { selector, target } = parseSelector(
                 '.first::second:someState::third',
-                '.first::second:someState'.length
+                '.first::second:someState'.length,
             );
             expect(target.index).to.equal(1);
             expect((target.focusChunk as any[]).length).to.equal(2);
@@ -148,7 +148,7 @@ describe('Selector Parser', () => {
         it('returns internal location in selector chunk', () => {
             const { target } = parseSelector(
                 '.first::second:someState::third',
-                '.first::second:someState'.length
+                '.first::second:someState'.length,
             );
             expect(target.internalIndex).to.equal(1);
         });
@@ -156,7 +156,7 @@ describe('Selector Parser', () => {
         it('returns internal location in selector chunk II', () => {
             const { target } = parseSelector(
                 '.first::second:someState::third:otherState',
-                '.first::second:someState'.length
+                '.first::second:someState'.length,
             );
             expect(target.internalIndex).to.equal(1);
         });

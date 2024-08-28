@@ -23,7 +23,7 @@ describe('cssDocs extraction', () => {
             '/entry.st.css',
             '/',
             path,
-            mockNamespace
+            mockNamespace,
         );
 
         const expected: StylableModuleSchema = {
@@ -55,7 +55,7 @@ describe('cssDocs extraction', () => {
             '/entry.st.css',
             '/',
             path,
-            mockNamespace
+            mockNamespace,
         );
 
         const expected: StylableModuleSchema = {
@@ -92,7 +92,7 @@ describe('cssDocs extraction', () => {
             '/entry.st.css',
             '/',
             path,
-            mockNamespace
+            mockNamespace,
         );
 
         const expected: StylableModuleSchema = {

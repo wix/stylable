@@ -9,13 +9,13 @@ import { LangServiceContext } from '@stylable/language-service/dist/lib-new/lang
 function assertPresent(
     actualCompletions: Completion[],
     expectedCompletions: Array<Partial<Completion>>,
-    prefix = ''
+    prefix = '',
 ) {
     expectedCompletions.forEach((expected) => {
         const actual = actualCompletions.find((comp) => comp.label === expected.label);
         expect(
             actual,
-            'Completion not found: ' + expected.label + ' ' + 'with prefix ' + prefix + ' '
+            'Completion not found: ' + expected.label + ' ' + 'with prefix ' + prefix + ' ',
         ).to.not.be.equal(undefined);
         if (actual) {
             for (const field in expected) {
@@ -35,7 +35,7 @@ function assertPresent(
                         field +
                         ' with prefix ' +
                         prefix +
-                        ' '
+                        ' ',
                 ).to.eql(expectedVal);
             }
         }
@@ -45,7 +45,7 @@ function assertPresent(
 function assertNotPresent(
     actualCompletions: Completion[],
     nonCompletions: Array<Partial<Completion>>,
-    prefix = ''
+    prefix = '',
 ) {
     nonCompletions.forEach((notAllowed) => {
         const actual = actualCompletions.find(
@@ -55,11 +55,11 @@ function assertNotPresent(
                 comp.range.start.line === notAllowed.range.start.line &&
                 comp.range.start.character === notAllowed.range.start.character &&
                 comp.range.end.line === notAllowed.range.end.line &&
-                comp.range.end.character === notAllowed.range.end.character
+                comp.range.end.character === notAllowed.range.end.character,
         );
         expect(
             actual,
-            prefix + 'unallowed completion found: ' + notAllowed.label + ' '
+            prefix + 'unallowed completion found: ' + notAllowed.label + ' ',
         ).to.be.equal(undefined);
     });
 }
@@ -77,7 +77,7 @@ export function getCompletions(fileName: string, prefix = '') {
             stat,
             content: src.replace('|', prefix),
         },
-        offset
+        offset,
     );
 
     const completions = stylableLSP.provideCompletionItemsFromSrc(context);
@@ -106,7 +106,7 @@ export function getStylableAndCssCompletions(fileName: string) {
             stat,
             content: src.replace('|', ''),
         },
-        offset
+        offset,
     );
     return stylableLSP.getCompletions(context);
 }
@@ -114,7 +114,7 @@ export function getStylableAndCssCompletions(fileName: string) {
 // syntactic
 // at-rules
 export const customSelectorDirectiveCompletion: (rng: ProviderRange) => Partial<Completion> = (
-    rng
+    rng,
 ) => {
     return {
         label: '@custom-selector',
@@ -152,7 +152,7 @@ export const stImportDirectiveCompletion: (rng: ProviderRange) => Partial<Comple
     };
 };
 export const stGlobalCustomPropertyCompletion: (rng: ProviderRange) => Partial<Completion> = (
-    rng
+    rng,
 ) => {
     return {
         label: '@st-global-custom-property',
@@ -197,7 +197,7 @@ export const rootClassCompletion: (rng: ProviderRange) => Partial<Completion> = 
 
 // declarations
 export const importDefaultDirectiveCompletion: (rng: ProviderRange) => Partial<Completion> = (
-    rng
+    rng,
 ) => {
     return {
         label: '-st-default:',
@@ -217,7 +217,7 @@ export const importFromDirectiveCompletion: (rng: ProviderRange) => Partial<Comp
     };
 };
 export const importNamedDirectiveCompletion: (rng: ProviderRange) => Partial<Completion> = (
-    rng
+    rng,
 ) => {
     return {
         label: '-st-named:',
@@ -269,14 +269,14 @@ export const valueDirective: (rng: ProviderRange) => Partial<Completion> = (rng)
 export const classCompletion: (
     className: string,
     rng: ProviderRange,
-    isDefaultImport?: boolean
+    isDefaultImport?: boolean,
 ) => Partial<Completion> = (className, rng, isDefaultImport?) => {
     return { label: (isDefaultImport ? '' : '.') + className, sortText: 'a', range: rng };
 };
 export const extendsCompletion: (
     typeName: string,
     rng: ProviderRange,
-    from: string
+    from: string,
 ) => Partial<Completion> = (typeName, rng, from) => {
     return {
         label: typeName,
@@ -290,7 +290,7 @@ export const namedCompletion: (
     typeName: string,
     rng: ProviderRange,
     from: string,
-    value?: string
+    value?: string,
 ) => Partial<Completion> = (typeName, rng, from, value?) => {
     return {
         label: typeName,
@@ -303,21 +303,21 @@ export const namedCompletion: (
 export const cssMixinCompletion: (
     symbolName: string,
     rng: ProviderRange,
-    from: string
+    from: string,
 ) => Partial<Completion> = (symbolName, rng, from) => {
     return new Completion(symbolName, 'from: ' + from, 'a', symbolName, rng);
 };
 export const codeMixinCompletion: (
     symbolName: string,
     rng: ProviderRange,
-    from: string
+    from: string,
 ) => Partial<Completion> = (symbolName, rng, from) => {
     return new Completion(symbolName, 'from: ' + from, 'a', symbolName + '($1)', rng, false, true);
 };
 export const formatterCompletion: (
     symbolName: string,
     rng: ProviderRange,
-    from: string
+    from: string,
 ) => Partial<Completion> = (symbolName, rng, from) => {
     return new Completion(
         symbolName,
@@ -326,13 +326,13 @@ export const formatterCompletion: (
         new Snippet(symbolName + '($1)'),
         rng,
         false,
-        true
+        true,
     );
 };
 export const stateTypeDefinitionCompletion: (
     type: string,
     rng: ProviderRange,
-    from?: string
+    from?: string,
 ) => Partial<Completion> = (type, rng, from = 'Stylable pseudo-class types') => {
     return {
         label: `${type}()`,
@@ -346,12 +346,12 @@ export const stateValidatorDefinitionCompletion: (
     validator: string,
     rng: ProviderRange,
     type: string,
-    from?: string
+    from?: string,
 ) => Partial<Completion> = (
     validator,
     rng,
     type,
-    from = `Stylable pseudo-class ${type} validators`
+    from = `Stylable pseudo-class ${type} validators`,
 ) => {
     return {
         label: `${validator}()`,
@@ -365,7 +365,7 @@ export const stateSelectorCompletion: (
     stateName: string,
     rng: ProviderRange,
     from?: string,
-    hasParam?: boolean
+    hasParam?: boolean,
 ) => Partial<Completion> = (stateName, rng, from = 'Local file', hasParam = false) => {
     return {
         label: ':' + stateName + (hasParam ? '()' : ''),
@@ -379,7 +379,7 @@ export const stateSelectorCompletion: (
 export const stateEnumCompletion: (
     option: string,
     rng: ProviderRange,
-    from?: string
+    from?: string,
 ) => Partial<Completion> = (option, rng, from = 'Local file') => {
     return {
         label: option,
@@ -392,7 +392,7 @@ export const stateEnumCompletion: (
 export const pseudoElementCompletion: (
     elementName: string,
     rng: ProviderRange,
-    from?: string
+    from?: string,
 ) => Partial<Completion> = (elementName, rng, from?) => {
     return {
         label: '::' + elementName,
@@ -406,7 +406,7 @@ export const valueCompletion: (
     name: string,
     rng: ProviderRange,
     value: string,
-    from: string
+    from: string,
 ) => Partial<Completion> = (name, rng, value, from) => {
     return {
         label: name,

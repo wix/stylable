@@ -5,7 +5,7 @@ import type { CodeMod, ApplyCodeModsResult } from './types';
 export function applyCodeMods(
     filePath: string,
     css: string,
-    mods: Set<{ id: string; apply: CodeMod }>
+    mods: Set<{ id: string; apply: CodeMod }>,
 ): ApplyCodeModsResult {
     try {
         const reports = new Map<string, Diagnostic[]>();

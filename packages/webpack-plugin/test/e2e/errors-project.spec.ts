@@ -4,7 +4,7 @@ import { dirname } from 'path';
 
 const project = 'errors-project';
 const projectDir = dirname(
-    require.resolve(`@stylable/webpack-plugin/test/e2e/projects/${project}/webpack.config`)
+    require.resolve(`@stylable/webpack-plugin/test/e2e/projects/${project}/webpack.config`),
 );
 
 describe(`(${project})`, () => {
@@ -18,7 +18,7 @@ describe(`(${project})`, () => {
         },
         before,
         afterEach,
-        after
+        after,
     );
 
     it('emit stylable errors/warnings as webpack errors/warnings', () => {
@@ -28,7 +28,7 @@ describe(`(${project})`, () => {
         expect(errors[0]).to.match(/\[error: \d+\]: cannot extend unknown symbol "NotFound"/);
         expect(warnings, 'should only have one warnings').to.have.lengthOf(1);
         expect(warnings[0]).to.match(
-            /\[warning: \d+\]: unscoped type selector "NotFound" will affect all elements of the same type in the document/
+            /\[warning: \d+\]: unscoped type selector "NotFound" will affect all elements of the same type in the document/,
         );
     });
 });

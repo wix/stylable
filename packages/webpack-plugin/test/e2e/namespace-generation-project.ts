@@ -5,7 +5,7 @@ import { dirname } from 'path';
 
 const project = 'namespace-generation-project';
 const projectDir = dirname(
-    require.resolve(`@stylable/webpack-plugin/test/e2e/projects/${project}/webpack.config`)
+    require.resolve(`@stylable/webpack-plugin/test/e2e/projects/${project}/webpack.config`),
 );
 
 describe(`(${project})`, () => {
@@ -18,7 +18,7 @@ describe(`(${project})`, () => {
         },
         before,
         afterEach,
-        after
+        after,
     );
 
     it('generates persistent namespace', () => {
@@ -34,12 +34,12 @@ describe(`(${project})`, () => {
         const expectedLocalClassname =
             'index' +
             murmurhash3_32_gc(
-                localPackageName + '@' + localPackageVersion + '/' + 'src/index.st.css'
+                localPackageName + '@' + localPackageVersion + '/' + 'src/index.st.css',
             );
         const expectedImportedClassname =
             'index' +
             murmurhash3_32_gc(
-                externalPackageName + '@' + externalPackageVersion + '/' + 'index.st.css'
+                externalPackageName + '@' + externalPackageVersion + '/' + 'index.st.css',
             );
 
         const source: string = projectRunner.getBuildAsset('main.js');

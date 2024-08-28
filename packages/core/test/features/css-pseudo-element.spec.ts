@@ -300,7 +300,7 @@ describe('features/css-pseudo-element', () => {
         
                     /* 
                         @transform-error(exist in 1) word(onlyInA) ${transformerStringDiagnostics.UNKNOWN_PSEUDO_ELEMENT(
-                            `onlyInA`
+                            `onlyInA`,
                         )}
                         @rule(exist in 1) .entry__root .a__root::onlyInA,.entry__root .b__root::onlyInA 
                     */
@@ -330,7 +330,7 @@ describe('features/css-pseudo-element', () => {
                 */
                 .root:not(:--part) {}
             `,
-                { stylableConfig: { experimentalSelectorInference: false } }
+                { stylableConfig: { experimentalSelectorInference: false } },
             );
         });
     });

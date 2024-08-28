@@ -40,7 +40,10 @@ export class WatchHandler {
     private diagnosticsManager: DiagnosticsManager;
     private generatedFiles = new Set<string>();
 
-    constructor(private fileSystem: IFileSystem, private options: WatchHandlerOptions = {}) {
+    constructor(
+        private fileSystem: IFileSystem,
+        private options: WatchHandlerOptions = {},
+    ) {
         this.resolverCache = this.options.resolverCache ?? new Map();
         this.log = this.options.log ?? createDefaultLogger();
         this.diagnosticsManager =
@@ -105,7 +108,7 @@ export class WatchHandler {
                 this.log(
                     buildMessages.NO_DIAGNOSTICS(),
                     buildMessages.CONTINUE_WATCH(),
-                    levels.info
+                    levels.info,
                 );
             } else {
                 this.log(buildMessages.CONTINUE_WATCH(), levels.info);

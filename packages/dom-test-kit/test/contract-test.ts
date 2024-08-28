@@ -6,9 +6,9 @@ import { expect } from 'chai';
 export const contractTest =
     <T extends PartialElement>(
         StylableUtilClass: new (
-            host: StylesheetHost & { cssStates(states: Record<string, StateValue>): string }
+            host: StylesheetHost & { cssStates(states: Record<string, StateValue>): string },
         ) => any,
-        options: { scopeSelectorTest?: boolean; createElement: () => T }
+        options: { scopeSelectorTest?: boolean; createElement: () => T },
     ) =>
     () => {
         const namespace = 'ns';
@@ -34,12 +34,12 @@ export const contractTest =
             });
             it('scopeSelector Error("pseudo-element")', () => {
                 expect(() => util.scopeSelector('.x::y')).to.throw(
-                    'selector with pseudo-element is not supported yet.'
+                    'selector with pseudo-element is not supported yet.',
                 );
             });
             it('scopeSelector Error("type")', () => {
                 expect(() => util.scopeSelector('x')).to.throw(
-                    'selector with type is not supported yet.'
+                    'selector with type is not supported yet.',
                 );
             });
             it('scopeSelector handle local states', () => {
@@ -47,12 +47,12 @@ export const contractTest =
             });
             it('scopeSelector handles local state with a paramter', () => {
                 expect(util.scopeSelector('.x:loading(done)')).to.equal(
-                    `.ns__x.ns---loading-4-done`
+                    `.ns__x.ns---loading-4-done`,
                 );
             });
             it('scopeSelector handle class local states (multiple)', () => {
                 expect(util.scopeSelector('.x:loading:thinking')).to.equal(
-                    `.ns__x.ns--loading.ns--thinking`
+                    `.ns__x.ns--loading.ns--thinking`,
                 );
             });
         }

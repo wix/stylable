@@ -4,7 +4,10 @@ import { getFormatterArgs, getNamedArgs, getStringValue } from './helpers/value'
 import type { ParsedValue } from './types';
 
 export class CustomValueError extends Error {
-    constructor(message: string, public fallbackValue: string) {
+    constructor(
+        message: string,
+        public fallbackValue: string,
+    ) {
         super(message);
     }
 }
@@ -18,7 +21,7 @@ export interface Box<Type extends string, Value> {
 export function box<Type extends string, Value>(
     type: Type,
     value: Value,
-    flatValue?: string
+    flatValue?: string,
 ): Box<Type, Value> {
     return {
         type,
@@ -35,7 +38,7 @@ export function unbox<B extends Box<string, unknown>>(
     boxed: B | string,
     unboxPrimitives = true,
     customValues?: CustomTypes,
-    node?: ParsedValue
+    node?: ParsedValue,
 ): any {
     if (typeof boxed === 'string') {
         return unboxPrimitives ? boxed : boxString(boxed);
@@ -64,13 +67,13 @@ export interface CustomValueExtension<T> {
         customTypes: {
             [typeID: string]: CustomValueExtension<unknown>;
         },
-        boxPrimitive?: boolean
+        boxPrimitive?: boolean,
     ): Box<string, T>;
     getValue(
         path: string[],
         value: Box<string, T>,
         node: ParsedValue,
-        customTypes: CustomTypes
+        customTypes: CustomTypes,
     ): string;
 }
 
@@ -215,7 +218,7 @@ export function createCustomValue<Value, Args>({
                             flattenValue,
                             box(localTypeSymbol, value),
                             fnNode,
-                            customTypes
+                            customTypes,
                         );
                     }
 
@@ -225,7 +228,7 @@ export function createCustomValue<Value, Args>({
                     path: string[],
                     obj: Box<string, Value>,
                     fallbackNode: ParsedValue, // TODO: add test
-                    customTypes: CustomTypes
+                    customTypes: CustomTypes,
                 ): string {
                     if (path.length === 0) {
                         if (flattenValue) {
@@ -235,7 +238,7 @@ export function createCustomValue<Value, Args>({
 
                             throw new CustomValueError(
                                 `/* Error trying to flat -> */${stringifiedValue}`,
-                                stringifiedValue
+                                stringifiedValue,
                             );
                         }
                     }
@@ -251,7 +254,7 @@ function getFlatValue<Value>(
     flattenValue: FlattenValue<Value>,
     obj: Box<string, Value>,
     fallbackNode: ParsedValue,
-    customTypes: CustomTypes
+    customTypes: CustomTypes,
 ) {
     const { delimiter, parts } = flattenValue(obj);
     return parts.map((v) => getBoxValue([], v, fallbackNode, customTypes)).join(delimiter);
@@ -261,7 +264,7 @@ function getBoxValue(
     path: string[],
     value: string | Box<string, unknown>,
     node: ParsedValue,
-    customTypes: CustomTypes
+    customTypes: CustomTypes,
 ): string {
     if (typeof value === 'string' || value.type === 'st-string') {
         return unbox(value, true, customTypes);

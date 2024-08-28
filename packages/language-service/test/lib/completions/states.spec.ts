@@ -14,7 +14,7 @@ describe('States', () => {
                     asserters.stateTypeDefinitionCompletion(str, rng, path);
 
                 const asserter = asserters.getCompletions(
-                    'states/with-param/state-def-with-param-start.st.css'
+                    'states/with-param/state-def-with-param-start.st.css',
                 );
                 const exp: Array<Partial<Completion>> = [];
                 exp.push(createCompletion('string', rng));
@@ -30,7 +30,7 @@ describe('States', () => {
                         asserters.stateTypeDefinitionCompletion(str, rng, path);
 
                     const asserter = asserters.getCompletions(
-                        'states/with-param/string/state-def-with-param-string-start.st.css'
+                        'states/with-param/string/state-def-with-param-string-start.st.css',
                     );
                     const exp: Array<Partial<Completion>> = [];
                     const unExp: Array<Partial<Completion>> = [];
@@ -48,17 +48,17 @@ describe('States', () => {
                             validator: string,
                             rng: ProviderRange,
                             type: string,
-                            path?: string
+                            path?: string,
                         ) =>
                             asserters.stateValidatorDefinitionCompletion(
                                 validator,
                                 rng,
                                 type,
-                                path
+                                path,
                             );
 
                         const asserter = asserters.getCompletions(
-                            'states/with-param/string/local-state-string-validators.st.css'
+                            'states/with-param/string/local-state-string-validators.st.css',
                         );
                         const exp: Array<Partial<Completion>> = [];
                         exp.push(createCompletion('regex', rng, 'string'));
@@ -74,17 +74,17 @@ describe('States', () => {
                             validator: string,
                             rng: ProviderRange,
                             type: string,
-                            path?: string
+                            path?: string,
                         ) =>
                             asserters.stateValidatorDefinitionCompletion(
                                 validator,
                                 rng,
                                 type,
-                                path
+                                path,
                             );
 
                         const asserter = asserters.getCompletions(
-                            'states/with-param/string/state-def-with-param-string-regex-start.st.css'
+                            'states/with-param/string/state-def-with-param-string-regex-start.st.css',
                         );
                         const exp: Array<Partial<Completion>> = [];
                         const unExp: Array<Partial<Completion>> = [];
@@ -102,17 +102,17 @@ describe('States', () => {
                             validator: string,
                             rng: ProviderRange,
                             type: string,
-                            path?: string
+                            path?: string,
                         ) =>
                             asserters.stateValidatorDefinitionCompletion(
                                 validator,
                                 rng,
                                 type,
-                                path
+                                path,
                             );
 
                         const asserter = asserters.getCompletions(
-                            'states/with-param/string/state-def-with-param-string-contains-start.st.css'
+                            'states/with-param/string/state-def-with-param-string-contains-start.st.css',
                         );
                         const exp: Array<Partial<Completion>> = [];
                         const unExp: Array<Partial<Completion>> = [];
@@ -130,17 +130,17 @@ describe('States', () => {
                             validator: string,
                             rng: ProviderRange,
                             type: string,
-                            path?: string
+                            path?: string,
                         ) =>
                             asserters.stateValidatorDefinitionCompletion(
                                 validator,
                                 rng,
                                 type,
-                                path
+                                path,
                             );
 
                         const asserter = asserters.getCompletions(
-                            'states/with-param/string/state-def-with-param-string-m-start.st.css'
+                            'states/with-param/string/state-def-with-param-string-m-start.st.css',
                         );
                         const exp: Array<Partial<Completion>> = [];
                         const unExp: Array<Partial<Completion>> = [];
@@ -160,7 +160,7 @@ describe('States', () => {
                         asserters.stateTypeDefinitionCompletion(str, rng, path);
 
                     const asserter = asserters.getCompletions(
-                        'states/with-param/number/state-def-with-param-number-start.st.css'
+                        'states/with-param/number/state-def-with-param-number-start.st.css',
                     );
                     const exp: Array<Partial<Completion>> = [];
                     const unExp: Array<Partial<Completion>> = [];
@@ -178,17 +178,17 @@ describe('States', () => {
                             validator: string,
                             rng: ProviderRange,
                             type: string,
-                            path?: string
+                            path?: string,
                         ) =>
                             asserters.stateValidatorDefinitionCompletion(
                                 validator,
                                 rng,
                                 type,
-                                path
+                                path,
                             );
 
                         const asserter = asserters.getCompletions(
-                            'states/with-param/number/local-state-number-validators.st.css'
+                            'states/with-param/number/local-state-number-validators.st.css',
                         );
                         const exp: Array<Partial<Completion>> = [];
                         exp.push(createCompletion('min', rng, 'number'));
@@ -203,17 +203,17 @@ describe('States', () => {
                             validator: string,
                             rng: ProviderRange,
                             type: string,
-                            path?: string
+                            path?: string,
                         ) =>
                             asserters.stateValidatorDefinitionCompletion(
                                 validator,
                                 rng,
                                 type,
-                                path
+                                path,
                             );
 
                         const asserter = asserters.getCompletions(
-                            'states/with-param/number/state-def-with-param-number-min-start.st.css'
+                            'states/with-param/number/state-def-with-param-number-min-start.st.css',
                         );
                         const exp: Array<Partial<Completion>> = [];
                         const unExp: Array<Partial<Completion>> = [];
@@ -230,17 +230,17 @@ describe('States', () => {
                             validator: string,
                             rng: ProviderRange,
                             type: string,
-                            path?: string
+                            path?: string,
                         ) =>
                             asserters.stateValidatorDefinitionCompletion(
                                 validator,
                                 rng,
                                 type,
-                                path
+                                path,
                             );
 
                         const asserter = asserters.getCompletions(
-                            'states/with-param/number/state-def-with-param-number-max-start.st.css'
+                            'states/with-param/number/state-def-with-param-number-max-start.st.css',
                         );
                         const exp: Array<Partial<Completion>> = [];
                         const unExp: Array<Partial<Completion>> = [];
@@ -257,17 +257,17 @@ describe('States', () => {
                             validator: string,
                             rng: ProviderRange,
                             type: string,
-                            path?: string
+                            path?: string,
                         ) =>
                             asserters.stateValidatorDefinitionCompletion(
                                 validator,
                                 rng,
                                 type,
-                                path
+                                path,
                             );
 
                         const asserter = asserters.getCompletions(
-                            'states/with-param/number/state-def-with-param-number-multiple-start.st.css'
+                            'states/with-param/number/state-def-with-param-number-multiple-start.st.css',
                         );
                         const exp: Array<Partial<Completion>> = [];
                         const unExp: Array<Partial<Completion>> = [];
@@ -287,7 +287,7 @@ describe('States', () => {
                         asserters.stateTypeDefinitionCompletion(str, rng, path);
 
                     const asserter = asserters.getCompletions(
-                        'states/with-param/enum/state-def-with-param-enum-start.st.css'
+                        'states/with-param/enum/state-def-with-param-enum-start.st.css',
                     );
                     const exp: Array<Partial<Completion>> = [];
                     const unExp: Array<Partial<Completion>> = [];

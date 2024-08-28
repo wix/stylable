@@ -51,7 +51,7 @@ export class STCBuilder {
         private fs: STCBuilderFileSystem,
         private configFilePath?: string,
         private log?: Log,
-        private watchMode?: boolean
+        private watchMode?: boolean,
     ) {
         this.diagnosticsManager = new DiagnosticsManager({
             log: this.log,
@@ -135,7 +135,7 @@ export class STCBuilder {
     public reportDiagnostics = (
         context: EmitDiagnosticsContext,
         diagnosticsMode: DiagnosticsMode,
-        remove = false
+        remove = false,
     ) => {
         for (const [filePath] of this.diagnosticsMessages.entries()) {
             this.reportDiagnostic(filePath, context, diagnosticsMode, remove);
@@ -152,7 +152,7 @@ export class STCBuilder {
         filePath: string,
         context: EmitDiagnosticsContext,
         diagnosticsMode: DiagnosticsMode,
-        remove = false
+        remove = false,
     ) => {
         const diagnostics = this.diagnosticsMessages.get(filePath);
 
@@ -169,7 +169,7 @@ export class STCBuilder {
                     diagnostic.line && diagnostic.column
                         ? `:${diagnostic.line}:${diagnostic.column}`
                         : ''
-                }`
+                }`,
             );
         }
 
@@ -189,7 +189,7 @@ export class STCBuilder {
 
         for (const filePath of modifiedFiles) {
             const event = createWatchEvent(
-                this.fs.existsSync(filePath) ? this.fs.realpathSync(filePath) : filePath
+                this.fs.existsSync(filePath) ? this.fs.realpathSync(filePath) : filePath,
             );
 
             await this.watchHandler.listener(event);
@@ -204,7 +204,7 @@ function createNoopLogger() {
         },
         () => {
             return;
-        }
+        },
     );
 }
 

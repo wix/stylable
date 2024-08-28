@@ -11,13 +11,13 @@ export interface FindAstOptions {
 type FindAstResult<T extends BaseAstNode> = [
     takenNodeAmount: number,
     matchedNode: T | undefined,
-    inspectedAmount: number
+    inspectedAmount: number,
 ];
 
 export function findAnything(
     value: BaseAstNode[],
     startIndex: number,
-    options?: Partial<FindAstOptions>
+    options?: Partial<FindAstOptions>,
 ) {
     return findValueAstNode(value, startIndex, () => true, options);
 }
@@ -25,7 +25,7 @@ export function findAnything(
 export function findFatArrow(
     value: BaseAstNode[],
     startIndex: number,
-    options?: Partial<FindAstOptions>
+    options?: Partial<FindAstOptions>,
 ): FindAstResult<Literal & { value: '>' }> {
     const [amountToEql, _eqlNode, eqlNodeInspectAmount] = findLiteral(value, startIndex, {
         ...options,
@@ -41,14 +41,14 @@ export function findFatArrow(
 }
 export function isExactLiteral<T extends string>(
     token: BaseAstNode,
-    name: T
+    name: T,
 ): token is Literal & { value: '>' } {
     return token && token.type === 'literal' && token.value === name;
 }
 export function findNextClassNode(
     value: BaseAstNode[],
     startIndex: number,
-    options?: Partial<FindAstOptions>
+    options?: Partial<FindAstOptions>,
 ): FindAstResult<CustomIdent> {
     const name = options?.name || '';
     let index = startIndex;
@@ -74,7 +74,7 @@ export function findNextClassNode(
 export function findNextPseudoClassNode(
     value: BaseAstNode[],
     startIndex: number,
-    options?: Partial<FindAstOptions>
+    options?: Partial<FindAstOptions>,
 ): FindAstResult<CustomIdent | Call> {
     const name = options?.name || '';
     let index = startIndex;
@@ -112,7 +112,7 @@ export function findNextPseudoClassNode(
 export function findPseudoElementNode(
     value: BaseAstNode[],
     startIndex: number,
-    options?: Partial<FindAstOptions>
+    options?: Partial<FindAstOptions>,
 ): FindAstResult<CustomIdent | Call> {
     let index = startIndex;
     while (index < value.length) {
@@ -152,40 +152,40 @@ export function findPseudoElementNode(
 export function findLiteral(
     value: BaseAstNode[],
     startIndex: number,
-    options?: Partial<FindAstOptions>
+    options?: Partial<FindAstOptions>,
 ): FindAstResult<Literal> {
     const name = options?.name || '';
     return findValueAstNode<Literal>(
         value,
         startIndex,
         (node) => node.type === 'literal' && (!name || node.value === name),
-        options
+        options,
     );
 }
 export function findCustomIdent(
     value: BaseAstNode[],
     startIndex: number,
-    options?: Partial<FindAstOptions>
+    options?: Partial<FindAstOptions>,
 ): FindAstResult<CustomIdent> {
     const name = options?.name || '';
     return findValueAstNode<CustomIdent>(
         value,
         startIndex,
         (node) => node.type === '<custom-ident>' && (!name || node.value === name),
-        options
+        options,
     );
 }
 export function findNextCallNode(
     value: BaseAstNode[],
     startIndex: number,
-    options?: Partial<FindAstOptions>
+    options?: Partial<FindAstOptions>,
 ): FindAstResult<Call> {
     const name = options?.name || '';
     return findValueAstNode(
         value,
         startIndex,
         (node) => node.type === 'call' && (!name || node.value === name),
-        options
+        options,
     );
 }
 
@@ -198,7 +198,7 @@ export function findValueAstNode<T extends BaseAstNode>(
         ignoreWhitespace = true,
         ignoreComments = true,
         stopOnMatch,
-    }: Partial<FindAstOptions> = {}
+    }: Partial<FindAstOptions> = {},
 ): FindAstResult<T> {
     let index = startIndex;
     while (index < valueAst.length) {

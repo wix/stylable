@@ -12,7 +12,7 @@ export type DiagnosticMessages = Map<string, CLIDiagnostic[]>;
 export function reportDiagnostics(
     log: Log,
     diagnosticsMessages: DiagnosticMessages,
-    diagnosticsMode?: string
+    diagnosticsMode?: string,
 ) {
     let message = '[Stylable Diagnostics]';
     for (const [filePath, diagnostics] of diagnosticsMessages.entries()) {
@@ -30,7 +30,7 @@ export function reportDiagnostics(
 function hasErrorOrWarning(diagnosticsMessages: DiagnosticMessages) {
     for (const diagnostics of diagnosticsMessages.values()) {
         const has = diagnostics.some(
-            (diagnostic) => diagnostic.severity === 'error' || diagnostic.severity === 'warning'
+            (diagnostic) => diagnostic.severity === 'error' || diagnostic.severity === 'warning',
         );
 
         if (has) {

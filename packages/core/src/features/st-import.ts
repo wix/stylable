@@ -74,45 +74,45 @@ export const diagnostics = {
     NO_ST_IMPORT_IN_NESTED_SCOPE: createDiagnosticReporter(
         '05011',
         'error',
-        () => `cannot use "@st-import" inside of nested scope`
+        () => `cannot use "@st-import" inside of nested scope`,
     ),
     NO_PSEUDO_IMPORT_IN_NESTED_SCOPE: createDiagnosticReporter(
         '05012',
         'error',
-        () => `cannot use ":import" inside of nested scope`
+        () => `cannot use ":import" inside of nested scope`,
     ),
     INVALID_CUSTOM_PROPERTY_AS_VALUE: createDiagnosticReporter(
         '05013',
         'error',
         (name: string, as: string) =>
-            `invalid alias for custom property "${name}" as "${as}"; custom properties must be prefixed with "--" (double-dash)`
+            `invalid alias for custom property "${name}" as "${as}"; custom properties must be prefixed with "--" (double-dash)`,
     ),
     UNKNOWN_IMPORTED_SYMBOL: createDiagnosticReporter(
         '05015',
         'error',
         (name: string, path: string) =>
-            `cannot resolve imported symbol "${name}" from stylesheet "${path}"`
+            `cannot resolve imported symbol "${name}" from stylesheet "${path}"`,
     ),
     UNKNOWN_IMPORTED_FILE: createDiagnosticReporter(
         '05016',
         'error',
         (path: string, error?: unknown) =>
-            `cannot resolve imported file: "${path}"${error ? `\nFailed with:\n${error}` : ''}`
+            `cannot resolve imported file: "${path}"${error ? `\nFailed with:\n${error}` : ''}`,
     ),
     UNKNOWN_TYPED_IMPORT: createDiagnosticReporter(
         '05018',
         'error',
-        (type: string) => `Unknown type import "${type}"`
+        (type: string) => `Unknown type import "${type}"`,
     ),
     NO_DEFAULT_EXPORT: createDiagnosticReporter(
         '05020',
         'error',
-        (path: string) => `Native CSS files have no default export. Imported file: "${path}"`
+        (path: string) => `Native CSS files have no default export. Imported file: "${path}"`,
     ),
     UNSUPPORTED_NATIVE_IMPORT: createDiagnosticReporter(
         '05021',
         'warning',
-        () => `Unsupported @import within imported native CSS file`
+        () => `Unsupported @import within imported native CSS file`,
     ),
 };
 
@@ -159,7 +159,7 @@ export const hooks = createFeature<{
         if (rule.selector !== `:import`) {
             context.diagnostics.report(
                 diagnostics.FORBIDDEN_DEF_IN_COMPLEX_SELECTOR(PseudoImport),
-                { node: rule }
+                { node: rule },
             );
             return;
         }
@@ -207,7 +207,7 @@ function calcCssDepth(context: FeatureTransformContext) {
                 cssDepth = Math.max(cssDepth, depth);
             }
         },
-        2
+        2,
     );
     context.meta.transformCssDepth = { cssDepth, deepDependencies };
 }
@@ -228,7 +228,7 @@ export function createImportSymbol(
     importDef: Imported,
     type: `default` | `named`,
     name: string,
-    dirContext: string
+    dirContext: string,
 ): ImportSymbol {
     return {
         _kind: 'import',
@@ -280,7 +280,7 @@ function checkForInvalidAsUsage(importDef: Imported, context: FeatureContext) {
         if (validateCustomPropertyName(imported) && !validateCustomPropertyName(local)) {
             context.diagnostics.report(
                 diagnostics.INVALID_CUSTOM_PROPERTY_AS_VALUE(imported, local),
-                { node: importDef.rule }
+                { node: importDef.rule },
             );
         }
     }
@@ -295,7 +295,7 @@ function validateImports(context: FeatureTransformContext) {
             const fromDecl =
                 importObj.rule.nodes &&
                 importObj.rule.nodes.find(
-                    (decl) => decl.type === 'decl' && decl.prop === PseudoImportDecl.FROM
+                    (decl) => decl.type === 'decl' && decl.prop === PseudoImportDecl.FROM,
                 );
 
             context.diagnostics.report(
@@ -303,7 +303,7 @@ function validateImports(context: FeatureTransformContext) {
                 {
                     node: fromDecl || importObj.rule,
                     word: importObj.request,
-                }
+                },
             );
         } else if (entity.kind === 'css') {
             const meta = entity.value;
@@ -338,12 +338,12 @@ function validateImports(context: FeatureTransformContext) {
                     const namedDecl =
                         importObj.rule.nodes &&
                         importObj.rule.nodes.find(
-                            (decl) => decl.type === 'decl' && decl.prop === PseudoImportDecl.NAMED
+                            (decl) => decl.type === 'decl' && decl.prop === PseudoImportDecl.NAMED,
                         );
 
                     context.diagnostics.report(
                         diagnostics.UNKNOWN_IMPORTED_SYMBOL(origName, importObj.request),
-                        { node: namedDecl || importObj.rule, word: origName }
+                        { node: namedDecl || importObj.rule, word: origName },
                     );
                 }
             }
@@ -360,8 +360,8 @@ function getErrorText(res: CachedModuleEntity) {
             return 'details' in error
                 ? String(error.details)
                 : 'message' in error
-                ? String(error.message)
-                : String(error);
+                  ? String(error.message)
+                  : String(error);
         }
         return String(error);
     }

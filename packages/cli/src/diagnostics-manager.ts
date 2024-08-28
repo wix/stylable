@@ -33,7 +33,7 @@ export class DiagnosticsManager {
     public set(
         identifier: string,
         filepath?: string,
-        processDiagnostics?: ProcessDiagnostics
+        processDiagnostics?: ProcessDiagnostics,
     ): void {
         if (this.store.has(identifier) && filepath && processDiagnostics) {
             this.store.get(identifier)!.set(filepath, processDiagnostics);
@@ -41,8 +41,8 @@ export class DiagnosticsManager {
             this.store.set(
                 identifier,
                 new Map(
-                    filepath && processDiagnostics ? [[filepath, processDiagnostics]] : undefined
-                )
+                    filepath && processDiagnostics ? [[filepath, processDiagnostics]] : undefined,
+                ),
             );
         }
     }
@@ -103,7 +103,7 @@ export class DiagnosticsManager {
             const hasFatalDiagnostics = reportDiagnostics(
                 this.log,
                 diagnosticMessages,
-                diagnosticMode
+                diagnosticMode,
             );
 
             this.options.hooks?.postReport?.(diagnosticMessages, hasFatalDiagnostics);

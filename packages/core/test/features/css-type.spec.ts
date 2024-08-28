@@ -27,7 +27,7 @@ describe(`features/css-type`, () => {
         expect(CSSType.get(meta, `Btn`), `collect capital letters`).to.deep.contain(
             CSSType.createSymbol({
                 name: 'Btn',
-            })
+            }),
         );
         expect(CSSType.get(meta, `div`), `ignore lowercase`).to.eql(undefined);
         expect(STSymbol.get(meta, `Btn`), `general symbols`).to.equal(CSSType.get(meta, `Btn`));
@@ -38,7 +38,7 @@ describe(`features/css-type`, () => {
 
         // public API
         expect(meta.getTypeElement(`Btn`), `meta.getTypeElement`).to.equal(
-            CSSType.get(meta, `Btn`)
+            CSSType.get(meta, `Btn`),
         );
         expect(meta.getAllTypeElements(), `meta.getAllTypeElements`).to.eql(CSSType.getAll(meta));
     });
@@ -48,7 +48,7 @@ describe(`features/css-type`, () => {
                 @rule(functional element type) div()
                 @analyze-error(functional element type) ${cssTypeDiagnostics.INVALID_FUNCTIONAL_SELECTOR(
                     `div`,
-                    `type`
+                    `type`,
                 )}
             */
             div() {}
@@ -61,7 +61,7 @@ describe(`features/css-type`, () => {
         */
         const { sheets } = testStylableCore(`
                 /* @analyze-warn word(button) ${cssTypeDiagnostics.UNSCOPED_TYPE_SELECTOR(
-                    `button`
+                    `button`,
                 )} */
                 button {}
 
@@ -120,13 +120,13 @@ describe(`features/css-type`, () => {
                 CSSType.createSymbol({
                     name: 'Before',
                     alias: STImport.createImportSymbol(importBeforeDef, `default`, `default`, `/`),
-                })
+                }),
             );
             expect(CSSType.get(meta, `After`), `after type symbol`).to.eql(
                 CSSType.createSymbol({
                     name: 'After',
                     alias: STImport.createImportSymbol(importAfterDef, `default`, `default`, `/`),
-                })
+                }),
             );
 
             // JS exports
@@ -161,13 +161,13 @@ describe(`features/css-type`, () => {
                 CSSType.createSymbol({
                     name: 'BeforePart',
                     alias: STImport.createImportSymbol(importBeforeDef, `named`, `BeforePart`, `/`),
-                })
+                }),
             );
             expect(CSSType.get(meta, `AfterPart`), `after type symbol`).to.eql(
                 CSSType.createSymbol({
                     name: 'AfterPart',
                     alias: STImport.createImportSymbol(importAfterDef, `named`, `AfterPart`, `/`),
-                })
+                }),
             );
 
             // JS exports
@@ -203,13 +203,13 @@ describe(`features/css-type`, () => {
                 CSSType.createSymbol({
                     name: 'BeforePart',
                     alias: STImport.createImportSymbol(importBeforeDef, `named`, `BeforePart`, `/`),
-                })
+                }),
             );
             expect(CSSType.get(meta, `AfterPart`), `after type symbol`).to.eql(
                 CSSType.createSymbol({
                     name: 'AfterPart',
                     alias: STImport.createImportSymbol(importAfterDef, `named`, `AfterPart`, `/`),
-                })
+                }),
             );
             // JS exports
             expect(exports.classes, `not add as classes exports`).to.eql({
@@ -241,7 +241,7 @@ describe(`features/css-type`, () => {
                     @st-import [importedPart] from "./classes.st.css";
 
                     /* @analyze-warn word(importedPart) ${cssTypeDiagnostics.UNSCOPED_TYPE_SELECTOR(
-                        `importedPart`
+                        `importedPart`,
                     )} */
                     importedPart {}
                 `,

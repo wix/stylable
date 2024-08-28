@@ -36,7 +36,7 @@ function safelyWalkJSON(
     obj: Record<string, any>,
     visitor: (key: string, value: any, path: string[]) => void | boolean,
     path: string[] = [],
-    visited = new Set()
+    visited = new Set(),
 ) {
     for (const key in obj) {
         const currentPath = [...path, key];
@@ -83,7 +83,7 @@ export function bundleServerLibs(config: Configuration, packages: string[], isSe
         if (hasError) {
             throw new Error(
                 'Invalid configuration: expected config.externals to be an Array with a single function. got ' +
-                    JSON.stringify(config.externals)
+                    JSON.stringify(config.externals),
             );
         }
     }

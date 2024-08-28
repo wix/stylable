@@ -23,7 +23,7 @@ export interface IStylableOptimizer {
     optimize(
         config: OptimizeConfig,
         stylableResult: StylableResults,
-        usageMapping: Record<string, boolean>
+        usageMapping: Record<string, boolean>,
     ): void;
     getNamespace(namespace: string): string;
     getClassName(className: string): string;
@@ -32,7 +32,7 @@ export interface IStylableOptimizer {
         targetAst: postcss.Root,
         usageMapping: Record<string, boolean>,
         jsExports: StylableExports,
-        globals: Record<string, boolean>
+        globals: Record<string, boolean>,
     ): void;
 }
 

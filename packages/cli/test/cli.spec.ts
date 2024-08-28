@@ -39,8 +39,8 @@ describe('Stylable Cli', function () {
         expect(
             evalStylableModule<{ namespace: string }>(
                 dirContent['style.st.css.js'],
-                'style.st.css.js'
-            ).namespace
+                'style.st.css.js',
+            ).namespace,
         ).equal('test-ns-0');
     });
 
@@ -62,8 +62,8 @@ describe('Stylable Cli', function () {
         expect(
             evalStylableModule<{ namespace: string }>(
                 dirContent['style.st.css.js'],
-                'style.st.css.js'
-            ).namespace
+                'style.st.css.js',
+            ).namespace,
         ).equal('test-ns-0');
     });
 
@@ -151,9 +151,9 @@ describe('Stylable Cli', function () {
             expect(
                 evalStylableModule<{ namespace: string }>(
                     loadDirSync(tempDir.path)['style.st.css.js'],
-                    'style.st.css.js'
+                    'style.st.css.js',
                 ).namespace,
-                'default'
+                'default',
             ).equal(resolveNamespace('style', join(tempDir.path, 'style.st.css')));
         }
         {
@@ -169,7 +169,7 @@ describe('Stylable Cli', function () {
                             };
                         },
                     };
-                `
+                `,
             );
 
             runCliSync(['--rootDir', tempDir.path, '--cjs']);
@@ -177,9 +177,9 @@ describe('Stylable Cli', function () {
             expect(
                 evalStylableModule<{ namespace: string }>(
                     loadDirSync(tempDir.path)['style.st.css.js'],
-                    'style.st.css.js'
+                    'style.st.css.js',
                 ).namespace,
-                'stylable.config'
+                'stylable.config',
             ).equal('config-ns-0');
         }
         {
@@ -191,7 +191,7 @@ describe('Stylable Cli', function () {
                     module.exports.resolveNamespace = function resolveNamespace() {
                         return 'custom-ns-' + c++;
                     }
-                `
+                `,
             );
 
             runCliSync(['--rootDir', tempDir.path, '--nsr', './custom-ns-resolver.js', '--cjs']);
@@ -199,9 +199,9 @@ describe('Stylable Cli', function () {
             expect(
                 evalStylableModule<{ namespace: string }>(
                     loadDirSync(tempDir.path)['style.st.css.js'],
-                    'style.st.css.js'
+                    'style.st.css.js',
                 ).namespace,
-                'cli argument'
+                'cli argument',
             ).equal('custom-ns-0');
         }
     });
@@ -225,7 +225,7 @@ describe('Stylable Cli', function () {
         const stylesheetContent = dirContent['dist/style.st.css'];
 
         expect(stylesheetContent.endsWith('/* st-namespace-reference="../style.st.css" */')).equal(
-            true
+            true,
         );
     });
 
@@ -254,10 +254,10 @@ describe('Stylable Cli', function () {
 
         expect(stylesheetContent).to.equal(srcContent);
         expect(dtsContent.startsWith('/* THIS FILE IS AUTO GENERATED DO NOT MODIFY */')).to.equal(
-            true
+            true,
         );
         expect(
-            dtsSourceMapContent.startsWith('{\n    "version": 3,\n    "file": "style.st.css.d.ts"')
+            dtsSourceMapContent.startsWith('{\n    "version": 3,\n    "file": "style.st.css.d.ts"'),
         ).to.equal(true);
     });
 
@@ -281,10 +281,10 @@ describe('Stylable Cli', function () {
         const dtsSourceMapContent = dirContent['dist/style.st.css.d.ts.map'];
 
         expect(dtsContent.startsWith('/* THIS FILE IS AUTO GENERATED DO NOT MODIFY */')).to.equal(
-            true
+            true,
         );
         expect(
-            dtsSourceMapContent.startsWith('{\n    "version": 3,\n    "file": "style.st.css.d.ts"')
+            dtsSourceMapContent.startsWith('{\n    "version": 3,\n    "file": "style.st.css.d.ts"'),
         ).to.equal(true);
 
         expect(status).to.equal(0);
@@ -304,11 +304,11 @@ describe('Stylable Cli', function () {
         const dtsSourceMapContent = dirContent['dist/style.st.css.d.ts.map'];
 
         expect(
-            dtsSourceMapContent.startsWith('{\n    "version": 3,\n    "file": "style.st.css.d.ts"')
+            dtsSourceMapContent.startsWith('{\n    "version": 3,\n    "file": "style.st.css.d.ts"'),
         ).to.equal(true);
         expect(dtsSourceMapContent).to.contain(
             `"sources": [\n        "../src/style.st.css"\n    ]`,
-            `expected to contain source file path for "${dtsSourceMapContent}"`
+            `expected to contain source file path for "${dtsSourceMapContent}"`,
         );
     });
 
@@ -336,7 +336,7 @@ describe('Stylable Cli', function () {
         const dtsSourceMapContent = dirContent['dist/style.st.css.d.ts.map'];
 
         expect(
-            dtsSourceMapContent.startsWith('{\n    "version": 3,\n    "file": "style.st.css.d.ts"')
+            dtsSourceMapContent.startsWith('{\n    "version": 3,\n    "file": "style.st.css.d.ts"'),
         ).to.equal(true);
         expect(dtsSourceMapContent).to.contain(`"sources": [\n        "style.st.css"\n    ]`);
     });
@@ -366,10 +366,10 @@ describe('Stylable Cli', function () {
 
         expect(stylesheetContent).to.equal(srcContent);
         expect(dtsContent.startsWith('/* THIS FILE IS AUTO GENERATED DO NOT MODIFY */')).to.equal(
-            true
+            true,
         );
         expect(
-            dtsSourceMapContent.startsWith('{\n    "version": 3,\n    "file": "style.st.css.d.ts"')
+            dtsSourceMapContent.startsWith('{\n    "version": 3,\n    "file": "style.st.css.d.ts"'),
         ).to.equal(true);
     });
 
@@ -400,7 +400,7 @@ describe('Stylable Cli', function () {
 
         expect(stylesheetContent).to.equal(srcContent);
         expect(dtsContent.startsWith('/* THIS FILE IS AUTO GENERATED DO NOT MODIFY */')).to.equal(
-            true
+            true,
         );
         expect(dtsSourceMapContent).to.equal(undefined);
     });
@@ -492,8 +492,8 @@ describe('Stylable Cli', function () {
             expect(status).to.equal(0);
             expect(stdout, 'stdout').to.match(
                 new RegExp(
-                    `No target output declared for "(.*?)", please provide one or more of the following target options: "cjs", "esm", "css", "stcss" or "indexFile"`
-                )
+                    `No target output declared for "(.*?)", please provide one or more of the following target options: "cjs", "esm", "css", "stcss" or "indexFile"`,
+                ),
             );
         });
 
@@ -516,9 +516,9 @@ describe('Stylable Cli', function () {
                 new RegExp(
                     `\\[info\\: \\d+]: ${stVarDiagnostics.DEPRECATED_ST_FUNCTION_NAME(
                         'stArray',
-                        'st-array'
-                    )}`
-                )
+                        'st-array',
+                    )}`,
+                ),
             );
         });
 
@@ -581,8 +581,8 @@ describe('Stylable Cli', function () {
             expect(status).to.equal(1);
             expect(
                 stdout.match(
-                    new RegExp(STImport.diagnostics.NO_ST_IMPORT_IN_NESTED_SCOPE().message, 'g')
-                )
+                    new RegExp(STImport.diagnostics.NO_ST_IMPORT_IN_NESTED_SCOPE().message, 'g'),
+                ),
             ).to.have.length(1);
         });
 
@@ -603,7 +603,7 @@ describe('Stylable Cli', function () {
                 '--cjs=false',
             ]);
             expect(res.stderr).to.contain(
-                'Error: Invalid configuration: When using "stcss" outDir and srcDir must be different.'
+                'Error: Invalid configuration: When using "stcss" outDir and srcDir must be different.',
             );
         });
     });
@@ -675,7 +675,7 @@ describe('Stylable Cli', function () {
                             return {
                                 resolveModule: createWebpackResolver(fs, {
                                     plugins: [new TsconfigPathsPlugin({ configFile: join(${JSON.stringify(
-                                        tempDir.path
+                                        tempDir.path,
                                     )},'tsconfig.json') })],
                                 })
                             };

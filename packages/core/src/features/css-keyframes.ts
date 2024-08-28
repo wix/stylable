@@ -59,28 +59,28 @@ export const diagnostics = {
     ILLEGAL_KEYFRAMES_NESTING: createDiagnosticReporter(
         '02001',
         'error',
-        () => `illegal nested "@keyframes"`
+        () => `illegal nested "@keyframes"`,
     ),
     MISSING_KEYFRAMES_NAME: createDiagnosticReporter(
         '02002',
         'error',
-        () => '"@keyframes" missing parameter'
+        () => '"@keyframes" missing parameter',
     ),
     MISSING_KEYFRAMES_NAME_INSIDE_GLOBAL: createDiagnosticReporter(
         '02003',
         'error',
-        () => `"@keyframes" missing parameter inside "${GLOBAL_FUNC}()"`
+        () => `"@keyframes" missing parameter inside "${GLOBAL_FUNC}()"`,
     ),
     KEYFRAME_NAME_RESERVED: createDiagnosticReporter(
         '02004',
         'error',
-        (name: string) => `keyframes "${name}" is reserved`
+        (name: string) => `keyframes "${name}" is reserved`,
     ),
     UNKNOWN_IMPORTED_KEYFRAMES: createDiagnosticReporter(
         '02005',
         'error',
         (name: string, path: string) =>
-            `cannot resolve imported keyframes "${name}" from stylesheet "${path}"`
+            `cannot resolve imported keyframes "${name}" from stylesheet "${path}"`,
     ),
 };
 
@@ -176,7 +176,7 @@ export const hooks = createFeature<{
                     {
                         node: symbol.import.rule,
                         word: symbol.name,
-                    }
+                    },
                 );
             }
         }
@@ -193,7 +193,7 @@ export const hooks = createFeature<{
         /* js keyframes mixins won't have resolved keyframes */
         atRule.params = resolve
             ? getTransformedName(resolve)
-            : globalName ?? namespace(name, context.meta.namespace);
+            : (globalName ?? namespace(name, context.meta.namespace));
     },
     transformDeclaration({ decl, resolved }) {
         const parsed = postcssValueParser(decl.value);
@@ -278,7 +278,7 @@ function addKeyframesDeclaration(
     meta: StylableMeta,
     name: string,
     origin: postcss.AtRule | postcss.Rule,
-    isImported: boolean
+    isImported: boolean,
 ) {
     let path = ``;
     let current = origin.parent;

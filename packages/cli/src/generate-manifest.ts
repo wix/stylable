@@ -10,7 +10,7 @@ export function generateManifest(
     stylable: Stylable,
     mode: string,
     log: Log,
-    fs: any
+    fs: any,
 ) {
     function getBuildNamespace(stylable: Stylable, filePath: string): string {
         return stylable.fileProcessor.process(filePath).namespace;
@@ -23,21 +23,21 @@ export function generateManifest(
         (manifest, filePath) => {
             manifest.namespaceMapping[relative(rootDir, filePath)] = getBuildNamespace(
                 stylable,
-                filePath
+                filePath,
             );
             return manifest;
         },
         {
             namespaceMapping: {},
-        }
+        },
     );
     log(mode, 'creating manifest file: ');
     tryRun(
         () => ensureDirectory(dirname(manifestOutputPath), fs),
-        `Ensure directory for manifest: ${manifestOutputPath}`
+        `Ensure directory for manifest: ${manifestOutputPath}`,
     );
     tryRun(
         () => fs.writeFileSync(manifestOutputPath, JSON.stringify(manifest)),
-        'Write Index File Error'
+        'Write Index File Error',
     );
 }

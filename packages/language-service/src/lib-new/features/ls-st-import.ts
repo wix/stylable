@@ -55,7 +55,7 @@ function getStImportCompletions(context: LangServiceContext, _importNode: postcs
             try {
                 const resolvedPath = context.stylable.resolver.resolvePath(
                     originDirPath,
-                    pathBeforeCaret
+                    pathBeforeCaret,
                 );
                 if (resolvedPath !== pathBeforeCaret) {
                     addSpecifierCompletions({
@@ -92,7 +92,7 @@ function getStImportCompletions(context: LangServiceContext, _importNode: postcs
                         ? importFrom.value.getAllSymbols()
                         : STSymbol.getAllByType(
                               importFrom.value,
-                              TYPED_NAMED[importType as keyof typeof TYPED_NAMED]
+                              TYPED_NAMED[importType as keyof typeof TYPED_NAMED],
                           );
                 addNamedImportCompletion({
                     context,
@@ -179,7 +179,7 @@ function addNamedImportCompletion({
         const originSymbolOrValue = resolveOrigin?.(value);
         let relativePath = path.relative(
             path.dirname(context.meta.source),
-            originSymbolOrValue?.originPath || ''
+            originSymbolOrValue?.originPath || '',
         );
         if (!path.isAbsolute(relativePath) && !relativePath.startsWith('.')) {
             relativePath = './' + relativePath;
@@ -191,7 +191,7 @@ function addNamedImportCompletion({
                 localName: name,
                 rng: range(context.getPosition(), { deltaStart }),
                 relativePath,
-            })
+            }),
         );
     }
 }
@@ -419,8 +419,8 @@ function addSpecifierCompletions({
                         detail,
                         'a',
                         snippet,
-                        range(context.getPosition(), { deltaStart })
-                    )
+                        range(context.getPosition(), { deltaStart }),
+                    ),
                 );
             }
         }
@@ -560,8 +560,8 @@ function addDirRelativeCompletions({
                     'a',
                     snippet,
                     range(context.getPosition(), { deltaStart }),
-                    !!directorySlash // trigger completion
-                )
+                    !!directorySlash, // trigger completion
+                ),
             );
         }
     }
@@ -628,8 +628,8 @@ function addPackageExportsCompletions({
                         'a',
                         snippet,
                         range(context.getPosition(), { deltaStart: -deltaStart }),
-                        true // trigger completion
-                    )
+                        true, // trigger completion
+                    ),
                 );
             } else {
                 // internal path completions
@@ -657,8 +657,8 @@ function addPackageExportsCompletions({
                     detail,
                     'a',
                     snippet,
-                    range(context.getPosition(), { deltaStart: -deltaStart })
-                )
+                    range(context.getPosition(), { deltaStart: -deltaStart }),
+                ),
             );
         }
     }
@@ -686,7 +686,7 @@ function getExportsRules(exportsField: any): any {
  * @example parsePackageSpecifier('@stylable/core/dist/some-file') === ['@stylable/core', 'dist/some-file']
  */
 export function parsePackageSpecifier(
-    specifier: string
+    specifier: string,
 ): readonly [packageName: string, pathInPackage?: string] {
     const firstSlashIdx = specifier.indexOf('/');
     if (firstSlashIdx === -1) {

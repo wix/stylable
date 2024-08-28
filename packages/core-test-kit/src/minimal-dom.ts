@@ -101,8 +101,8 @@ export class MinimalElement {
         }
         return wrapArrayAsMinimalElementList(
             this._children.filter(
-                (c) => c.tagName === 'style' && c.getAttribute('st_runtime') === m[1]
-            )
+                (c) => c.tagName === 'style' && c.getAttribute('st_runtime') === m[1],
+            ),
         );
     }
 }

@@ -182,7 +182,7 @@ describe('features/css-contains', () => {
             .a {
                 /* 
                     @analyze-error(longhand unexpected) word("?") ${diagnostics.UNEXPECTED_DECL_VALUE(
-                        '"?"'
+                        '"?"',
                     )}
                     @decl(longhand unexpected) container-name: entry__a "?" not_a_container_name
                 */
@@ -190,7 +190,7 @@ describe('features/css-contains', () => {
                 
                 /* 
                     @analyze-error(shorthand unknown type) word(unknown-type) ${diagnostics.UNKNOWN_DECL_TYPE(
-                        'unknown-type'
+                        'unknown-type',
                     )}
                     @decl(shorthand unknown type) container: entry__a / unknown-type
                 */
@@ -204,7 +204,7 @@ describe('features/css-contains', () => {
 
                 /* 
                     @analyze-error(shorthand unexpected) word("?") ${diagnostics.UNEXPECTED_DECL_VALUE(
-                        '"?"'
+                        '"?"',
                     )}
                     @decl(shorthand unexpected) container: entry__a "?" b
                 */
@@ -269,7 +269,7 @@ describe('features/css-contains', () => {
 
                 /* 
                     @analyze-error(none ident) word(none) ${diagnostics.INVALID_CONTAINER_NAME(
-                        'none'
+                        'none',
                     )}
                     @decl(none ident) container-name: entry__xxx none
                 */
@@ -283,7 +283,7 @@ describe('features/css-contains', () => {
 
                 /* 
                     @analyze-error(shorthand none ident) word(none) ${diagnostics.INVALID_CONTAINER_NAME(
-                        'none'
+                        'none',
                     )}
                     @decl(shorthand none ident) container: entry__xxx none / normal
                 */
@@ -291,12 +291,12 @@ describe('features/css-contains', () => {
             }
 
             /* @analyze-error(hard-def and) word(and) ${diagnostics.INVALID_CONTAINER_NAME(
-                'and'
+                'and',
             )} */
             @container and;
 
             /* @analyze-error(hard-def not) word(not) ${diagnostics.INVALID_CONTAINER_NAME(
-                'not'
+                'not',
             )} */
             @container not;
 
@@ -431,7 +431,7 @@ describe('features/css-contains', () => {
                 '/entry.st.css': `
                     /* @transform-error word(unknown) ${diagnostics.UNKNOWN_IMPORTED_CONTAINER(
                         `unknown`,
-                        `./imported.st.css`
+                        `./imported.st.css`,
                     )} */
                     @st-import [container(unknown as local)] from './imported.st.css';
                 `,
@@ -611,7 +611,7 @@ describe('features/css-contains', () => {
                 .into {
                     -st-mixin: mix;
                 }
-            `)
+            `),
             );
 
             const { meta } = sheets['/entry.st.css'];
@@ -632,7 +632,7 @@ describe('features/css-contains', () => {
                 @container (inline-size > 1px) {
                     .entry__into { id: mix-in-container; }
                 }
-            `)
+            `),
             );
         });
     });
@@ -665,7 +665,7 @@ describe('features/css-contains', () => {
                         container-name: a;
                     }
                     @container a (inline-size > 100px) {}
-                `)
+                `),
             );
 
             // JS exports

@@ -5,7 +5,7 @@ import { join, dirname } from 'path';
 
 const project = 'basic-integration';
 const projectDir = dirname(
-    require.resolve(`@stylable/experimental-loader/test/projects/${project}/webpack.config`)
+    require.resolve(`@stylable/experimental-loader/test/projects/${project}/webpack.config`),
 );
 
 describe(`(${project})`, () => {
@@ -18,7 +18,7 @@ describe(`(${project})`, () => {
         },
         before,
         afterEach,
-        after
+        after,
     );
 
     it('renders css', async () => {
@@ -30,7 +30,7 @@ describe(`(${project})`, () => {
 
     it('output buildInfo', () => {
         const manifest = JSON.parse(
-            readFileSync(join(projectRunner.outputDir, 'test-manifest.json'), 'utf8')
+            readFileSync(join(projectRunner.outputDir, 'test-manifest.json'), 'utf8'),
         );
         expect(manifest).to.eql({
             'foo.st.css': 'foo',

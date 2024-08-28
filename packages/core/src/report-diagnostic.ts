@@ -14,7 +14,7 @@ export function reportDiagnostic(
     ctx: EmitDiagnosticsContext,
     diagnosticsMode: DiagnosticsMode,
     { code, message, severity }: Diagnostic,
-    from?: string
+    from?: string,
 ) {
     const messageToPrint = `[${severity}: ${code}]: ${message}`;
     const error = new Error(from ? `[${from}]:\n\n${messageToPrint}` : messageToPrint);
@@ -41,7 +41,7 @@ export function emitDiagnostics(
     ctx: EmitDiagnosticsContext,
     meta: StylableMeta,
     diagnosticsMode: DiagnosticsMode,
-    filePath?: string
+    filePath?: string,
 ) {
     meta.diagnostics?.reports.forEach(handleReport);
     meta.transformDiagnostics?.reports.forEach(handleReport);

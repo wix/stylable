@@ -386,7 +386,7 @@ describe('stylable-resolver', () => {
                         return '';
                     },
                 },
-            }
+            },
         );
 
         stylable.resolver.resolvePath('/', './entry.st.css');

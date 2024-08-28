@@ -29,7 +29,7 @@ describe('CLI Codemods st-import-to-at-import', () => {
         const dirContent = loadDirSync(tempDir.path);
 
         expect(dirContent['style.st.css']).equal(
-            '@st-import Name, [name1 as name1Alias, name2, --var1, keyframes(kf1 as kf1Alias, kf2, kf3, kf4)] from "./x";'
+            '@st-import Name, [name1 as name1Alias, name2, --var1, keyframes(kf1 as kf1Alias, kf2, kf3, kf4)] from "./x";',
         );
     });
 
@@ -49,7 +49,7 @@ describe('CLI Codemods st-import-to-at-import', () => {
         const dirContent = loadDirSync(tempDir.path);
 
         expect(dirContent['style.st.css']).equal(
-            `:import {-st-from: './x.st.css'; -st-from: './y.st.css';}`
+            `:import {-st-from: './x.st.css'; -st-from: './y.st.css';}`,
         );
         expect(stdout).to.match(new RegExp(parseImportMessages.MULTIPLE_FROM_IN_IMPORT().message));
     });

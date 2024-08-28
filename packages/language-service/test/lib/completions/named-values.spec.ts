@@ -19,7 +19,7 @@ describe('Named Values', () => {
                     str,
                     rng,
                     path,
-                    str === str4 ? 'pink' : str === str3 ? 'brown' : 'Stylable class'
+                    str === str4 ? 'pink' : str === str3 ? 'brown' : 'Stylable class',
                 );
             const prefix = str.slice(0, i);
 
@@ -45,14 +45,14 @@ describe('Named Values', () => {
                     }
                     asserter.suggested(exp);
                     asserter.notSuggested(notExp);
-                }
+                },
             );
 
             it('completes names after single value, with prefix ' + prefix + ' ', () => {
                 const rng = createRange(2, 22, 2, 22 + i);
                 const asserter = asserters.getCompletions(
                     'named/st-named-single-value.st.css',
-                    prefix
+                    prefix,
                 );
                 const exp: Array<Partial<Completion>> = [];
                 const notExp: Array<Partial<Completion>> = [];
@@ -79,7 +79,7 @@ describe('Named Values', () => {
                 const rng = createRange(2, 29, 2, 29 + i);
                 const asserter = asserters.getCompletions(
                     'named/st-named-multi-values.st.css',
-                    prefix
+                    prefix,
                 );
                 const exp: Array<Partial<Completion>> = [];
                 const notExp: Array<Partial<Completion>> = [];
@@ -106,7 +106,7 @@ describe('Named Values', () => {
                 const rng = createRange(3, 4, 3, 4 + i);
                 const asserter = asserters.getCompletions(
                     'named/st-named-multi-line.st.css',
-                    prefix
+                    prefix,
                 );
                 const exp: Array<Partial<Completion>> = [];
                 const notExp: Array<Partial<Completion>> = [];

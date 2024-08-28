@@ -28,7 +28,7 @@ export function extractSchema(
     filePath: string,
     root: string,
     path: MinimalPath,
-    resolveNamespace?: (namespace: string, source: string) => string
+    resolveNamespace?: (namespace: string, source: string) => string,
 ) {
     const processor = new StylableProcessor(undefined, resolveNamespace);
     const meta = processor.process(cssParse(css, { from: filePath }));
@@ -39,7 +39,7 @@ export function generateSchema(
     meta: StylableMeta,
     filePath: string,
     basePath: string,
-    path: MinimalPath
+    path: MinimalPath,
 ): StylableModuleSchema {
     const schema: StylableModuleSchema = {
         $id: `/${path.relative(basePath, filePath).replace(/\\/g, '/')}`,
@@ -97,7 +97,7 @@ export function generateSchema(
 function generateCssDocs(
     meta: StylableMeta,
     symbol: ClassSymbol | ElementSymbol | VarSymbol,
-    schemaEntry: StylableSymbolSchema
+    schemaEntry: StylableSymbolSchema,
 ) {
     const cssDoc = getCssDocsForSymbol(meta, symbol);
     if (cssDoc) {
@@ -115,7 +115,7 @@ function addModuleDependency(
     filePath: string,
     importPath: string,
     basePath: string,
-    path: MinimalPath
+    path: MinimalPath,
 ) {
     if (!schema.moduleDependencies) {
         schema.moduleDependencies = [];
@@ -177,14 +177,14 @@ function getImportedRef(
     fileName: string,
     importSymbol: ImportSymbol,
     basePath: string,
-    path: MinimalPath
+    path: MinimalPath,
 ): string {
     const suffix = importSymbol.type === 'default' ? 'root' : `${importSymbol.name}`;
     return `${normalizeImportPath(
         fileName,
         importSymbol.import.request,
         basePath,
-        path
+        path,
     )}#${suffix}`;
 }
 
@@ -192,7 +192,7 @@ function normalizeImportPath(
     fileName: string,
     importString: string,
     basePath: string,
-    path: MinimalPath
+    path: MinimalPath,
 ): string {
     if (importString.startsWith('.')) {
         // is relative

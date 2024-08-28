@@ -12,15 +12,15 @@ export function injectCssModules(
     compilation: Compilation,
     staticPublicPath: string,
     stylableModules: Map<NormalModule, BuildData | null>,
-    assetsModules: Map<string, NormalModule>
+    assetsModules: Map<string, NormalModule>,
 ) {
     const MiniCssExtractPlugin = compilation.options.plugins.find(
-        (plugin) => plugin?.constructor?.name === 'MiniCssExtractPlugin'
+        (plugin) => plugin?.constructor?.name === 'MiniCssExtractPlugin',
     );
 
     if (!MiniCssExtractPlugin) {
         throw new Error(
-            'StylableWebpackPlugin cannot find "MiniCssExtractPlugin" in the compilation plugin list'
+            'StylableWebpackPlugin cannot find "MiniCssExtractPlugin" in the compilation plugin list',
         );
     }
 
@@ -47,7 +47,7 @@ export function injectCssModules(
                         runtime: 'CSS' /*runtime*/,
                         runtimeTemplate,
                         stylableBuildData: getStylableBuildData(stylableModules, module),
-                    })
+                    }),
                 ),
             });
 
@@ -58,7 +58,7 @@ export function injectCssModules(
                     compilation,
                     compilation.resolverFactory.get('normal'),
                     compilation.compiler.inputFileSystem ?? compilation.inputFileSystem,
-                    () => (syncCheck = true)
+                    () => (syncCheck = true),
                 );
                 if (!syncCheck) {
                     throw new Error('Expect CssModule build to be sync');
@@ -66,7 +66,7 @@ export function injectCssModules(
             } catch (e) {
                 throw new Error(
                     'CssModule build failed inside Stylable integration with Error:\n' +
-                        (e as Error)?.message
+                        (e as Error)?.message,
                 );
             }
 

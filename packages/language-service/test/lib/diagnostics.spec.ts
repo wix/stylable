@@ -14,7 +14,7 @@ describe('diagnostics', () => {
             {
                 [filePath]: '.root:unknown{}',
             },
-            filePath
+            filePath,
         );
 
         expect(diagnostics).to.deep.include({
@@ -68,7 +68,7 @@ describe('diagnostics', () => {
                         .ninja{}
                         `,
             },
-            filePathB
+            filePathB,
         );
 
         expect(diagnostics).to.deep.include({
@@ -96,7 +96,7 @@ describe('diagnostics', () => {
                     }
                     `,
                 },
-                filePath
+                filePath,
             );
 
             expect(diagnostics).to.eql([
@@ -124,7 +124,7 @@ describe('diagnostics', () => {
                     }
                     `,
                 },
-                filePath
+                filePath,
             );
 
             expect(diagnostics).to.eql([]);
@@ -143,7 +143,7 @@ describe('diagnostics', () => {
                     .root:someState(T1.1) {}    /* css-rparentexpected    */
                     `,
                 },
-                filePath
+                filePath,
             );
 
             expect(diagnostics).to.eql([]);
@@ -164,7 +164,7 @@ describe('diagnostics', () => {
                     }
                     `,
                 },
-                filePath
+                filePath,
             );
 
             expect(diagnostics).to.eql([]);
@@ -193,7 +193,7 @@ describe('diagnostics', () => {
                     }
                     `),
                 },
-                filePath
+                filePath,
             );
 
             expect(diagnostics).to.eql([]);

@@ -23,7 +23,7 @@ export const diagnostics = {
         `03001`,
         'warning',
         (name: string) =>
-            `unscoped type selector "${name}" will affect all elements of the same type in the document`
+            `unscoped type selector "${name}" will affect all elements of the same type in the document`,
     ),
 };
 
@@ -41,7 +41,7 @@ export const hooks = createFeature<{
                 {
                     node: rule,
                     word: stringifySelector(node),
-                }
+                },
             );
         }
         addType(context, node.value, rule);

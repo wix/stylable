@@ -27,7 +27,7 @@ describe('Formatters', () => {
                         const rng = createRange(12, 11, 12, 11 + i);
                         const asserter = asserters.getCompletions(
                             'mixins/imported-formatters.st.css',
-                            prefix
+                            prefix,
                         );
                         const exp: Array<Partial<Completion>> = [];
                         const notExp: Array<Partial<Completion>> = [];
@@ -45,7 +45,7 @@ describe('Formatters', () => {
                         notExp.push(createComp(ts_mixin_2, rng, tsFrom));
                         asserter.suggested(exp);
                         asserter.notSuggested(notExp);
-                    }
+                    },
                 ).timeout(10000);
 
                 it(
@@ -54,7 +54,7 @@ describe('Formatters', () => {
                         const rng = createRange(11, 49, 11, 49 + i);
                         const asserter = asserters.getCompletions(
                             'mixins/imported-formatters-single-value.st.css',
-                            prefix
+                            prefix,
                         );
                         const exp: Array<Partial<Completion>> = [];
                         const notExp: Array<Partial<Completion>> = [];
@@ -72,7 +72,7 @@ describe('Formatters', () => {
                         notExp.push(createComp(ts_mixin_2, rng, tsFrom));
                         asserter.suggested(exp);
                         asserter.notSuggested(notExp);
-                    }
+                    },
                 ).timeout(10000);
             });
         });
@@ -88,7 +88,7 @@ describe('Formatters', () => {
                         const rng = createRange(12, 11, 12, 11 + i);
                         const asserter = asserters.getCompletions(
                             'mixins/imported-formatters.st.css',
-                            prefix
+                            prefix,
                         );
                         const exp: Array<Partial<Completion>> = [];
                         const notExp: Array<Partial<Completion>> = [];
@@ -100,7 +100,7 @@ describe('Formatters', () => {
                         exp.push(createComp(js_formatter_2, rng, jsFrom));
                         asserter.suggested(exp);
                         asserter.notSuggested(notExp);
-                    }
+                    },
                 ).timeout(10000);
 
                 it(
@@ -109,7 +109,7 @@ describe('Formatters', () => {
                         const rng = createRange(11, 49, 11, 49 + i);
                         const asserter = asserters.getCompletions(
                             'mixins/imported-formatters-single-value.st.css',
-                            prefix
+                            prefix,
                         );
                         const exp: Array<Partial<Completion>> = [];
                         const notExp: Array<Partial<Completion>> = [];
@@ -121,14 +121,14 @@ describe('Formatters', () => {
                         exp.push(createComp(js_formatter_2, rng, jsFrom));
                         asserter.suggested(exp);
                         asserter.notSuggested(notExp);
-                    }
+                    },
                 ).timeout(10000);
             });
         });
 
         it('should complete formatters inside a mixin param list', () => {
             const asserter = asserters.getCompletions(
-                'mixins/imported-mixins-in-param-list.st.css'
+                'mixins/imported-mixins-in-param-list.st.css',
             );
             const rng = createRange(0, 0, 0, 0);
             const notExp: Array<Partial<Completion>> = [];

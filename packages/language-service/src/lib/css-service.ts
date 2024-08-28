@@ -57,7 +57,7 @@ export class CssService {
         const cssCompsRaw = this.inner.doComplete(
             document,
             position,
-            this.inner.parseStylesheet(document)
+            this.inner.parseStylesheet(document),
         );
         return cssCompsRaw ? cssCompsRaw.items : [];
     }
@@ -71,7 +71,7 @@ export class CssService {
             URI.file(filePath).toString(),
             'stylable',
             version,
-            cleanContentAst.toString()
+            cleanContentAst.toString(),
         );
     }
 
@@ -119,7 +119,7 @@ export class CssService {
 
                     atRule.params = atRule.params.replace(
                         stGlobalMatch,
-                        ' '.repeat(stGlobalMatch.length)
+                        ' '.repeat(stGlobalMatch.length),
                     );
 
                     atRule.params =
@@ -167,7 +167,7 @@ export class CssService {
 
                 const line = readDocRange(
                     document,
-                    Range.create(Position.create(diagStart.line, 0), diagEnd)
+                    Range.create(Position.create(diagStart.line, 0), diagEnd),
                 );
 
                 if (diag.code === 'emptyRules') {
@@ -220,7 +220,7 @@ export class CssService {
     public doHover(
         document: TextDocument,
         position: Position,
-        settings?: HoverSettings
+        settings?: HoverSettings,
     ): Hover | null {
         const stylesheet = this.inner.parseStylesheet(document);
         return this.inner.doHover(document, position, stylesheet, settings);
@@ -234,7 +234,7 @@ export class CssService {
     public getColorPresentations(
         document: TextDocument,
         color: Color,
-        range: Range
+        range: Range,
     ): ColorPresentation[] {
         const stylesheet: Stylesheet = this.inner.parseStylesheet(document);
         return this.inner.getColorPresentations(document, stylesheet, color, range);

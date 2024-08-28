@@ -30,7 +30,7 @@ describe('Imported Values', () => {
                     () => {
                         const asserter = asserters.getCompletions(
                             'imports/st-extends.st.css',
-                            prefix
+                            prefix,
                         );
                         const exp: Array<Partial<Completion>> = [];
                         const notExp: Array<Partial<Completion>> = [];
@@ -42,7 +42,7 @@ describe('Imported Values', () => {
                         }
                         asserter.suggested(exp);
                         asserter.notSuggested(notExp);
-                    }
+                    },
                 );
 
                 it(
@@ -52,7 +52,7 @@ describe('Imported Values', () => {
                     () => {
                         const asserter = asserters.getCompletions(
                             'imports/st-extends-with-semicolon.st.css',
-                            prefix
+                            prefix,
                         );
                         const exp: Array<Partial<Completion>> = [];
                         const notExp: Array<Partial<Completion>> = [];
@@ -64,7 +64,7 @@ describe('Imported Values', () => {
                         }
                         asserter.suggested(exp);
                         asserter.notSuggested(notExp);
-                    }
+                    },
                 );
             });
         });
@@ -98,7 +98,7 @@ describe('Imported Values', () => {
                         const rng = createRange(6, 0, 6, i);
                         const asserter = asserters.getCompletions(
                             'imports/st-extends-selectors.st.css',
-                            prefix
+                            prefix,
                         );
                         const exp: Array<Partial<Completion>> = [];
                         const notExp: Array<Partial<Completion>> = [];
@@ -110,7 +110,7 @@ describe('Imported Values', () => {
                         }
                         asserter.suggested(exp);
                         asserter.notSuggested(notExp);
-                    }
+                    },
                 );
 
                 it(
@@ -121,7 +121,7 @@ describe('Imported Values', () => {
                         const rng = createRange(6, 6, 6, 6 + i);
                         const asserter = asserters.getCompletions(
                             'imports/st-extends-complex-selectors.st.css',
-                            prefix
+                            prefix,
                         );
                         const exp: Array<Partial<Completion>> = [];
                         const notExp: Array<Partial<Completion>> = [];
@@ -133,7 +133,7 @@ describe('Imported Values', () => {
                         }
                         asserter.suggested(exp);
                         asserter.notSuggested(notExp);
-                    }
+                    },
                 );
             });
         });
@@ -158,7 +158,7 @@ describe('Imported Values', () => {
                     () => {
                         const asserter = asserters.getCompletions(
                             'imports/from-package/st-extends.st.css',
-                            prefix
+                            prefix,
                         );
                         const exp: Array<Partial<Completion>> = [];
                         const notExp: Array<Partial<Completion>> = [];
@@ -170,7 +170,7 @@ describe('Imported Values', () => {
                         }
                         asserter.suggested(exp);
                         asserter.notSuggested(notExp);
-                    }
+                    },
                 );
             });
         });

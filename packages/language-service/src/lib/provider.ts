@@ -72,7 +72,7 @@ import { StImportPlugin } from '../lib-new/features/ls-st-import';
 
 function findLast<T>(
     arr: T[],
-    predicate: (item: T, index: number, array: T[]) => boolean
+    predicate: (item: T, index: number, array: T[]) => boolean,
 ): T | null {
     for (let index = arr.length - 1; index >= 0; index--) {
         const item = arr[index];
@@ -104,7 +104,10 @@ export class Provider {
         PseudoElementCompletionPlugin,
         ValueCompletionPlugin,
     ];
-    constructor(private stylable: Stylable, private tsLangService: ExtendedTsLanguageService) {}
+    constructor(
+        private stylable: Stylable,
+        private tsLangService: ExtendedTsLanguageService,
+    ) {}
 
     public analyzeCaretContext(context: LangServiceContext) {
         for (const plugin of this.plugins) {
@@ -113,7 +116,7 @@ export class Provider {
     }
     public provideCompletionItemsFromSrc(
         context: LangServiceContext,
-        fs: IFileSystem
+        fs: IFileSystem,
     ): Completion[] {
         const src = context.document.getText();
         const filePath = context.meta.source;
@@ -133,7 +136,7 @@ export class Provider {
             res.processed.fakes,
             res.currentLine,
             res.cursorLineIndex,
-            fs
+            fs,
         );
         for (const provider of this.plugins) {
             completions.push(...provider.onCompletion(options));
@@ -146,7 +149,7 @@ export class Provider {
         src: string,
         position: ProviderPosition,
         filePath: string,
-        fs: IFileSystem
+        fs: IFileSystem,
     ): ProviderLocation[] {
         if (!filePath.endsWith('.st.css')) {
             return [];
@@ -174,7 +177,7 @@ export class Provider {
                     new ProviderLocation(maybeRequestPath, {
                         start: { line: 0, character: 0 },
                         end: { line: 0, character: 0 },
-                    })
+                    }),
                 );
             }
         } else if (Object.keys(meta.getAllSymbols()).find((sym) => sym === word.replace('.', ''))) {
@@ -187,9 +190,9 @@ export class Provider {
                             this.findWord(
                                 word.replace('.', ''),
                                 fs.readFileSync(meta.source, 'utf8'),
-                                position
-                            )
-                        )
+                                position,
+                            ),
+                        ),
                     );
                     break;
                 }
@@ -197,8 +200,8 @@ export class Provider {
                     defs.push(
                         new ProviderLocation(
                             meta.source,
-                            this.findWord(word, fs.readFileSync(meta.source, 'utf8'), position)
-                        )
+                            this.findWord(word, fs.readFileSync(meta.source, 'utf8'), position),
+                        ),
                     );
                     break;
                 }
@@ -218,7 +221,7 @@ export class Provider {
                         try {
                             filePath = this.stylable.resolvePath(
                                 dirname(meta.source),
-                                symbol.import.request
+                                symbol.import.request,
                             );
                         } catch {
                             // todo: figure out proper logging
@@ -230,7 +233,7 @@ export class Provider {
 
                         if (doc !== '') {
                             defs.push(
-                                new ProviderLocation(filePath, this.findWord(word, doc, position))
+                                new ProviderLocation(filePath, this.findWord(word, doc, position)),
                             );
                         }
                     }
@@ -245,7 +248,7 @@ export class Provider {
                     if (symbolStates && Object.keys(symbolStates).some((key) => key === word)) {
                         const postcsspos = new ProviderPosition(
                             position.line + 1,
-                            position.character
+                            position.character,
                         );
                         const pfp = pathFromPosition(callingMeta.sourceAst, postcsspos, [], true);
                         const selec = (pfp[pfp.length - 1] as postcss.Rule).selector;
@@ -262,7 +265,7 @@ export class Provider {
                             : t.focusChunk.text;
                         let name = findLast(
                             arr,
-                            (str: string) => !str.startsWith(':') || str.startsWith('::')
+                            (str: string) => !str.startsWith(':') || str.startsWith('::'),
                         );
                         name = name!.replace('.', '').replace(/:/g, '');
                         const localSymbol = callingMeta.getSymbol(name);
@@ -297,8 +300,8 @@ export class Provider {
                 defs.push(
                     new ProviderLocation(
                         meta.source,
-                        this.findWord(name, fs.readFileSync(stateMeta!.source, 'utf8'), position)
-                    )
+                        this.findWord(name, fs.readFileSync(stateMeta!.source, 'utf8'), position),
+                    ),
                 );
             }
         } else if (STCustomSelector.getCustomSelector(meta, word)) {
@@ -306,7 +309,7 @@ export class Provider {
             // seems to point to local custom selector definition.
             // see local-custom-selector.st.css for example.
             defs.push(
-                new ProviderLocation(meta.source, this.findWord(':--' + word, src, position))
+                new ProviderLocation(meta.source, this.findWord(':--' + word, src, position)),
             );
         } else if (!word.startsWith(word.charAt(0).toLowerCase())) {
             // Default import, link to top of imported stylesheet
@@ -319,7 +322,7 @@ export class Provider {
     public findMyState(
         origMeta: StylableMeta,
         elementName: string,
-        state: string
+        state: string,
     ): CSSResolve | null {
         const importedSymbol = origMeta.getClass(elementName)![`-st-extends`];
         let res: ReturnType<StylableResolver['resolveImport']> = null;
@@ -347,7 +350,7 @@ export class Provider {
         pos: Position,
         filePath: string,
         fs: IFileSystem,
-        paramInfo: typeof ParameterInformation
+        paramInfo: typeof ParameterInformation,
     ): SignatureHelp | null {
         if (!filePath.endsWith('.st.css')) {
             return null;
@@ -418,7 +421,7 @@ export class Provider {
                     activeParam,
                     mappedSymbol.import.from,
                     (meta.getSymbol(mixin)! as ImportSymbol).type === 'default',
-                    paramInfo
+                    paramInfo,
                 );
             } else if (mappedSymbol.import.from.endsWith('.js')) {
                 if (fs.fileExistsSync(mappedSymbol.import.from.slice(0, -3) + '.d.ts')) {
@@ -427,12 +430,12 @@ export class Provider {
                         activeParam,
                         mappedSymbol.import.from.slice(0, -3) + '.d.ts',
                         mappedSymbol.type === 'default',
-                        paramInfo
+                        paramInfo,
                     );
                 } else {
                     const resolvedPath = this.stylable.resolvePath(
                         dirname(meta.source),
-                        mappedSymbol.import.request
+                        mappedSymbol.import.request,
                     );
                     const fileExists = fs.fileExistsSync(resolvedPath);
 
@@ -441,7 +444,7 @@ export class Provider {
                               mixin,
                               activeParam,
                               fs.readFileSync(resolvedPath, 'utf8'),
-                              paramInfo
+                              paramInfo,
                           )
                         : null;
                 }
@@ -475,7 +478,7 @@ export class Provider {
                 lineIndex,
                 line.lastIndexOf(word),
                 lineIndex,
-                line.lastIndexOf(word) + word.length
+                line.lastIndexOf(word) + word.length,
             );
         } else {
             return createRange(0, 0, 0, 0);
@@ -491,13 +494,13 @@ export class Provider {
         activeParam: number,
         filePath: string,
         isDefault: boolean,
-        paramInfo: typeof ParameterInformation
+        paramInfo: typeof ParameterInformation,
     ): SignatureHelp | null {
         const sig: ts.Signature | undefined = extractTsSignature(
             filePath,
             mixin,
             isDefault,
-            this.tsLangService
+            this.tsLangService,
         );
         if (!sig || !sig.declaration) {
             return null;
@@ -542,7 +545,7 @@ export class Provider {
         mixin: string,
         activeParam: number,
         fileSrc: string,
-        paramInfo: typeof ParameterInformation
+        paramInfo: typeof ParameterInformation,
     ): SignatureHelp | null {
         const lines = fileSrc.split('\n');
         const mixinLine: number = lines.findIndex((l) => l.trim().startsWith('exports.' + mixin));
@@ -550,7 +553,7 @@ export class Provider {
             lines
                 .slice(0, mixinLine)
                 .reverse()
-                .find((l) => l.trim().startsWith('/**'))!
+                .find((l) => l.trim().startsWith('/**'))!,
         );
         const docLines = lines.slice(docStartLine, mixinLine);
         const formattedLines: string[] = [];
@@ -628,7 +631,7 @@ export class Provider {
         } else {
             descLines = formattedLines.slice(
                 0,
-                formattedLines.findIndex((l) => l.startsWith('@')) + 1
+                formattedLines.findIndex((l) => l.startsWith('@')) + 1,
             );
         }
         if (descLines[0] && descLines[0].startsWith('@description')) {
@@ -636,7 +639,7 @@ export class Provider {
         }
 
         const parameters: ParameterInformation[] = params.map((p) =>
-            paramInfo.create(p[1] + ': ' + p[0], p[2].trim())
+            paramInfo.create(p[1] + ': ' + p[0], p[2].trim()),
         );
 
         const sigInfo: SignatureInformation = {
@@ -654,7 +657,7 @@ export class Provider {
     private getSignatureForStateWithParamSelector(
         meta: StylableMeta,
         pos: ProviderPosition,
-        line: string
+        line: string,
     ): SignatureHelp | null {
         let word = '';
         const posChar = pos.character + 1;
@@ -710,7 +713,7 @@ export class Provider {
 
     private getSignatureForStateWithParamDefinition(
         pos: ProviderPosition,
-        line: string
+        line: string,
     ): SignatureHelp | null {
         const res = resolveStateTypeOrValidator(pos, line);
 
@@ -731,7 +734,7 @@ export class Provider {
         fakeRules: postcss.Rule[],
         fullLineText: string,
         cursorPosInLine: number,
-        fs: IFileSystem
+        fs: IFileSystem,
     ): PluginCompletionOptions {
         const path = pathFromPosition(meta.sourceAst, {
             line: position.line + 1,
@@ -749,16 +752,16 @@ export class Provider {
             }) === -1
                 ? parentAst
                 : astAtCursor &&
-                  isSelector(astAtCursor) &&
-                  fakeRules.findIndex((f) => {
-                      return f.selector === astAtCursor.selector;
-                  }) === -1
-                ? astAtCursor
-                : null;
+                    isSelector(astAtCursor) &&
+                    fakeRules.findIndex((f) => {
+                        return f.selector === astAtCursor.selector;
+                    }) === -1
+                  ? astAtCursor
+                  : null;
 
         const { lineChunkAtCursor, fixedCharIndex } = getChunkAtCursor(
             fullLineText,
-            cursorPosInLine
+            cursorPosInLine,
         );
         const ps = parseSelector(lineChunkAtCursor, fixedCharIndex);
         const chunkStrings: string[] = ps.selector.reduce((acc, s) => {
@@ -771,7 +774,7 @@ export class Provider {
         // transforms inline custom selectors (e.g. ":--custom" -> ".x .y")
         const expandedLine: string = STCustomSelector.transformCustomSelectorInline(
             meta,
-            lineChunkAtCursor
+            lineChunkAtCursor,
         )
             .split(' ')
             .pop()!; // TODO: replace with selector parser
@@ -781,7 +784,7 @@ export class Provider {
         let resolved: CSSResolve[] = [];
         if (currentSelector && resolvedElements[0].length) {
             const clas = resolvedElements[0].find(
-                (e) => e.type === 'class' || (e.type === 'element' && e.resolved.length > 1)
+                (e) => e.type === 'class' || (e.type === 'element' && e.resolved.length > 1),
             ); // TODO: better type parsing
             resolved = clas ? clas.resolved : [];
         }
@@ -834,7 +837,7 @@ function findRefs(
     scannedMeta: StylableMeta,
     callingMeta: StylableMeta,
     stylable: Stylable,
-    pos?: Position
+    pos?: Position,
 ): Location[] {
     if (!word) {
         return [];
@@ -908,9 +911,9 @@ function findRefs(
                     const callingElement = findLast(
                         callPs.selector[callPs.target.index].text.slice(
                             0,
-                            callPs.target.internalIndex + 1
+                            callPs.target.internalIndex + 1,
                         ),
-                        (e) => !e.startsWith(':') || e.startsWith('::')
+                        (e) => !e.startsWith(':') || e.startsWith('::'),
                     );
                     if (!callingElement) {
                         return false;
@@ -918,7 +921,7 @@ function findRefs(
                     const selector = (lastStPath as postcss.Rule).selector;
                     const selectorElement = stylable.transformSelector(
                         callingMeta,
-                        selector.slice(0, selector.indexOf(word) + word.length)
+                        selector.slice(0, selector.indexOf(word) + word.length),
                     ).resolved[0];
                     const resolvedSelectorElement =
                         selectorElement[selectorElement.length - 1].resolved;
@@ -929,8 +932,8 @@ function findRefs(
                             (inner) =>
                                 inner.meta.source === defMeta.source &&
                                 Object.keys((inner.symbol as ClassSymbol)[`-st-states`]!).includes(
-                                    word
-                                )
+                                    word,
+                                ),
                         ) &&
                         rs.resolved[rs.resolved.length - 1].symbol.name ===
                             lastResolvedSelector.symbol.name
@@ -1010,11 +1013,11 @@ function findRefs(
         const callPs = parseSelector((pfp[pfp.length - 1] as postcss.Rule).selector, char);
         const callingElement = findLast(
             callPs.selector[callPs.target.index].text.slice(0, callPs.target.internalIndex + 1),
-            (e) => !e.startsWith(':') || e.startsWith('::')
+            (e) => !e.startsWith(':') || e.startsWith('::'),
         );
         const blargh = stylable.transformSelector(
             callingMeta,
-            (pfp[pfp.length - 1] as postcss.Rule).selector
+            (pfp[pfp.length - 1] as postcss.Rule).selector,
         ).resolved;
         if (
             directiveRegex.test(decl.prop) &&
@@ -1027,7 +1030,7 @@ function findRefs(
                     inner.resolved.some(
                         (s) =>
                             s.symbol.name ===
-                            (decl.parent as postcss.Rule).selector.replace('.', '')
+                            (decl.parent as postcss.Rule).selector.replace('.', ''),
                     )
                 );
             })
@@ -1171,7 +1174,7 @@ function newFindRefs(
     callingMeta: StylableMeta,
     stylesheetsPath: string[], // TODO: use docs instead?
     stylable: Stylable,
-    pos?: Position
+    pos?: Position,
 ): Location[] {
     let refs: Location[] = [];
     if (word.startsWith(':global(')) {
@@ -1225,7 +1228,7 @@ function newFindRefs(
             if (scannedMeta.source === defMeta.source) {
                 // We're in the defining file
                 refs = refs.concat(
-                    findRefs(word.replace('.', ''), defMeta, scannedMeta, callingMeta, stylable)
+                    findRefs(word.replace('.', ''), defMeta, scannedMeta, callingMeta, stylable),
                 );
             } else {
                 // We're in a using file
@@ -1235,7 +1238,13 @@ function newFindRefs(
                 }
                 if (newSymb.meta.source === defMeta.source) {
                     refs = refs.concat(
-                        findRefs(word.replace('.', ''), defMeta, scannedMeta, callingMeta, stylable)
+                        findRefs(
+                            word.replace('.', ''),
+                            defMeta,
+                            scannedMeta,
+                            callingMeta,
+                            stylable,
+                        ),
                     );
                 }
             }
@@ -1263,8 +1272,8 @@ function newFindRefs(
                                 defMeta,
                                 scannedMeta,
                                 callingMeta,
-                                stylable
-                            )
+                                stylable,
+                            ),
                         );
                         done = true;
                     }
@@ -1280,7 +1289,7 @@ function newFindRefs(
                                 (n as postcss.Declaration).prop === `-st-from` &&
                                 path.resolve(
                                     path.dirname(scannedMeta.source),
-                                    (n as postcss.Declaration).value.replace(/"/g, '')
+                                    (n as postcss.Declaration).value.replace(/"/g, ''),
                                 ) === defMeta.source
                             );
                         })
@@ -1291,8 +1300,8 @@ function newFindRefs(
                                 defMeta,
                                 scannedMeta,
                                 callingMeta,
-                                stylable
-                            )
+                                stylable,
+                            ),
                         );
                         done = true;
                     }
@@ -1325,7 +1334,7 @@ function newFindRefs(
                             : t.focusChunk.text;
                         let name = findLast(
                             arr,
-                            (str: string) => !str.startsWith(':') || str.startsWith('::')
+                            (str: string) => !str.startsWith(':') || str.startsWith('::'),
                         );
                         const pse = stylable.transformSelector(callingMeta, selec).resolved;
                         name = name!.replace('.', '').replace(/:/g, '');
@@ -1334,7 +1343,7 @@ function newFindRefs(
                             !!pse[0].some(
                                 (psInner) =>
                                     psInner.name === name &&
-                                    psInner.resolved.some((r) => r.symbol.name === sym.name)
+                                    psInner.resolved.some((r) => r.symbol.name === sym.name),
                             )
                         ) {
                             return true;
@@ -1356,8 +1365,8 @@ function newFindRefs(
                         scannedMeta,
                         callingMeta,
                         stylable,
-                        pos
-                    )
+                        pos,
+                    ),
                 );
                 return;
             }
@@ -1373,11 +1382,11 @@ function newFindRefs(
                         !(parsed.selector[parsed.target.index] as SelectorChunk).type.startsWith(
                             (parsed.selector[parsed.target.index] as SelectorChunk).type
                                 .charAt(0)
-                                .toLowerCase()
+                                .toLowerCase(),
                         )
                             ? findLast(
                                   (parsed.selector[parsed.target.index] as SelectorChunk).text,
-                                  (str: string) => !str.startsWith(':') || str.startsWith('::')
+                                  (str: string) => !str.startsWith(':') || str.startsWith('::'),
                               )!.replace('.', '')
                             : (parsed.selector[parsed.target.index] as SelectorInternalChunk).name;
                     const reso = stylable.transformSelector(scannedMeta, r.selector).resolved;
@@ -1404,8 +1413,8 @@ function newFindRefs(
                                 scannedMeta,
                                 callingMeta,
                                 stylable,
-                                pos
-                            )
+                                pos,
+                            ),
                         );
                         done = true;
                     }
@@ -1420,7 +1429,7 @@ export function getRenameRefs(
     filePath: string,
     pos: ProviderPosition,
     fs: IFileSystem,
-    stylable: Stylable
+    stylable: Stylable,
 ): Location[] {
     const refs = getRefs(filePath, pos, fs, stylable);
     const newRefs: Location[] = [];
@@ -1439,7 +1448,7 @@ export function getRefs(
     filePath: string,
     position: ProviderPosition,
     fs: IFileSystem,
-    stylable: Stylable
+    stylable: Stylable,
 ): Location[] {
     const callingMeta = stylable.analyze(filePath);
 
@@ -1448,7 +1457,7 @@ export function getRefs(
         position,
         fs.realpathSync.native(filePath),
         stylable,
-        fs
+        fs,
     );
 
     if (!symb.meta) {
@@ -1499,7 +1508,7 @@ export function fixAndProcess(
     src: string,
     position: ProviderPosition,
     filePath: string,
-    fs: IFileSystem
+    fs: IFileSystem,
 ) {
     let cursorLineIndex: number = position.character;
     const lines = src.replace(/\r\n/g, '\n').split('\n');
@@ -1536,14 +1545,17 @@ export function fixAndProcess(
 }
 
 export class ProviderLocation {
-    constructor(public uri: string, public range: ProviderRange) {}
+    constructor(
+        public uri: string,
+        public range: ProviderRange,
+    ) {}
 }
 
 export function extractTsSignature(
     filePath: string,
     mixin: string,
     isDefault: boolean,
-    tsLangService: ExtendedTsLanguageService
+    tsLangService: ExtendedTsLanguageService,
 ): ts.Signature | undefined {
     tsLangService.setOpenedFiles([filePath]);
     const program = tsLangService.ts.getProgram();
@@ -1575,7 +1587,7 @@ export function extractJsModifierReturnType(mixin: string, fileSrc: string): str
         lines
             .slice(0, mixinLine)
             .reverse()
-            .find((l) => l.trim().startsWith('/**'))!
+            .find((l) => l.trim().startsWith('/**'))!,
     );
     const docLines = lines.slice(docStartLine, mixinLine);
     const formattedLines: string[] = [];
@@ -1648,7 +1660,7 @@ export function isInValue(lineText: string, position: ProviderPosition) {
 
 function getChunkAtCursor(
     fullLineText: string,
-    cursorPosInLine: number
+    cursorPosInLine: number,
 ): { lineChunkAtCursor: string; fixedCharIndex: number } {
     let fixedCharIndex = cursorPosInLine;
     let lineChunkAtCursor = fullLineText;
@@ -1689,7 +1701,7 @@ function findNode(nodes: any[], index: number): any {
             (m, n) => {
                 return m.sourceIndex > n.sourceIndex ? m : n;
             },
-            { sourceIndex: -1 }
+            { sourceIndex: -1 },
         );
 }
 
@@ -1698,7 +1710,7 @@ export function getDefSymbol(
     position: ProviderPosition,
     filePath: string,
     stylable: Stylable,
-    fs: IFileSystem
+    fs: IFileSystem,
 ) {
     const res = fixAndProcess(src, position, filePath, fs);
     let meta = res.processed.meta;
@@ -1729,10 +1741,10 @@ export function getDefSymbol(
 
     const { lineChunkAtCursor } = getChunkAtCursor(
         res.currentLine.slice(0, val.sourceIndex + val.value.length),
-        position.character
+        position.character,
     );
     const directiveRegex = new RegExp(
-        `-st-extends` + '|' + `-st-named` + '|' + `-st-default` + '|' + `-st-mixin`
+        `-st-extends` + '|' + `-st-named` + '|' + `-st-default` + '|' + `-st-mixin`,
     );
     if (lineChunkAtCursor.startsWith(':global')) {
         return { word: ':global(' + word + ')', meta };
@@ -1788,7 +1800,7 @@ export function getDefSymbol(
     // transforms inline custom selectors (e.g. ":--custom" -> ".x .y")
     const expandedLine: string = STCustomSelector.transformCustomSelectorInline(
         meta,
-        lineChunkAtCursor
+        lineChunkAtCursor,
     )
         .split(' ')
         .pop()!; // TODO: replace with selector parser
@@ -1797,7 +1809,7 @@ export function getDefSymbol(
     let reso: CSSResolve | undefined;
     if (!word.startsWith(word.charAt(0).toLowerCase())) {
         reso = resolvedElements[0][resolvedElements[0].length - 1].resolved.find(
-            (res) => !!(res.symbol as ClassSymbol)['-st-root']
+            (res) => !!(res.symbol as ClassSymbol)['-st-root'],
         );
     } else if (resolvedElements.length && resolvedElements[0].length) {
         reso = resolvedElements[0][resolvedElements[0].length - 1].resolved.find((res) => {

@@ -24,7 +24,7 @@ describe('@st-scope', () => {
                     .part {}
                 }
             `,
-                { from: 'path/to/style.css' }
+                { from: 'path/to/style.css' },
             );
 
             shouldReportNoDiagnostics(meta);
@@ -44,7 +44,7 @@ describe('@st-scope', () => {
                     .part {}
                 }
             `,
-                { from: 'path/to/style.css' }
+                { from: 'path/to/style.css' },
             );
 
             shouldReportNoDiagnostics(meta);
@@ -77,7 +77,7 @@ describe('@st-scope', () => {
             shouldReportNoDiagnostics(meta);
 
             expect((meta.targetAst!.nodes[0] as Rule).selector).to.equal(
-                '.entry__root .entry__part'
+                '.entry__root .entry__part',
             );
         });
 
@@ -99,7 +99,7 @@ describe('@st-scope', () => {
             shouldReportNoDiagnostics(meta);
 
             expect((meta.targetAst!.nodes[0] as Rule).selector).to.equal(
-                '.entry__scope1 .entry__part1, .entry__scope2 .entry__part1, .entry__scope1 .entry__part2, .entry__scope2 .entry__part2'
+                '.entry__scope1 .entry__part1, .entry__scope2 .entry__part1, .entry__scope1 .entry__part2, .entry__scope2 .entry__part2',
             );
         });
 
@@ -171,7 +171,7 @@ describe('@st-scope', () => {
             shouldReportNoDiagnostics(meta);
 
             expect((meta.targetAst!.nodes[1] as Rule).selector).to.equal(
-                '.entry__root .imported__part .entry__part1, .entry__root .imported__part .entry__part2'
+                '.entry__root .imported__part .entry__part1, .entry__root .imported__part .entry__part2',
             );
         });
 
@@ -203,7 +203,7 @@ describe('@st-scope', () => {
             shouldReportNoDiagnostics(meta);
 
             expect((meta.targetAst!.first as Rule).selector).to.equal(
-                '.imported__importedPart .entry__part'
+                '.imported__importedPart .entry__part',
             );
         });
 
@@ -228,7 +228,7 @@ describe('@st-scope', () => {
             shouldReportNoDiagnostics(meta);
 
             expect((meta.targetAst!.nodes[2] as Rule).selector).to.equal(
-                '.entry__root .entry__part .entry__scopedPart'
+                '.entry__root .entry__part .entry__scopedPart',
             );
 
             expect(meta.scopes).to.flatMatch([
@@ -258,7 +258,7 @@ describe('@st-scope', () => {
             shouldReportNoDiagnostics(meta);
 
             expect((meta.targetAst!.nodes[0] as Rule).selector).to.equal(
-                '.entry__root .entry__part, .entry__root .entry__otherPart, .entry__root .entry__oneMorePart'
+                '.entry__root .entry__part, .entry__root .entry__otherPart, .entry__root .entry__oneMorePart',
             );
         });
 
@@ -479,7 +479,7 @@ describe('@st-scope', () => {
                 },
             ]);
             expect((meta.targetAst!.first as Rule).selector).to.equal(
-                '.entry__root::unknownPart .entry__part'
+                '.entry__root::unknownPart .entry__part',
             );
         });
         it('should warn on invalid scoped selector', () => {
@@ -511,7 +511,7 @@ describe('@st-scope', () => {
                 },
             ]);
             expect((meta.targetAst!.first as Rule).selector).to.equal(
-                '.entry__root::unknownPart .entry__part::unknownPart'
+                '.entry__root::unknownPart .entry__part::unknownPart',
             );
         });
     });

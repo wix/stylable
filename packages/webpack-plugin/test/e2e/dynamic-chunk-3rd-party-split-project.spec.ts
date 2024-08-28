@@ -4,7 +4,7 @@ import { dirname } from 'path';
 
 const project = 'dynamic-chunk-3rd-party-split-project';
 const projectDir = dirname(
-    require.resolve(`@stylable/webpack-plugin/test/e2e/projects/${project}/webpack.config`)
+    require.resolve(`@stylable/webpack-plugin/test/e2e/projects/${project}/webpack.config`),
 );
 
 describe(`(${project})`, () => {
@@ -17,7 +17,7 @@ describe(`(${project})`, () => {
         },
         before,
         afterEach,
-        after
+        after,
     );
 
     it('split chunks nicely', () => {
@@ -30,7 +30,7 @@ describe(`(${project})`, () => {
                 'test-components/button.js',
                 'src/button.js',
             ],
-            'Button'
+            'Button',
         );
         expect(chunkByName.Gallery).to.eql(
             [
@@ -39,7 +39,7 @@ describe(`(${project})`, () => {
                 'test-components/label.js',
                 'src/gallery.js',
             ],
-            'Gallery'
+            'Gallery',
         );
         expect(chunkByName.main).to.eql(['src/index.js', 'dist/index.mjs'], 'main');
     });

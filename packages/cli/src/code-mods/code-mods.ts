@@ -24,7 +24,7 @@ export function codeMods({ fs, rootDir, extension, mods, log }: CodeModsOptions)
         relative,
         rootDir,
         extension,
-        new Set<string>(['node_modules', '.git'])
+        new Set<string>(['node_modules', '.git']),
     );
 
     if (files.size === 0) {

@@ -55,7 +55,7 @@ describe('CLI Codemods st-global-custom-property-to-at-property', () => {
         const dirContent = loadDirSync(tempDir.path);
 
         expect(dirContent['style.st.css']).equal(
-            '@property st-global(--myVar);\n@property st-global(--mySecondVar);\n@property st-global(--myThirdVar);'
+            '@property st-global(--myVar);\n@property st-global(--mySecondVar);\n@property st-global(--myThirdVar);',
         );
     });
 
@@ -77,12 +77,12 @@ describe('CLI Codemods st-global-custom-property-to-at-property', () => {
         expect(stdout).to.match(
             new RegExp(
                 `style.st.css: ${cssCustomPropertyDiagnostics.GLOBAL_CSS_VAR_MISSING_COMMA(
-                    '--myVar --mySecondVar'
-                )}`
-            )
+                    '--myVar --mySecondVar',
+                )}`,
+            ),
         );
         expect(dirContent['style.st.css']).equal(
-            '@st-global-custom-property --myVar --mySecondVar;'
+            '@st-global-custom-property --myVar --mySecondVar;',
         );
     });
 });

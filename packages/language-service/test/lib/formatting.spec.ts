@@ -111,7 +111,7 @@ describe('Formatting', () => {
             const res = getFormattingEdits(
                 '.root { color: red      ;}',
                 undefined,
-                experimentalOptions
+                experimentalOptions,
             );
 
             expect(res).to.eql([
@@ -130,7 +130,7 @@ describe('Formatting', () => {
             const res = getFormattingEdits(
                 '.a{prop:\ngreen,\nblue}',
                 undefined,
-                experimentalOptions
+                experimentalOptions,
             );
 
             expect(res).to.eql([
@@ -151,7 +151,7 @@ describe('Formatting', () => {
             const res = getFormattingEdits(
                 '.a { color: red      ;}\n.b { color: green      ;}',
                 { start: 25, end: 50 },
-                experimentalOptions
+                experimentalOptions,
             );
 
             expect(res).to.eql([
@@ -170,7 +170,7 @@ describe('Formatting', () => {
             const res = getFormattingEdits(
                 '.a{color:red}.b{color:green}',
                 { start: 13, end: 28 },
-                experimentalOptions
+                experimentalOptions,
             );
 
             expect(res).to.eql([

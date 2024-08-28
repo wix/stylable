@@ -114,7 +114,7 @@ describe('Definitions', () => {
 
             it('should return definition of imported class used as pseudo-element', () => {
                 const defs = asserters.getDefinition(
-                    'definitions/imported-class-pseudo-element.st.css'
+                    'definitions/imported-class-pseudo-element.st.css',
                 );
                 expect(defs.length).to.equal(1);
                 const def = defs[0];
@@ -127,7 +127,7 @@ describe('Definitions', () => {
                 expect(defs.length).to.equal(1);
                 const def = defs[0];
                 expect(def.uri).to.equal(
-                    getCasePath('../node_modules/fake-stylable-package/stylesheet.st.css')
+                    getCasePath('../node_modules/fake-stylable-package/stylesheet.st.css'),
                 );
                 expect(def.range).to.eql(createRange(9, 1, 9, 6));
             });
@@ -147,7 +147,7 @@ describe('Definitions', () => {
                 expect(defs.length).to.equal(1);
                 const def = defs[0];
                 expect(def.uri).to.equal(
-                    getCasePath('../node_modules/fake-stylable-package/stylesheet.st.css')
+                    getCasePath('../node_modules/fake-stylable-package/stylesheet.st.css'),
                 );
                 expect(def.range).to.eql(createRange(1, 4, 1, 10));
             });
@@ -172,12 +172,12 @@ describe('Definitions', () => {
 
             it('should return definition of 3rd party JS mixin in -st-named', () => {
                 const defs = asserters.getDefinition(
-                    'definitions/3rd-party-mixins-named-js.st.css'
+                    'definitions/3rd-party-mixins-named-js.st.css',
                 );
                 expect(defs.length).to.equal(1);
                 const def = defs[0];
                 expect(def.uri).to.equal(
-                    getCasePath('../node_modules/fake-stylable-package/js-mixins.js')
+                    getCasePath('../node_modules/fake-stylable-package/js-mixins.js'),
                 );
                 expect(def.range).to.eql(createRange(8, 8, 8, 14));
             });
@@ -240,7 +240,7 @@ describe('Definitions', () => {
                         const def = defs[0];
                         expect(def.uri).to.equal(getCasePath('definitions/states-import.st.css'));
                         expect(def.range).to.eql(createRange(0, 1, 0, 5));
-                    }
+                    },
                 );
             });
 
@@ -266,7 +266,7 @@ describe('Definitions', () => {
                         const def = defs[0];
                         expect(def.uri).to.equal(getCasePath('definitions/states-import.st.css'));
                         expect(def.range).to.eql(createRange(4, 1, 4, 4));
-                    }
+                    },
                 );
             });
         });

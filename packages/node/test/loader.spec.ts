@@ -22,7 +22,7 @@ describeIf(nodeMajorVersion > 14)('node loader', () => {
         symlinkSync(
             join(rootRepoPath, 'node_modules'),
             join(tempDir.path, 'node_modules'),
-            'junction'
+            'junction',
         );
     });
 
@@ -91,7 +91,7 @@ describeIf(nodeMajorVersion > 14)('node loader', () => {
 
         expect(result.status, result.stderr).to.equal(0);
         expect(result.stdout, result.stderr).to.eql(
-            `{ root: 'x-index__root', part: 'x-index__part' }\n`
+            `{ root: 'x-index__root', part: 'x-index__part' }\n`,
         );
     });
 
@@ -129,7 +129,7 @@ describeIf(nodeMajorVersion > 14)('node loader', () => {
 
         expect(result.status, result.stderr).to.equal(0);
         expect(result.stdout, result.stderr).to.eql(
-            `{ root: 'x-index__root', part: 'x-index__part' }\n`
+            `{ root: 'x-index__root', part: 'x-index__part' }\n`,
         );
     });
 });

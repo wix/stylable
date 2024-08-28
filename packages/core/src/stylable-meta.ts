@@ -65,7 +65,7 @@ export class StylableMeta {
     constructor(
         public sourceAst: postcss.Root,
         public diagnostics: Diagnostics,
-        public flags: FeatureFlags
+        public flags: FeatureFlags,
     ) {
         // initiate features
         const context: FeatureContext = { meta: this, diagnostics };

@@ -51,7 +51,7 @@ describe('createForceStateMatchers', () => {
 
     it('should ignore DOMStructurePseudoClasses from states', () => {
         const out = createForceStateMatchers(
-            `.x:${Array.from(DOMLocationBasedPseudoClasses).join(':')}`
+            `.x:${Array.from(DOMLocationBasedPseudoClasses).join(':')}`,
         );
         expect(out).to.eql([
             [
@@ -101,7 +101,7 @@ describe('stylable-forcestates-plugin', () => {
         });
 
         expect((res.meta.targetAst!.nodes[1] as postcss.Rule).selector).to.equal(
-            '.entry__root.entry--myState,.entry__root[stylable-force-state-myState]'
+            '.entry__root.entry--myState,.entry__root[stylable-force-state-myState]',
         );
     });
     it('should mark a boolean state as forced using a data-attribute selector (namespace mapping function)', () => {
@@ -128,7 +128,7 @@ describe('stylable-forcestates-plugin', () => {
         });
 
         expect((res.meta.targetAst!.nodes[1] as postcss.Rule).selector).to.equal(
-            '.entry__root.entry--myState,.entry__root[stylable-force-state-myState]'
+            '.entry__root.entry--myState,.entry__root[stylable-force-state-myState]',
         );
     });
 
@@ -154,7 +154,7 @@ describe('stylable-forcestates-plugin', () => {
         });
 
         expect((res.meta.targetAst!.nodes[1] as postcss.Rule).selector).to.equal(
-            '.entry__root:hover,.entry__root[stylable-force-state-hover]'
+            '.entry__root:hover,.entry__root[stylable-force-state-hover]',
         );
     });
 
@@ -185,8 +185,8 @@ describe('stylable-forcestates-plugin', () => {
             `.entry__root.entry---myState-5-value,.entry__root[${createDataAttr(
                 OVERRIDE_STATE_PREFIX,
                 'myState',
-                'value'
-            )}]`
+                'value',
+            )}]`,
         );
     });
 
@@ -217,8 +217,8 @@ describe('stylable-forcestates-plugin', () => {
             `.entry__root.entry---myState-10-some_value,.entry__root[${createDataAttr(
                 OVERRIDE_STATE_PREFIX,
                 'myState',
-                'some value'
-            )}]`
+                'some value',
+            )}]`,
         );
     });
 });

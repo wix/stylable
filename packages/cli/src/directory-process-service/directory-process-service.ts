@@ -7,7 +7,7 @@ export interface DirectoryProcessServiceOptions {
         watcher: DirectoryProcessService,
         affectedFiles: Set<string>,
         deletedFiles: Set<string>,
-        changeOrigin?: IWatchEvent
+        changeOrigin?: IWatchEvent,
     ): Promise<{ generatedFiles: Set<string> }> | { generatedFiles: Set<string> };
     directoryFilter?(directoryPath: string): boolean;
     fileFilter?(filePath: string): boolean;
@@ -22,7 +22,10 @@ export interface DirectoryProcessServiceOptions {
 export class DirectoryProcessService {
     public invalidationMap = new Map<string, Set<string>>();
     public watchedDirectoryFiles = new Map<string, Set<string>>();
-    constructor(private fs: IFileSystem, private options: DirectoryProcessServiceOptions = {}) {
+    constructor(
+        private fs: IFileSystem,
+        private options: DirectoryProcessServiceOptions = {},
+    ) {
         if (this.options.watchMode && !this.options.watchOptions?.skipInitialWatch) {
             this.startWatch();
         }
@@ -100,7 +103,7 @@ export class DirectoryProcessService {
     }
     public async handleWatchChange(
         files: Map<string, IWatchEvent>,
-        originalEvent: IWatchEvent
+        originalEvent: IWatchEvent,
     ): Promise<{
         hasChanges: boolean;
         generatedFiles: Set<string>;
@@ -164,7 +167,7 @@ export class DirectoryProcessService {
                 this,
                 affectedFiles,
                 deletedFiles,
-                originalEvent
+                originalEvent,
             );
 
             return {

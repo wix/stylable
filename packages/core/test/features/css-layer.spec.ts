@@ -225,7 +225,7 @@ describe('features/css-layer', () => {
 
             /*
                 @analyze-error(reserved wide keywords) word(initial) ${cssLayerDiagnostics.RESERVED_KEYWORD(
-                    'initial'
+                    'initial',
                 )}
                 @atrule(reserved wide keywords) initial
             */
@@ -352,7 +352,7 @@ describe('features/css-layer', () => {
                 '/entry.st.css': `
                     /* @transform-error word(unknown) ${cssLayerDiagnostics.UNKNOWN_IMPORTED_LAYER(
                         `unknown`,
-                        `./imported.st.css`
+                        `./imported.st.css`,
                     )} */
                     @st-import [layer(unknown as local)] from './imported.st.css';
                 `,
@@ -435,7 +435,7 @@ describe('features/css-layer', () => {
                 .into {
                     -st-mixin: mix;
                 }
-            `)
+            `),
             );
 
             const { meta } = sheets['/entry.st.css'];
@@ -456,7 +456,7 @@ describe('features/css-layer', () => {
                 @layer entry__x {
                     .entry__into { id: mix-in-layer; }
                 }
-            `)
+            `),
             );
         });
     });
@@ -580,7 +580,7 @@ describe('features/css-layer', () => {
                 deindent(`
                     @layer a, b;
                     @layer c {}
-                `)
+                `),
             );
 
             // JS exports
@@ -600,7 +600,7 @@ describe('features/css-layer', () => {
                 deindent(`
                     @layer a, st-global(b);
                     @layer st-global(c) {}
-                `)
+                `),
             );
         });
     });

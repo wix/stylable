@@ -85,7 +85,7 @@ function getStVarsSrcPosition(varName: string, meta: StylableMeta): Position | u
                                         rawDeclaration,
                                         node.name,
                                         node.after,
-                                        rootPosition
+                                        rootPosition,
                                     ),
                                     generatedOffsetLevel: level,
                                 };
@@ -107,7 +107,7 @@ function getStVarsSrcPosition(varName: string, meta: StylableMeta): Position | u
 
 function getKeyframeSrcPosition(keyframeName: string, meta: StylableMeta): Position | undefined {
     const keyframe = CSSKeyframes.getKeyframesStatements(meta).find(
-        (keyframe) => keyframe.params === keyframeName
+        (keyframe) => keyframe.params === keyframeName,
     );
 
     if (keyframe && keyframe.source && keyframe.source.start) {
@@ -153,7 +153,7 @@ type LinePartMapping = [number, number, number, number];
 function createLinePartMapping(
     dtsOffset: number,
     srcLine: number,
-    srcCol: number
+    srcCol: number,
 ): LinePartMapping {
     return [dtsOffset, 0, srcLine, srcCol];
 }
@@ -188,7 +188,7 @@ function createStateLineMapping(
     stateTokens: ClassStateToken[],
     entryClassName: string,
     lastSrcPosition: Position,
-    meta: StylableMeta
+    meta: StylableMeta,
 ) {
     const res: { mapping: LinePartMapping[]; lastSrcPosition: Position } = {
         mapping: [],
@@ -216,8 +216,8 @@ function createStateLineMapping(
                 createLinePartMapping(
                     stateToken.stateName.column - prevDtsColumn,
                     stateSourcePosition.line - res.lastSrcPosition.line,
-                    stateSourcePosition.column - res.lastSrcPosition.column
-                )
+                    stateSourcePosition.column - res.lastSrcPosition.column,
+                ),
             );
 
             prevDtsColumn = stateToken.stateName.column;
@@ -264,7 +264,7 @@ function getClassSourceName(targetName: string, classTokens: ClassesToken): stri
 export function generateDTSSourceMap(
     dtsContent: string,
     meta: StylableMeta,
-    targetFilePath?: string
+    targetFilePath?: string,
 ) {
     const tokens = tokenizeDTS(dtsContent);
     const mapping: Record<number, LineMapping> = {};
@@ -308,7 +308,7 @@ export function generateDTSSourceMap(
                     mapping[dtsLine] = createLineMapping(
                         SPACING.repeat(currentSrcPosition.generatedOffsetLevel ?? 1).length,
                         lineDelta,
-                        columnDelta
+                        columnDelta,
                     );
 
                     // reset to default offset level
@@ -319,7 +319,7 @@ export function generateDTSSourceMap(
             } else if (resToken.type === 'states') {
                 const classSourceName = getClassSourceName(
                     resToken.token.className.value,
-                    tokens[1] as ClassesToken
+                    tokens[1] as ClassesToken,
                 );
 
                 if (classSourceName) {
@@ -327,7 +327,7 @@ export function generateDTSSourceMap(
                         resToken.token.classStates,
                         stripQuotes(classSourceName),
                         lastSrcPosition,
-                        meta
+                        meta,
                     );
                     lastSrcPosition = stateRes.lastSrcPosition;
                     mapping[dtsLine] = stateRes.mapping;
@@ -350,7 +350,7 @@ export function generateDTSSourceMap(
                 .join(';'),
         },
         null,
-        4
+        4,
     );
 }
 
@@ -358,7 +358,7 @@ function calculateEstimatedPosition(
     rawValue: string,
     name: string,
     after = '',
-    rootPosition?: Position
+    rootPosition?: Position,
 ): Position {
     const valueLength = rawValue.indexOf(name + after) + name.length - after.length;
     const value = rawValue.slice(0, valueLength);

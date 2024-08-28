@@ -29,7 +29,7 @@ fs.writeFileSync(
 }
 
 @keyframes test {}
-`
+`,
 );
 
 after(() => {

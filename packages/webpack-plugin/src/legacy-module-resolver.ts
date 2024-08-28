@@ -9,7 +9,7 @@ function bundleSafeRequireExtensions(): string[] {
         // we use nodeModule here to avoid bundling warnings about require.extensions we always has fallback for browsers
         extensions = Object.keys(
             (nodeModule as typeof nodeModule & { _extensions?: Record<string, unknown> })
-                ._extensions ?? {}
+                ._extensions ?? {},
         );
     } catch {
         extensions = [];
@@ -23,7 +23,7 @@ const resolverContext = {};
  */
 export function createWebpackResolver(
     fileSystem: ResolveOptions['fileSystem'],
-    resolveOptions: Partial<ResolveOptions>
+    resolveOptions: Partial<ResolveOptions>,
 ) {
     const extensions =
         resolveOptions.extensions && resolveOptions.extensions.length
@@ -40,7 +40,7 @@ export function createWebpackResolver(
         const res = eResolver.resolveSync(resolverContext, directoryPath, request);
         if (res === false) {
             throw new Error(
-                `Stylable does not support browser field 'false' values. ${request} resolved to 'false' from ${directoryPath}`
+                `Stylable does not support browser field 'false' values. ${request} resolved to 'false' from ${directoryPath}`,
             );
         }
         return res;

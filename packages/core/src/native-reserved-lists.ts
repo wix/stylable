@@ -93,7 +93,7 @@ export const knownPseudoClassesWithNestedSelectors = reservedFunctionalPseudoCla
                 return false;
         }
         return true;
-    }
+    },
 );
 
 export const nativePseudoElements = [

@@ -13,7 +13,7 @@ declare module 'typescript' {
         useCaseSensitiveFileNames: boolean,
         currentDirectory: string,
         depth: number | undefined,
-        getFileSystemEntries: (path: string) => FileSystemEntries
+        getFileSystemEntries: (path: string) => FileSystemEntries,
     ): string[];
 
     // used by matchFiles above
@@ -25,6 +25,6 @@ declare module 'typescript' {
     // needed to resolve newLine, while taking compilerOptions into consideration, for each `LanguageServiceHost`
     export function getNewLineCharacter(
         options: ts.CompilerOptions | ts.PrinterOptions,
-        getNewLine?: () => string
+        getNewLine?: () => string,
     ): string;
 }

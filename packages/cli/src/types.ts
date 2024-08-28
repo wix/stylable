@@ -25,12 +25,12 @@ export type ConfigurationProvider<P extends string = string> = () => Configurati
  * @deprecated use stcConfig() instead
  */
 export function typedConfiguration<P extends string>(
-    configOrConfigProvider: Configuration<P> | ConfigurationProvider<P>
+    configOrConfigProvider: Configuration<P> | ConfigurationProvider<P>,
 ) {
     return configOrConfigProvider;
 }
 export function stcConfig<P extends string>(
-    configOrConfigProvider: Configuration<P> | ConfigurationProvider<P>
+    configOrConfigProvider: Configuration<P> | ConfigurationProvider<P>,
 ) {
     return configOrConfigProvider;
 }
@@ -47,7 +47,7 @@ export interface RawProjectEntity {
 export type STCProjects = ProjectEntity[];
 export type ResolveRequests = (
     projects: Array<RawProjectEntity>,
-    context: ResolveProjectsContext
+    context: ResolveProjectsContext,
 ) => Promise<STCProjects> | STCProjects;
 
 export interface ResolveProjectsContext {

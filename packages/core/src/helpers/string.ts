@@ -9,7 +9,7 @@ export function filename2varname(filename: string) {
             // remove extension (eg. .css)
             .replace(/(?=.*)\.\w+$/, '')
             // remove potential .st extension prefix
-            .replace(/\.st$/, '')
+            .replace(/\.st$/, ''),
     );
 }
 

@@ -9,13 +9,13 @@ const testInjectCSS = new Function(
     'css',
     'depth',
     'runtimeId',
-    `(${injectCSS})(namespace, css, depth, runtimeId);`
+    `(${injectCSS})(namespace, css, depth, runtimeId);`,
 ) as (
     document: MicroDocument,
     namespace: string,
     css: string,
     depth: number,
-    runtimeId: string
+    runtimeId: string,
 ) => void;
 
 describe('css-runtime-renderer', () => {

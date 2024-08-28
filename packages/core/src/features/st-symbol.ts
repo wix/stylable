@@ -123,12 +123,12 @@ export const diagnostics = {
     REDECLARE_SYMBOL: createDiagnosticReporter(
         '06001',
         'warning',
-        (name: string) => `redeclare symbol "${name}"`
+        (name: string) => `redeclare symbol "${name}"`,
     ),
     REDECLARE_ROOT: createDiagnosticReporter(
         '06002',
         'error',
-        () => `root is used for the stylesheet and cannot be overridden`
+        () => `root is used for the stylesheet and cannot be overridden`,
     ),
 };
 
@@ -148,7 +148,7 @@ export function get<T extends keyof SymbolMap>(meta: StylableMeta, name: string,
 
 export function getAll<NS extends keyof NamespaceToSymbolType = `main`>(
     meta: StylableMeta,
-    ns?: NS
+    ns?: NS,
 ) {
     const { byNSFlat } = plugableRecord.getUnsafe(meta.data, dataKey);
     return byNSFlat[ns || `main`] as State['byNSFlat'][NS];
@@ -156,7 +156,7 @@ export function getAll<NS extends keyof NamespaceToSymbolType = `main`>(
 
 export function getAllByType<T extends SymbolTypes>(
     meta: StylableMeta,
-    type: T
+    type: T,
 ): State['byType'][T] {
     const { byType } = plugableRecord.getUnsafe(meta.data, dataKey);
     return byType[type];
@@ -177,7 +177,7 @@ export function addSymbol({
 }) {
     const { byNS, byNSFlat, byType, symbolToAst } = plugableRecord.getUnsafe(
         context.meta.data,
-        dataKey
+        dataKey,
     );
     const name = localName || symbol.name;
     const typeTable = byType[symbol._kind];
@@ -198,7 +198,7 @@ export function addSymbol({
 
 export function getSymbolAstNode(
     meta: StylableMeta,
-    symbol: StylableSymbol
+    symbol: StylableSymbol,
 ): postcss.Node | undefined {
     const { symbolToAst } = plugableRecord.getUnsafe(meta.data, dataKey);
     return symbolToAst.get(symbol);

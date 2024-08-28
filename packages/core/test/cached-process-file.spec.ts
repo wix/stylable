@@ -69,7 +69,7 @@ describe('cachedProcessFile', () => {
         const out = p.process(file);
         expect(out).to.equal('FROM CACHE');
         expect(p.processContent('Hello', file), 'process context should ignore cache').to.equal(
-            'Hello'
+            'Hello',
         );
     });
 

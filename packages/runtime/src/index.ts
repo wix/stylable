@@ -103,7 +103,7 @@ export function injectCSS(id: string, css: string, depth: number, runtimeId: str
     style.setAttribute('st_runtime', runtimeId);
     style.textContent = css;
     var loadedStyleElements = head.querySelectorAll<HTMLStyleElement>(
-        'style[st_runtime="' + runtimeId + '"]'
+        'style[st_runtime="' + runtimeId + '"]',
     );
     var inserted = false;
     var insertAfter: HTMLElement | undefined;

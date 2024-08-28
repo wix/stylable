@@ -4,7 +4,7 @@ import { dirname } from 'path';
 
 const project = 'dev-mode-warnings-project';
 const projectDir = dirname(
-    require.resolve(`@stylable/webpack-plugin/test/e2e/projects/${project}/webpack.config`)
+    require.resolve(`@stylable/webpack-plugin/test/e2e/projects/${project}/webpack.config`),
 );
 
 describe(`(${project})`, () => {
@@ -17,7 +17,7 @@ describe(`(${project})`, () => {
         },
         before,
         afterEach,
-        after
+        after,
     );
 
     it('css is working', async () => {
@@ -33,7 +33,7 @@ describe(`(${project})`, () => {
         const notErrorValues = await page.evaluate(() => {
             const computedStyle = getComputedStyle(
                 document.body.querySelector('[data-not-direct]')!,
-                '::before'
+                '::before',
             );
             return {
                 content: computedStyle.content,
@@ -45,7 +45,7 @@ describe(`(${project})`, () => {
         expect(values.color).to.eql('rgb(255, 0, 0)');
 
         expect(values.content).to.match(
-            /"class extending component '\.root => \.comp\d+__root' in stylesheet 'comp\.st\.css' was set on a node that does not extend '\.root => \.other\d+__root' from stylesheet 'other\.st\.css'"/
+            /"class extending component '\.root => \.comp\d+__root' in stylesheet 'comp\.st\.css' was set on a node that does not extend '\.root => \.other\d+__root' from stylesheet 'other\.st\.css'"/,
         );
     });
 });

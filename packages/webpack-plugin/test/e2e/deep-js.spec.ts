@@ -5,7 +5,7 @@ import { dirname, join } from 'path';
 
 const project = 'deep-js';
 const projectDir = dirname(
-    require.resolve(`@stylable/webpack-plugin/test/e2e/projects/${project}/webpack.config`)
+    require.resolve(`@stylable/webpack-plugin/test/e2e/projects/${project}/webpack.config`),
 );
 
 describe(`(${project})`, () => {
@@ -20,7 +20,7 @@ describe(`(${project})`, () => {
         },
         before,
         afterEach,
-        after
+        after,
     );
 
     it('deep invalidation from javascript file', async () => {
@@ -34,20 +34,20 @@ describe(`(${project})`, () => {
             () =>
                 promises.writeFile(
                     join(projectRunner.testDir, 'src', 'mixin.js'),
-                    `module.exports = () => ({ color: 'green' });`
+                    `module.exports = () => ({ color: 'green' });`,
                 ),
             (waitFor) =>
                 waitFor(
                     async () => {
                         await page.reload();
                         const updatedColor = await page.evaluate(
-                            () => (window as any).backgroundColorAtLoadTime
+                            () => (window as any).backgroundColorAtLoadTime,
                         );
 
                         expect(updatedColor).to.eql('rgb(0, 128, 0)');
                     },
-                    { timeout: 10_000 }
-                )
+                    { timeout: 10_000 },
+                ),
         );
     });
 });

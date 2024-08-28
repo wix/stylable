@@ -31,74 +31,74 @@ export const diagnostics = {
     GLOBAL_MAPPING_LIMITATION: createDiagnosticReporter(
         '21000',
         'error',
-        () => `Currently class mapping is limited to single global selector: :global(<selector>)`
+        () => `Currently class mapping is limited to single global selector: :global(<selector>)`,
     ),
     UNSUPPORTED_TOP_DEF: createDiagnosticReporter(
         '21001',
         'error',
-        () => 'top level @st must start with a class'
+        () => 'top level @st must start with a class',
     ),
     MISSING_EXTEND: createDiagnosticReporter(
         '21002',
         'error',
-        () => `missing required class reference to extend a class (e.g. ":is(.class-name)"`
+        () => `missing required class reference to extend a class (e.g. ":is(.class-name)"`,
     ),
     OVERRIDE_IMPORTED_CLASS: createDiagnosticReporter(
         '21003',
         'error',
-        () => `cannot override imported class definition`
+        () => `cannot override imported class definition`,
     ),
     STATE_OUT_OF_CONTEXT: createDiagnosticReporter(
         '21004',
         'error',
-        () => 'pseudo-state definition must be directly nested in a `@st .class{}` definition'
+        () => 'pseudo-state definition must be directly nested in a `@st .class{}` definition',
     ),
     // 31005 - unused
     MISSING_MAPPED_SELECTOR: createDiagnosticReporter(
         '21006',
         'error',
-        () => `missing mapped selector after "=>"`
+        () => `missing mapped selector after "=>"`,
     ),
     MULTI_MAPPED_SELECTOR: createDiagnosticReporter(
         '21007',
         'error',
         () =>
-            'mapped selector accepts only a single selector.\nuse `:is()` or `:where()` to map multiple selectors)'
+            'mapped selector accepts only a single selector.\nuse `:is()` or `:where()` to map multiple selectors)',
     ),
     ELEMENT_OUT_OF_CONTEXT: createDiagnosticReporter(
         '21008',
         'error',
-        () => 'pseudo-element definition must be directly nested in a `@st .class{}` definition'
+        () => 'pseudo-element definition must be directly nested in a `@st .class{}` definition',
     ),
     MISSING_MAPPING: createDiagnosticReporter(
         '21009',
         'error',
-        () => 'expected selector mapping (e.g. "=> <selector>")'
+        () => 'expected selector mapping (e.g. "=> <selector>")',
     ),
     REDECLARE: createDiagnosticReporter(
         '21010',
         'error',
-        (type: string, src: string) => `redeclare ${type} definition: "${src}"`
+        (type: string, src: string) => `redeclare ${type} definition: "${src}"`,
     ),
     INVALID_ST_DEF: createDiagnosticReporter(
         '21011',
         'error',
-        (params: string) => `invalid @st "${params}" definition`
+        (params: string) => `invalid @st "${params}" definition`,
     ),
     MAPPING_UNSUPPORTED_NESTING: createDiagnosticReporter(
         '21012',
         'error',
-        () => 'mapped selector can only contain `&` as an initial selector'
+        () => 'mapped selector can only contain `&` as an initial selector',
     ),
     UNEXPECTED_EXTRA_VALUE: createDiagnosticReporter(
         '21013',
         'error',
-        (extraValue: string) => `found unexpected extra value definition: "${extraValue}"`
+        (extraValue: string) => `found unexpected extra value definition: "${extraValue}"`,
     ),
     CLASS_OUT_OF_CONTEXT: createDiagnosticReporter(
         '21014',
         'error',
-        () => 'class definition must be top level'
+        () => 'class definition must be top level',
     ),
 };
 
@@ -157,7 +157,7 @@ export const hooks = createFeature({
 
         const { analyzedDefToPartSymbol, declaredClasses } = plugableRecord.getUnsafe(
             context.meta.data,
-            dataKey
+            dataKey,
         );
         const analyzed = analyzeStAtRule(atRule, context);
         if (!analyzed) {
@@ -176,7 +176,7 @@ export const hooks = createFeature({
                     atRule,
                     '.' + analyzed.name,
                     '-st-extends',
-                    getAlias(extendedSymbol) || extendedSymbol
+                    getAlias(extendedSymbol) || extendedSymbol,
                 );
             }
             // class mapping
@@ -194,7 +194,7 @@ export const hooks = createFeature({
                         {
                             isScoped: false,
                             originalNode: atRule,
-                        }
+                        },
                     );
                     // register global mapping to class
                     CSSClass.extendTypedRule(
@@ -202,7 +202,7 @@ export const hooks = createFeature({
                         atRule,
                         analyzed.name,
                         '-st-global',
-                        mappedSelectorAst.nodes
+                        mappedSelectorAst.nodes,
                     );
                 }
             }
@@ -234,7 +234,7 @@ export const hooks = createFeature({
                 {
                     isScoped: true,
                     originalNode: atRule,
-                }
+                },
             );
             // register part mapping to parent definition
             const partSymbol = setPart(parentSymbol, getSymbolId(parentSymbol), partName, [
@@ -299,7 +299,7 @@ function isStAtRule(node: postcss.AnyNode): node is postcss.AtRule {
 function getPartParentSymbol(
     context: FeatureContext,
     { parentAnalyze }: ParsedStPart,
-    analyzedDefToPartSymbol: Map<AnalyzedStDef, PartSymbol>
+    analyzedDefToPartSymbol: Map<AnalyzedStDef, PartSymbol>,
 ) {
     return parentAnalyze.type === 'topLevelClass'
         ? CSSClass.get(context.meta, parentAnalyze.name)
@@ -311,7 +311,7 @@ export function isStructureMode(meta: StylableMeta) {
 }
 
 export function createPartSymbol(
-    input: Partial<PartSymbol> & Pick<PartSymbol, 'name' | 'id' | 'mapTo'>
+    input: Partial<PartSymbol> & Pick<PartSymbol, 'name' | 'id' | 'mapTo'>,
 ): PartSymbol {
     const parts = input['-st-parts'] || {};
     const states = input['-st-states'] || {};
@@ -322,7 +322,7 @@ export function setPart(
     symbol: HasParts,
     parentId: string,
     partName: string,
-    mapTo: PartSymbol['mapTo']
+    mapTo: PartSymbol['mapTo'],
 ) {
     const partSymbol = createPartSymbol({
         name: partName,
@@ -387,7 +387,7 @@ function isMatch(result: any): result is AnalyzedStDef {
 type AnalyzedStDef = ParsedStClass | ParsedStPart | ParsedStState;
 function analyzeStAtRule(
     atRule: postcss.AtRule,
-    context: FeatureContext
+    context: FeatureContext,
 ): AnalyzedStDef | undefined {
     // cache
     const { analyzedDefs } = plugableRecord.getUnsafe(context.meta.data, dataKey);
@@ -625,7 +625,7 @@ function findGlobalPseudo(def: Partial<ParsedStClass>, checkAfter = false) {
 function parseStateDefinition(
     context: FeatureContext,
     atRule: postcss.AtRule,
-    params: BaseAstNode[]
+    params: BaseAstNode[],
 ) {
     const result: Partial<ParsedStState> = {
         type: 'state',
@@ -658,7 +658,7 @@ function parseStateDefinition(
     const [amountToStateDef, stateDef] = STCustomState.parseStateValue(
         params.slice(index - 1),
         atRule,
-        context.diagnostics
+        context.diagnostics,
     );
     if (stateDef !== undefined) {
         index += amountToStateDef;
@@ -679,7 +679,7 @@ function parseStateDefinition(
 function parsePseudoElementDefinition(
     context: FeatureContext,
     atRule: postcss.AtRule,
-    params: BaseAstNode[]
+    params: BaseAstNode[],
 ) {
     const { analyzedDefs } = plugableRecord.getUnsafe(context.meta.data, dataKey);
     const result: Partial<ParsedStPart> = {
@@ -768,7 +768,7 @@ function parseClassDefinition(atRule: postcss.AtRule, params: BaseAstNode[]) {
                 const [amountToFatArrow] = findFatArrow(nodes, index, { stopOnFail: true });
                 return amountToFatArrow > 0;
             },
-        }
+        },
     );
     if (extendsNode) {
         result.ranges.extend.push(...params.slice(index, index + extendInspectAmount));
@@ -782,7 +782,7 @@ function parseClassDefinition(atRule: postcss.AtRule, params: BaseAstNode[]) {
                 // check leftover nodes
                 const [amountToUnexpectedNode] = findAnything(
                     extendsNode.args,
-                    amountToExtendedClass
+                    amountToExtendedClass,
                 );
                 if (!amountToUnexpectedNode) {
                     result.extendedClass = nameNode!.value;
@@ -817,7 +817,7 @@ function parseClassDefinition(atRule: postcss.AtRule, params: BaseAstNode[]) {
 function validateNestingInMapping(
     selector: ImmutableSelector,
     context: FeatureContext,
-    atRule: postcss.AtRule
+    atRule: postcss.AtRule,
 ) {
     // check for unsupported & anywhere except first
     let invalid = false;

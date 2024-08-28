@@ -23,7 +23,7 @@ export class TestManifestPlugin {
                 }
 
                 compilation.assets['test-manifest.json'] = new compiler.webpack.sources.RawSource(
-                    JSON.stringify(data, null, 4)
+                    JSON.stringify(data, null, 4),
                 );
             });
         });

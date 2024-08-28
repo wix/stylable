@@ -13,7 +13,7 @@ export function resolveDocumentColors(
     stylable: Stylable,
     cssService: CssService,
     document: TextDocument,
-    fs: IFileSystem
+    fs: IFileSystem,
 ) {
     const processor = stylable.fileProcessor;
     const src = document.getText();
@@ -22,7 +22,7 @@ export function resolveDocumentColors(
         src,
         new ProviderPosition(0, 0),
         fs.sep === '/' ? filePath.replace(/\\/g, '/') : filePath, // TODO: this is very suspicious
-        fs
+        fs,
     );
     const meta = res.processed.meta;
 
@@ -44,15 +44,15 @@ export function resolveDocumentColors(
                         0,
                         '.gaga {border: ' +
                             stylable.transformDecl(meta, `unknown-prop`, sym.text).value +
-                            '}'
+                            '}',
                     );
                     color = cssService.findColor(doc);
                 } else if (sym && sym._kind === 'import' && sym.type === 'named') {
                     const impMeta = processor.process(
-                        stylable.resolvePath(dirname(meta.source), sym.import.request)
+                        stylable.resolvePath(dirname(meta.source), sym.import.request),
                     );
                     const relevantVar = Object.values(impMeta.getAllStVars()).find(
-                        (v) => v.name === sym.name
+                        (v) => v.name === sym.name,
                     );
                     if (relevantVar) {
                         const doc = TextDocument.create(
@@ -63,9 +63,9 @@ export function resolveDocumentColors(
                                 stylable.transformDecl(
                                     impMeta,
                                     `unknown-prop`,
-                                    `value(${sym.name})`
+                                    `value(${sym.name})`,
                                 ).value +
-                                '}'
+                                '}',
                         );
                         color = cssService.findColor(doc);
                     }
@@ -76,15 +76,15 @@ export function resolveDocumentColors(
                             ind,
                             regexResult.index +
                                 regexResult[0].indexOf(regexResult[1]) -
-                                'value('.length
+                                'value('.length,
                         ),
                         new ProviderPosition(
                             ind,
                             regexResult.index +
                                 regexResult[0].indexOf(regexResult[1]) +
                                 result.length +
-                                ')'.length
-                        )
+                                ')'.length,
+                        ),
                     );
                     colorComps.push({ color, range } as ColorInformation);
                 }
@@ -96,7 +96,7 @@ export function resolveDocumentColors(
         const cleanDocument = cssService.createSanitizedDocument(
             meta.sourceAst,
             filePath,
-            document.version
+            document.version,
         );
 
         return colorComps.concat(cssService.findColors(cleanDocument));
@@ -109,20 +109,20 @@ export function getColorPresentation(
     cssService: CssService,
     document: TextDocument,
     params: ColorPresentationParams,
-    fs: IFileSystem
+    fs: IFileSystem,
 ): ColorPresentation[] {
     const src = document.getText();
     const res = fixAndProcess(
         src,
         new ProviderPosition(0, 0),
         URI.parse(params.textDocument.uri).fsPath,
-        fs
+        fs,
     );
     const meta = res.processed.meta;
 
     const wordStart = new ProviderPosition(
         params.range.start.line + 1,
-        params.range.start.character + 1
+        params.range.start.character + 1,
     );
     let noPicker = false;
     meta?.sourceAst.walkDecls(`-st-named`, (node) => {

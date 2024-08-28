@@ -9,14 +9,14 @@ type FunctionConfig<T> = Pick<
 
 export function wrapAndCatchErrors<T extends Record<string, any>>(
     config: Partial<FunctionConfig<T>>,
-    context: new (...args: any[]) => T
+    context: new (...args: any[]) => T,
 ) {
     const proto = context.prototype;
     for (const [name, defaultReturn] of Object.entries(config)) {
         const func = proto[name];
         if (typeof func !== 'function') {
             console.error(
-                `expected to find a function named ${name} on context, but found ${typeof func}`
+                `expected to find a function named ${name} on context, but found ${typeof func}`,
             );
             continue;
         }

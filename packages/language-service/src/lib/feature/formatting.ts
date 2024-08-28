@@ -10,7 +10,7 @@ export interface StylableLangServiceFormattingOptions extends FormattingOptions 
 }
 
 export function lspFormattingOptionsToJsBeautifyOptions( // ToDo: check if be private
-    options: FormattingOptions
+    options: FormattingOptions,
 ): CSSBeautifyOptions {
     return {
         indent_size: options.tabSize,
@@ -23,7 +23,7 @@ export function lspFormattingOptionsToJsBeautifyOptions( // ToDo: check if be pr
 export function format(
     doc: TextDocument,
     offset: { start: number; end: number },
-    options: StylableLangServiceFormattingOptions
+    options: StylableLangServiceFormattingOptions,
 ): TextEdit[] {
     const sourceCss = doc.getText();
     let range = { start: doc.positionAt(offset.start), end: doc.positionAt(offset.end) };
@@ -41,7 +41,7 @@ export function format(
         targetCss = getDocumentFormatting(
             sourceCss,
             offset,
-            lspFormattingOptionsToJsBeautifyOptions(options)
+            lspFormattingOptionsToJsBeautifyOptions(options),
         );
     }
     // ToDo(tech-debt): check against source ranged (currently there are false-positives cases in ranged format)

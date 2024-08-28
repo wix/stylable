@@ -4,7 +4,7 @@ import { dirname } from 'path';
 
 const project = 'metadata-plugin-project';
 const projectDir = dirname(
-    require.resolve(`@stylable/webpack-extensions/test/e2e/projects/${project}/webpack.config`)
+    require.resolve(`@stylable/webpack-extensions/test/e2e/projects/${project}/webpack.config`),
 );
 
 describe(`(${project})`, () => {
@@ -17,7 +17,7 @@ describe(`(${project})`, () => {
         },
         before,
         afterEach,
-        after
+        after,
     );
 
     const expectMetadataJSON = (content: any) => {
@@ -110,12 +110,12 @@ describe(`(${project})`, () => {
             },
             before,
             afterEach,
-            after
+            after,
         );
 
         it('contains metadata file with content hash (length 4)', () => {
             const file = Object.keys(projectRunnerJs.getBuildAssets()).find((fileName) =>
-                fileName.match(/test\.(\w{4})\.metadata\.json/)
+                fileName.match(/test\.(\w{4})\.metadata\.json/),
             );
             const s = projectRunnerJs.getBuildAsset(file!);
             expectMetadataJSON(JSON.parse(s));
@@ -133,7 +133,7 @@ describe(`(${project})`, () => {
             },
             before,
             afterEach,
-            after
+            after,
         );
 
         it('contains metadata as cjs export', () => {
@@ -155,7 +155,7 @@ describe(`(${project})`, () => {
             },
             before,
             afterEach,
-            after
+            after,
         );
 
         it('contains metadata as static amd export', () => {
@@ -177,7 +177,7 @@ describe(`(${project})`, () => {
             },
             before,
             afterEach,
-            after
+            after,
         );
 
         it('contains metadata as factory amd export', () => {

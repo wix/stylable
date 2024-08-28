@@ -6,7 +6,7 @@ export function handleAssets(
     rootDir: string,
     srcDir: string,
     outDir: string,
-    fs: IFileSystem
+    fs: IFileSystem,
 ) {
     const generatedAssets = new Set<string>();
 

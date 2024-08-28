@@ -54,7 +54,7 @@ export async function buildStylable(
         resolveModule,
         configFilePath,
         watchOptions = {},
-    }: BuildStylableContext = {}
+    }: BuildStylableContext = {},
 ) {
     const { config } = resolveConfig(rootDir, fs, configFilePath) || {};
     validateDefaultConfig(config?.defaultConfig);
@@ -76,7 +76,7 @@ export async function buildStylable(
                 projectRoot,
                 i,
                 options.length > 1,
-                projects.length > 1
+                projects.length > 1,
             );
 
             log('[Project]', projectRoot, buildOptions);
@@ -84,7 +84,7 @@ export async function buildStylable(
             if (!hasStylableCSSOutput(buildOptions)) {
                 log(
                     `No target output declared for "${identifier}", please provide one or more of the following target options: "cjs", "esm", "css", "stcss" or "indexFile"`,
-                    levels.info
+                    levels.info,
                 );
             }
 

@@ -14,20 +14,23 @@ export * from './create-forcestate-matchers';
 
 // This transformation is applied on target AST code
 // Not Stylable source AST
-const nativePseudoClassesMap = nativePseudoClasses.reduce((acc, name: string) => {
-    acc[name] = true;
-    return acc;
-}, {} as Record<string, boolean>);
+const nativePseudoClassesMap = nativePseudoClasses.reduce(
+    (acc, name: string) => {
+        acc[name] = true;
+        return acc;
+    },
+    {} as Record<string, boolean>,
+);
 
 export const OVERRIDE_STATE_PREFIX = 'stylable-force-state-';
 
 const { hasOwnProperty } = Object.prototype;
 
 export const MATCH_STATE_CLASS = new RegExp(
-    `^(.+?)${STCustomState.delimiters.booleanStateDelimiter}(.+)`
+    `^(.+?)${STCustomState.delimiters.booleanStateDelimiter}(.+)`,
 );
 export const MATCH_STATE_ATTR = new RegExp(
-    `^class~="(.+?)${STCustomState.delimiters.booleanStateDelimiter}(.+)"`
+    `^class~="(.+?)${STCustomState.delimiters.booleanStateDelimiter}(.+)"`,
 );
 
 export function createDataAttr(dataAttrPrefix: string, stateName: string, param?: string) {
@@ -47,10 +50,13 @@ export function applyStylableForceStateSelectors(
     targetAst: postcss.Root,
     namespaceMapping: Record<string, boolean> | ((namespace: string) => boolean) = {},
     dataPrefix = OVERRIDE_STATE_PREFIX,
-    plugin: (ctx: AddForceStateSelectorsContext) => AddForceStateSelectorsContext = (id) => id
+    plugin: (ctx: AddForceStateSelectorsContext) => AddForceStateSelectorsContext = (id) => id,
 ) {
     const mapping: Record<string, string> = {};
-    addForceStateSelectors(targetAst, createForceStatesContext(dataPrefix, namespaceMapping, mapping, plugin));
+    addForceStateSelectors(
+        targetAst,
+        createForceStatesContext(dataPrefix, namespaceMapping, mapping, plugin),
+    );
     return mapping;
 }
 
@@ -71,10 +77,10 @@ export interface AddForceStateSelectorsContext {
  */
 export function addForceStateSelectors(
     targetAst: postcss.Root,
-    context: AddForceStateSelectorsContext
+    context: AddForceStateSelectorsContext,
 ) {
     targetAst.walkRules((rule) =>
-        mutateWithForceStates(parseCssSelector(rule.selector), context, rule)
+        mutateWithForceStates(parseCssSelector(rule.selector), context, rule),
     );
 }
 /**
@@ -88,7 +94,7 @@ export function createForceStatesContext(
     dataPrefix: string,
     namespaceMapping: Record<string, boolean> | ((namespace: string) => boolean),
     mapping: Record<string, string>,
-    plugin: (ctx: AddForceStateSelectorsContext) => AddForceStateSelectorsContext
+    plugin: (ctx: AddForceStateSelectorsContext) => AddForceStateSelectorsContext,
 ) {
     const isKnownNamespace =
         typeof namespaceMapping === 'function'
@@ -134,7 +140,7 @@ export function createForceStatesContext(
 export function mutateWithForceStates(
     selectorAst: SelectorList,
     context: AddForceStateSelectorsContext,
-    rule?: postcss.Rule
+    rule?: postcss.Rule,
 ) {
     const overrideSelectors: SelectorList = [];
     for (const selector of selectorAst) {

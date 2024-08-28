@@ -311,7 +311,7 @@ describe(`features/st-mixin`, () => {
                 @media (min-width: 789px) {
                     .valid__root { color: purple; }
                 }
-            `)
+            `),
         );
     });
     it(`should report unknown args`, () => {
@@ -370,7 +370,7 @@ describe(`features/st-mixin`, () => {
             .root {
                 /* @transform-error ${mixinDiagnostics.UNSUPPORTED_MIXIN_SYMBOL(
                     `--customPropX`,
-                    'cssVar'
+                    'cssVar',
                 )} */
                 -st-mixin: --customPropX;
             }
@@ -403,7 +403,7 @@ describe(`features/st-mixin`, () => {
                         return meta;
                     },
                 },
-            }
+            },
         );
     });
     describe('css nesting', () => {
@@ -435,7 +435,7 @@ describe(`features/st-mixin`, () => {
                         color: green;
                     }
                 }
-            `)
+            `),
             );
         });
         it('should preserve nesting selector', () => {
@@ -466,7 +466,7 @@ describe(`features/st-mixin`, () => {
                         color: green;
                     }
                 }
-            `)
+            `),
             );
         });
         it('should mix into nesting context', () => {
@@ -501,7 +501,7 @@ describe(`features/st-mixin`, () => {
                     }
                     }
                 }
-            `)
+            `),
             );
         });
         it('should report recursive mixin ', () => {
@@ -534,7 +534,7 @@ describe(`features/st-mixin`, () => {
                         color: green;
                     }
                 }
-            `)
+            `),
             );
         });
         it('should mix nested at-rules with content', () => {
@@ -571,7 +571,7 @@ describe(`features/st-mixin`, () => {
                         }
                     }
                 }
-            `)
+            `),
             );
         });
         it('should nest any declaration following nested mixed-in rules', () => {
@@ -612,7 +612,7 @@ describe(`features/st-mixin`, () => {
                         declD: 4;
                     }
                 }
-            `)
+            `),
             );
         });
         it('should nest mixin decls that follow another mixin with nested nodes', () => {
@@ -652,7 +652,7 @@ describe(`features/st-mixin`, () => {
                         color: blue;
                     }
                 }
-            `)
+            `),
             );
         });
     });
@@ -793,7 +793,7 @@ describe(`features/st-mixin`, () => {
                     /* @rule .entry__root { color: green } */
                     .root {
                         /* @transform-warn word(unknown) ${mixinDiagnostics.UNKNOWN_ARG(
-                            'unknown'
+                            'unknown',
                         )} */
                         -st-mixin: mix(
                             a green, 
@@ -1137,7 +1137,7 @@ describe(`features/st-mixin`, () => {
                 /*  @rule(v1) .entry__a { } */
                 .a {
                     /* @transform-error word(mix-color) ${mixinDiagnostics.PARTIAL_MIXIN_MISSING_ARGUMENTS(
-                        `mix-color`
+                        `mix-color`,
                     )} */
                     -st-partial-mixin: mix-color();
                 }
@@ -1546,7 +1546,7 @@ describe(`features/st-mixin`, () => {
                     }
 
                     /* @transform-error(mix throw) word(throw) ${mixinDiagnostics.FAILED_TO_APPLY_MIXIN(
-                        `bug in js mix`
+                        `bug in js mix`,
                     )} */
                     .a {
                         -st-mixin: throw;
@@ -2058,7 +2058,7 @@ describe(`features/st-mixin`, () => {
                     }
                 `,
                 },
-                { stylableConfig: { experimentalSelectorInference: false } }
+                { stylableConfig: { experimentalSelectorInference: false } },
             );
 
             const { meta } = sheets['/entry.st.css'];
@@ -2089,7 +2089,7 @@ describe(`features/st-mixin`, () => {
                 deindent(`
                     .entry__into {}
                         .entry__into .mix__inside { color: green; }
-                `)
+                `),
             );
         });
     });
@@ -2240,7 +2240,7 @@ describe(`features/st-mixin`, () => {
                     meta.targetAst!.nodes[2] as postcss.Container,
                     0,
                     '.entry__a',
-                    'id: nested'
+                    'id: nested',
                 );
             });
             it(`should mix @media queries for nested JS mixin`, () => {
@@ -2275,7 +2275,7 @@ describe(`features/st-mixin`, () => {
                     meta.targetAst!.nodes[2] as postcss.Container,
                     0,
                     '.entry__a',
-                    'id: nested'
+                    'id: nested',
                 );
             });
             it(`should mix @media queries as part of root mixin`, () => {
@@ -2309,7 +2309,7 @@ describe(`features/st-mixin`, () => {
                     meta.targetAst!.nodes[3] as postcss.Container,
                     0,
                     '.entry__a .mixin__mix',
-                    'id: nested'
+                    'id: nested',
                 );
             });
         });
@@ -2345,7 +2345,7 @@ describe(`features/st-mixin`, () => {
                     meta.targetAst!.nodes[2] as postcss.Container,
                     0,
                     '.entry__a',
-                    'id: nested'
+                    'id: nested',
                 );
             });
             it(`should mix @supports queries for nested JS mixin`, () => {
@@ -2380,7 +2380,7 @@ describe(`features/st-mixin`, () => {
                     meta.targetAst!.nodes[2] as postcss.Container,
                     0,
                     '.entry__a',
-                    'id: nested'
+                    'id: nested',
                 );
             });
             it(`should mix @supports queries as part of root mixin`, () => {
@@ -2414,7 +2414,7 @@ describe(`features/st-mixin`, () => {
                     meta.targetAst!.nodes[3] as postcss.Container,
                     0,
                     '.entry__a .mixin__mix',
-                    'id: nested'
+                    'id: nested',
                 );
             });
         });
@@ -2473,7 +2473,7 @@ describe(`features/st-mixin`, () => {
                 {
                     diagnostics,
                     resolveOptionalArgs: true,
-                }
+                },
             );
 
             expect(resolvedMixins[0], 'local-mix').to.eql({
@@ -2524,7 +2524,7 @@ describe(`features/st-mixin`, () => {
             });
             expect(
                 jsMix.kind === 'js-func' && jsMix.func(['color', 'green']),
-                'importedFuncMix func ref'
+                'importedFuncMix func ref',
             ).to.eql({ color: 'green!' });
             expect(diagnostics.reports, 'diagnostics').to.containSubset([
                 STMixin.diagnostics.UNKNOWN_MIXIN('unknownBetweenMix'),

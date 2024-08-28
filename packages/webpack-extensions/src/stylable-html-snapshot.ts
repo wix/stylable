@@ -47,7 +47,7 @@ export class HTMLSnapshotPlugin {
     private async snapShotStylableModule(
         compilation: Compilation,
         module: Module,
-        getLogicModule: GetLogicModule
+        getLogicModule: GetLogicModule,
     ) {
         const component = getLogicModule(module, compilation.moduleGraph);
         if (!component || !component.context) {
@@ -65,19 +65,19 @@ export class HTMLSnapshotPlugin {
 
         const targetPath = join(this.outDir, basename(component.resource)).replace(
             /\.[^.]+$/,
-            '.snapshot.html'
+            '.snapshot.html',
         );
 
         if (!compilation.assets[targetPath]) {
             compilation.assets[targetPath] = new compilation.compiler.webpack.sources.RawSource(
                 html,
-                false
+                false,
             );
         } else {
             compilation.errors.push(
                 new Error(
-                    `Duplicate component name ${component.resource} target path ${targetPath}`
-                ) as any // TODO: webpack types
+                    `Duplicate component name ${component.resource} target path ${targetPath}`,
+                ) as any, // TODO: webpack types
             );
         }
     }

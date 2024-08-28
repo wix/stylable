@@ -37,7 +37,7 @@ describe('build index', () => {
                 rootDir: '/',
                 projectRoot: '/',
                 log,
-            }
+            },
         );
 
         const res = fs.readFileSync('/index.st.css', 'utf8');
@@ -48,7 +48,7 @@ describe('build index', () => {
                 '.root CompA{}',
                 ':import {-st-from: "./a/b/comp-B.st.css";-st-default:CompB;}',
                 '.root CompB{}',
-            ].join('\n')
+            ].join('\n'),
         );
     });
     it('should create index file importing all matched stylesheets in outDir (outputSources)', async () => {
@@ -82,7 +82,7 @@ describe('build index', () => {
                 rootDir: '/',
                 projectRoot: '/',
                 log,
-            }
+            },
         );
 
         const res = fs.readFileSync('./dist/index.st.css', 'utf8');
@@ -93,7 +93,7 @@ describe('build index', () => {
                 '.root CompA{}',
                 ':import {-st-from: "./a/b/comp-B.st.css";-st-default:CompB;}',
                 '.root CompB{}',
-            ].join('\n')
+            ].join('\n'),
         );
     });
 
@@ -128,7 +128,7 @@ describe('build index', () => {
                 rootDir: '/',
                 projectRoot: '/',
                 log,
-            }
+            },
         );
 
         const res = fs.readFileSync('/dist/index.st.css', 'utf8');
@@ -139,7 +139,7 @@ describe('build index', () => {
                 '.root CompA{}',
                 ':import {-st-from: "../src/a/b/comp-B.st.css";-st-default:CompB;}',
                 '.root CompB{}',
-            ].join('\n')
+            ].join('\n'),
         );
     });
     it('should create index file using a the default generator', async () => {
@@ -170,7 +170,7 @@ describe('build index', () => {
                 rootDir: '/',
                 projectRoot: '/',
                 log,
-            }
+            },
         );
 
         const res = fs.readFileSync('/index.st.css', 'utf8');
@@ -181,7 +181,7 @@ describe('build index', () => {
                 '.root CompA{}',
                 ':import {-st-from: "./b/1-some-comp-B-.st.css";-st-default:SomeCompB;}',
                 '.root SomeCompB{}',
-            ].join('\n')
+            ].join('\n'),
         );
     });
     it('should create index file using a custom generator', async () => {
@@ -213,7 +213,7 @@ describe('build index', () => {
                 rootDir: '/',
                 projectRoot: '/',
                 log,
-            }
+            },
         );
 
         const res = fs.readFileSync('/index.st.css', 'utf8');
@@ -224,7 +224,7 @@ describe('build index', () => {
                 '.root Style0{}',
                 ':import {-st-from: "./b/1-some-comp-B-.st.css";-st-default:Style1;}',
                 '.root Style1{}',
-            ].join('\n')
+            ].join('\n'),
         );
     });
     it('should create index file when srcDir is parent directory of outDir', async () => {
@@ -257,7 +257,7 @@ describe('build index', () => {
                 rootDir: '/',
                 projectRoot: '/',
                 log,
-            }
+            },
         );
 
         expect(fs.existsSync('/index.st.css'), 'index is not generated').to.eql(true);
@@ -270,7 +270,7 @@ describe('build index', () => {
                 '.root CompA{}',
                 ':import {-st-from: "./dist/a/b/comp-B.st.css";-st-default:CompB;}',
                 '.root CompB{}',
-            ].join('\n')
+            ].join('\n'),
         );
     });
     it('custom generator is able to filter files from the index', async () => {
@@ -302,13 +302,13 @@ describe('build index', () => {
                 rootDir: '/',
                 projectRoot: '/',
                 log,
-            }
+            },
         );
 
         const res = fs.readFileSync('/index.st.css', 'utf8');
 
         expect(res.trim()).to.equal(
-            ':import {-st-from: "./comp-A.st.css";-st-default:Style0;}\n.root Style0{}'
+            ':import {-st-from: "./comp-A.st.css";-st-default:Style0;}\n.root Style0{}',
         );
     });
     it('should create index file using a custom generator with named exports generation and @st-namespace', async () => {
@@ -346,7 +346,7 @@ describe('build index', () => {
                 rootDir: '/',
                 projectRoot: '/',
                 log,
-            }
+            },
         );
 
         const res = fs.readFileSync('/index.st.css', 'utf8');
@@ -360,7 +360,7 @@ describe('build index', () => {
                 ':import {-st-from: "./b/1-some-comp-B-.st.css";-st-default:SomeCompB;-st-named: b as SomeCompB__b;}',
                 '.root SomeCompB{}',
                 '.root .SomeCompB__b{}',
-            ].join('\n')
+            ].join('\n'),
         );
     });
     it('should create non-existing folders in path to the generated indexFile', async () => {
@@ -387,13 +387,15 @@ describe('build index', () => {
                 rootDir: '/',
                 projectRoot: '/',
                 log,
-            }
+            },
         );
 
         const res = fs.readFileSync('/some-dir/other-dir/index.st.css', 'utf8');
 
         expect(res.trim()).to.equal(
-            [':import {-st-from: "../../comp.st.css";-st-default:Comp;}', '.root Comp{}'].join('\n')
+            [':import {-st-from: "../../comp.st.css";-st-default:Comp;}', '.root Comp{}'].join(
+                '\n',
+            ),
         );
     });
     it('should handle name collisions by failing', async () => {
@@ -427,11 +429,11 @@ describe('build index', () => {
                 projectRoot: '/',
                 log,
                 diagnosticsManager,
-            }
+            },
         );
 
         expect(diagnosticsManager.get('/', '/a/comp.st.css')?.diagnostics[0].message).to.equal(
-            `Name Collision Error:\nexport symbol Comp from ${'/a/comp.st.css'} is already used by ${'/comp.st.css'}`
+            `Name Collision Error:\nexport symbol Comp from ${'/a/comp.st.css'} is already used by ${'/comp.st.css'}`,
         );
     });
 });

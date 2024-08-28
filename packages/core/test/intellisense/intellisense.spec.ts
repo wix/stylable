@@ -390,7 +390,7 @@ describe('Stylable intellisense selector meta data', () => {
         const meta = t.fileProcessor.process('/entry.st.css');
         const elements = t.resolveSelectorElements(
             meta,
-            STCustomSelector.transformCustomSelectorInline(meta, ':--pongo')
+            STCustomSelector.transformCustomSelectorInline(meta, ':--pongo'),
         );
 
         expect(elements[0]).to.eql([
@@ -658,7 +658,7 @@ describe('Stylable intellisense selector meta data', () => {
 
         const elements = t.resolveSelectorElements(
             meta,
-            '.gaga:lala::bobo:otherState:state::momo:anotherState'
+            '.gaga:lala::bobo:otherState:state::momo:anotherState',
         );
 
         expect(elements[0]).to.eql([

@@ -3,7 +3,10 @@ import type { ResolveRequest } from 'enhanced-resolve';
 
 export class ReExt {
     private newExt: string[];
-    constructor(private matchExtRegExp: RegExp, newExt: string | string[]) {
+    constructor(
+        private matchExtRegExp: RegExp,
+        newExt: string | string[],
+    ) {
         this.newExt = Array.isArray(newExt) ? newExt : [newExt];
     }
     apply(resolver: Resolver) {
@@ -45,7 +48,7 @@ export class ReExt {
                         resolveContext,
                         (err, resolved) => {
                             err ? res(undefined) : res(resolved);
-                        }
+                        },
                     );
                 });
             }

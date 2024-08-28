@@ -8,13 +8,13 @@ import playwright from 'playwright-core';
 
 type BuildFn = (
     build: typeof context,
-    options: (options: BuildOptions) => BuildOptions
+    options: (options: BuildOptions) => BuildOptions,
 ) => Promise<BuildContext>;
 
 export class ESBuildTestKit {
     disposables: Array<() => void | Promise<void>> = [];
     constructor(
-        private options: { log?: boolean; launchOptions?: playwright.LaunchOptions } = {}
+        private options: { log?: boolean; launchOptions?: playwright.LaunchOptions } = {},
     ) {}
     async build({
         project,
@@ -43,7 +43,7 @@ export class ESBuildTestKit {
             symlinkSync(
                 join(__dirname, '../../../../../node_modules'),
                 join(t.path, 'node_modules'),
-                'junction'
+                'junction',
             );
             this.options.log &&
                 console.log(`created temp project ${projectDir} and linked node_modules`);
@@ -109,7 +109,7 @@ export class ESBuildTestKit {
             const { server, serverUrl } = await runServer(
                 projectDir,
                 3000,
-                (...args) => this.options.log && console.log(project, ...args)
+                (...args) => this.options.log && console.log(project, ...args),
             );
             this.disposables.push(() => server.close());
             this.options.log && console.log(project, 'Served at ', serverUrl);
@@ -118,7 +118,7 @@ export class ESBuildTestKit {
         const open = async (
             launchOptions?: playwright.LaunchOptions,
             pathname?: string,
-            captureResponses?: boolean
+            captureResponses?: boolean,
         ) => {
             if (!openServerUrl) {
                 await serve();

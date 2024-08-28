@@ -4,7 +4,7 @@ import { dirname } from 'path';
 
 const project = 'tree-shake';
 const projectDir = dirname(
-    require.resolve(`@stylable/webpack-plugin/test/e2e/projects/${project}/webpack.config`)
+    require.resolve(`@stylable/webpack-plugin/test/e2e/projects/${project}/webpack.config`),
 );
 
 describe(`(${project})`, () => {
@@ -17,13 +17,13 @@ describe(`(${project})`, () => {
         },
         before,
         afterEach,
-        after
+        after,
     );
 
     it('should inline classes and remove the stylesheet js module', () => {
         const files = projectRunner.getProjectFiles();
         expect(files['dist/main.js']).to.eql(
-            `(()=>{"use strict";document.body.innerHTML='<div class="index__bbb">bbb used</div>'})();\n//# sourceMappingURL=main.js.map`
+            `(()=>{"use strict";document.body.innerHTML='<div class="index__bbb">bbb used</div>'})();\n//# sourceMappingURL=main.js.map`,
         );
     });
 });

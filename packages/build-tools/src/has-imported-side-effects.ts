@@ -10,7 +10,7 @@ export function collectImportsWithSideEffects(
     stylable: Stylable,
     meta: StylableMeta,
     visit: (contextMeta: StylableMeta, absPath: string, hasSideEffects: boolean) => void,
-    visited: Set<string> = new Set()
+    visited: Set<string> = new Set(),
 ) {
     for (const importData of meta.getImportStatements()) {
         // attempt to resolve the request through stylable resolveModule,
@@ -19,7 +19,7 @@ export function collectImportsWithSideEffects(
         try {
             resolvedImportPath = stylable.resolver.resolvePath(
                 importData.context,
-                importData.request
+                importData.request,
             );
         } catch {
             // fallback to request // TODO: check if this is correct
@@ -113,7 +113,7 @@ export function hasImportedSideEffects(stylable: Stylable, meta: StylableMeta, i
         ) {
             const cssResolved = stylable.resolver.resolveSymbolOrigin(
                 localSymbol['-st-extends'],
-                meta
+                meta,
             );
             if (
                 cssResolved?.symbol &&

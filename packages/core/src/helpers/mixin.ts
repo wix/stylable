@@ -9,7 +9,7 @@ export const mixinHelperDiagnostics = {
     VALUE_CANNOT_BE_STRING: createDiagnosticReporter(
         '10008',
         'error',
-        () => 'value can not be a string (remove quotes?)'
+        () => 'value can not be a string (remove quotes?)',
     ),
 };
 
@@ -17,7 +17,7 @@ export function parseStMixin(
     mixinNode: postcss.Declaration,
     strategy: (type: string) => 'named' | 'args',
     diagnostics?: Diagnostics,
-    emitStrategyDiagnostics = true
+    emitStrategyDiagnostics = true,
 ) {
     const ast = postcssValueParser(mixinNode.value);
     const mixins: Array<MixinValue> = [];
@@ -57,7 +57,7 @@ export function parseStPartialMixin(
     mixinNode: postcss.Declaration,
     strategy: (type: string) => 'named' | 'args',
     report?: Diagnostics,
-    emitStrategyDiagnostics?: boolean
+    emitStrategyDiagnostics?: boolean,
 ) {
     return parseStMixin(mixinNode, strategy, report, emitStrategyDiagnostics).map((mixin) => {
         mixin.partial = true;

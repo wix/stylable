@@ -8,7 +8,7 @@ import { dirname, join } from 'path';
 
 const project = 'project-with-assets';
 const projectDir = dirname(
-    require.resolve(`@stylable/webpack-plugin/test/e2e/projects/${project}/webpack.config`)
+    require.resolve(`@stylable/webpack-plugin/test/e2e/projects/${project}/webpack.config`),
 );
 
 const expectedAssets = ['asset.png', 'asset-in-root.png', 'mandela.svg'];
@@ -26,7 +26,7 @@ describe(`(${project})`, () => {
         },
         before,
         afterEach,
-        after
+        after,
     );
 
     it('renders css', async () => {
@@ -41,7 +41,7 @@ describe(`(${project})`, () => {
         const assetResponses = filterAssetResponses(responses, expectedAssets);
 
         expect(assetResponses.length, 'all expected assets has matching responses').to.equal(
-            expectedAssets.length
+            expectedAssets.length,
         );
 
         for (const response of assetResponses) {
@@ -64,7 +64,7 @@ describe(`(${project}) production mode`, () => {
         },
         before,
         afterEach,
-        after
+        after,
     );
 
     it('load assets from url() declaration value (prod)', async () => {
@@ -72,7 +72,7 @@ describe(`(${project}) production mode`, () => {
         const assetResponses = filterAssetResponses(responses, expectedAssets);
 
         expect(assetResponses.length, 'all expected assets has matching responses').to.equal(
-            expectedAssets.length
+            expectedAssets.length,
         );
 
         for (const response of assetResponses) {

@@ -22,7 +22,7 @@ describe('Global scope reference', () => {
         it('should be completed at top level after element, with prefix ' + prefix, () => {
             const asserter = asserters.getCompletions(
                 'pseudo-elements/default-import-as-tag.st.css',
-                prefix
+                prefix,
             );
             const rng = createRange(6, 4, 6, 4 + i);
             const exp: Array<Partial<Completion>> = [];
@@ -33,7 +33,7 @@ describe('Global scope reference', () => {
         it('should be completed inside custom selector definition, with prefix ' + prefix, () => {
             const asserter = asserters.getCompletions(
                 'custom-selectors/inside-selector-def.st.css',
-                prefix
+                prefix,
             );
             const rng = createRange(8, 39, 8, 39 + i);
             const exp: Array<Partial<Completion>> = [];

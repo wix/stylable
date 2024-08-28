@@ -118,7 +118,7 @@ export function testInlineExpects(result: postcss.Root | Context, expectedTestIn
                                 expectation: testInput.trim(),
                                 errors: [
                                     testInlineExpectsErrors.deprecatedRootInputNotSupported(
-                                        testScope + testInput
+                                        testScope + testInput,
                                     ),
                                 ],
                                 hasMissingDiagnostic: false,
@@ -130,7 +130,7 @@ export function testInlineExpects(result: postcss.Root | Context, expectedTestIn
                                 context,
                                 testInput.trim(),
                                 isRemoved ? undefined : nodeTarget,
-                                nodeSrc
+                                nodeSrc,
                             );
                             result.type = testScope;
                             errors.push(...result.errors);
@@ -157,7 +157,7 @@ function checkTest(
     context: Context,
     expectation: string,
     targetNode: AST | undefined,
-    srcNode: AST
+    srcNode: AST,
 ): Test {
     const type = srcNode?.type || targetNode?.type;
     switch (type) {
@@ -180,7 +180,7 @@ function ruleTest(
     context: Context,
     expectation: string,
     targetNode: AST | undefined,
-    srcNode: AST
+    srcNode: AST,
 ): Test {
     const result: Test = {
         type: `@rule`,
@@ -189,7 +189,7 @@ function ruleTest(
         hasMissingDiagnostic: false,
     };
     const { msg, ruleIndex, expectedSelector, expectedBody } = expectation.match(
-        /(?<msg>\([^)]*\))*(\[(?<ruleIndex>\d+)\])*(?<expectedSelector>[^{}]*)\s*(?<expectedBody>.*)/s
+        /(?<msg>\([^)]*\))*(\[(?<ruleIndex>\d+)\])*(?<expectedSelector>[^{}]*)\s*(?<expectedBody>.*)/s,
     )!.groups!;
     const prefix = msg ? msg + `: ` : ``;
     if (!targetNode) {
@@ -202,7 +202,7 @@ function ruleTest(
     if (ruleIndex) {
         if (targetNode?.type !== `rule`) {
             result.errors.push(
-                `mixed-in expectation is only supported for CSS Rule, not ${targetNode?.type}`
+                `mixed-in expectation is only supported for CSS Rule, not ${targetNode?.type}`,
             );
             return result;
         } else {
@@ -228,7 +228,7 @@ function ruleTest(
                         expectedDeclarations.push([prop.trim(), value.trim()]);
                     } else {
                         result.errors.push(
-                            testInlineExpectsErrors.ruleMalformedDecl(decl, expectation)
+                            testInlineExpectsErrors.ruleMalformedDecl(decl, expectation),
                         );
                     }
                 }
@@ -237,7 +237,11 @@ function ruleTest(
 
         if (testNode.selector !== expectedSelector.trim()) {
             result.errors.push(
-                testInlineExpectsErrors.selector(expectedSelector.trim(), testNode.selector, prefix)
+                testInlineExpectsErrors.selector(
+                    expectedSelector.trim(),
+                    testNode.selector,
+                    prefix,
+                ),
             );
         }
         if (declarationCheck === `full`) {
@@ -254,8 +258,8 @@ function ruleTest(
                         expectedDecl,
                         actualDecl,
                         testNode.selector,
-                        prefix
-                    )
+                        prefix,
+                    ),
                 );
             }
         }
@@ -266,7 +270,7 @@ function ruleTest(
             context,
             expectation.replace(`[${ruleIndex}]`, ``),
             testNode,
-            null as unknown as AST
+            null as unknown as AST,
         );
     } else {
         // unsupported mixed-in node test
@@ -278,7 +282,7 @@ function atRuleTest(
     _context: Context,
     expectation: string,
     targetNode: AST | undefined,
-    srcNode: AST
+    srcNode: AST,
 ): Test {
     const result: Test = {
         type: `@atrule`,
@@ -286,8 +290,9 @@ function atRuleTest(
         errors: [],
         hasMissingDiagnostic: false,
     };
-    const { msg, expectedParams } = expectation.match(/(?<msg>\([^)]*\))*(?<expectedParams>.*)/)!
-        .groups!;
+    const { msg, expectedParams } = expectation.match(
+        /(?<msg>\([^)]*\))*(?<expectedParams>.*)/,
+    )!.groups!;
     if (expectedParams.match(/^\[\d+\]/)) {
         result.errors.push(testInlineExpectsErrors.atRuleMultiTest(expectation));
         return result;
@@ -302,8 +307,8 @@ function atRuleTest(
                 testInlineExpectsErrors.atruleParams(
                     expectedParams.trim(),
                     targetNode.params,
-                    prefix
-                )
+                    prefix,
+                ),
             );
         }
     } else {
@@ -315,7 +320,7 @@ function declTest(
     _context: Context,
     expectation: string,
     targetNode: AST | undefined,
-    srcNode: AST
+    srcNode: AST,
 ): Test {
     const result: Test = {
         type: `@decl`,
@@ -325,7 +330,7 @@ function declTest(
     };
     // eslint-disable-next-line prefer-const
     let { label, prop, colon, value } = expectation.match(
-        /(?<label>\([^)]*\))*(?<prop>[^:]*)\s*(?<colon>:?)\s*(?<value>.*)/
+        /(?<label>\([^)]*\))*(?<prop>[^:]*)\s*(?<colon>:?)\s*(?<value>.*)/,
     )!.groups!;
     label = label ? label + `: ` : ``;
     prop = prop.trim();
@@ -342,7 +347,7 @@ function declTest(
         }
     } else {
         result.errors.push(
-            testInlineExpectsErrors.unsupportedNode(`@decl`, targetNode.type, label)
+            testInlineExpectsErrors.unsupportedNode(`@decl`, targetNode.type, label),
         );
     }
     return result;
@@ -351,7 +356,7 @@ function analyzeTest(
     context: Context,
     expectation: string,
     targetNode: AST | undefined,
-    srcNode: AST
+    srcNode: AST,
 ): Test {
     return diagnosticTest(`analyze`, context, expectation, targetNode, srcNode);
 }
@@ -359,7 +364,7 @@ function transformTest(
     context: Context,
     expectation: string,
     targetNode: AST | undefined,
-    srcNode: AST
+    srcNode: AST,
 ): Test {
     // check node is removed in transformation
     const matchResult = expectation.match(/-remove(?<label>\([^)]*\))?/);
@@ -386,7 +391,7 @@ function diagnosticTest(
     { meta }: Context,
     expectation: string,
     _targetNode: AST | undefined,
-    srcNode: AST
+    srcNode: AST,
 ): Test {
     const result: Test = {
         type: `@${type}`,
@@ -395,7 +400,7 @@ function diagnosticTest(
         hasMissingDiagnostic: false,
     };
     const matchResult = expectation.match(
-        /-(?<severity>\w+)(?<label>\([^)]*\))?\s?(?:word\((?<word>[^)]*)\))?\s?(?<message>[\s\S]*)/
+        /-(?<severity>\w+)(?<label>\([^)]*\))?\s?(?:word\((?<word>[^)]*)\))?\s?(?<message>[\s\S]*)/,
     );
     if (!matchResult) {
         result.errors.push(testInlineExpectsErrors.diagnosticsMalformed(type, expectation));
@@ -436,7 +441,7 @@ function diagnosticTest(
                 result.hasMissingDiagnostic = true;
                 return testInlineExpectsErrors.diagnosticExpectedNotFound(...args);
             },
-        }
+        },
     );
     if (error) {
         result.errors.push(error);
@@ -527,7 +532,7 @@ export const testInlineExpectsErrors = {
         expectedSeverity: string,
         actualSeverity: string,
         message: string,
-        label = ``
+        label = ``,
     ) =>
         `${label}expected ${type} diagnostic "${message}" to be reported with "${expectedSeverity}", but it was reported with "${actualSeverity}"`,
     diagnosticExpectedNotFound: (type: string, message: string, label = ``) =>
@@ -547,7 +552,7 @@ export const testInlineExpectsErrors = {
                     };
                 }),
                 null,
-                2
+                2,
             );
         };
         const analyzedReports = transformReport(diagnostics.reports);

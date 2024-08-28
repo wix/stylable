@@ -30,7 +30,7 @@ describe('Mixins', () => {
                         const rng = createRange(15, 15, 15, 15 + i);
                         const asserter = asserters.getCompletions(
                             'pseudo-elements/recursive-import-3-mixin.st.css',
-                            prefix
+                            prefix,
                         );
                         const exp: Array<Partial<Completion>> = [];
                         const notExp: Array<Partial<Completion>> = [];
@@ -48,7 +48,7 @@ describe('Mixins', () => {
 
                         asserter.suggested(exp);
                         asserter.notSuggested(notExp);
-                    }
+                    },
                 );
 
                 it(
@@ -58,7 +58,7 @@ describe('Mixins', () => {
                         const rng = createRange(15, 23, 15, 23 + i);
                         const asserter = asserters.getCompletions(
                             'pseudo-elements/recursive-import-3-mixin-single-value.st.css',
-                            prefix
+                            prefix,
                         );
                         const exp: Array<Partial<Completion>> = [];
                         const notExp: Array<Partial<Completion>> = [];
@@ -83,7 +83,7 @@ describe('Mixins', () => {
 
                         asserter.suggested(exp);
                         asserter.notSuggested(notExp);
-                    }
+                    },
                 );
 
                 it(
@@ -93,7 +93,7 @@ describe('Mixins', () => {
                         const rng = createRange(15, 28, 15, 28 + i);
                         const asserter = asserters.getCompletions(
                             'pseudo-elements/recursive-import-3-mixin-multiple-values.st.css',
-                            prefix
+                            prefix,
                         );
                         const exp: Array<Partial<Completion>> = [];
                         const notExp: Array<Partial<Completion>> = [];
@@ -118,7 +118,7 @@ describe('Mixins', () => {
 
                         asserter.suggested(exp);
                         asserter.notSuggested(notExp);
-                    }
+                    },
                 );
             });
         });
@@ -132,7 +132,7 @@ describe('Mixins', () => {
 
                 const asserter = asserters.getCompletions(
                     'mixins/3rd-party-css-mixin.st.css',
-                    prefix
+                    prefix,
                 );
                 exp.push(createComp('part1', rng, 'fake-stylable-package/stylesheet.st.css'));
 
@@ -165,7 +165,7 @@ describe('Mixins', () => {
                             const rng = createRange(12, 15, 12, 15 + i);
                             const asserter = asserters.getCompletions(
                                 'mixins/imported-mixins.st.css',
-                                prefix
+                                prefix,
                             );
                             const exp: Array<Partial<Completion>> = [];
                             const notExp: Array<Partial<Completion>> = [];
@@ -189,7 +189,7 @@ describe('Mixins', () => {
                             notExp.push(createComp(badStr, rng, tsFrom));
                             asserter.suggested(exp);
                             asserter.notSuggested(notExp);
-                        }
+                        },
                     ).timeout(10000);
 
                     it(
@@ -198,7 +198,7 @@ describe('Mixins', () => {
                             const rng = createRange(11, 46, 11, 46 + i);
                             const asserter = asserters.getCompletions(
                                 'mixins/imported-mixins-single-value.st.css',
-                                prefix
+                                prefix,
                             );
                             const exp: Array<Partial<Completion>> = [];
                             const notExp: Array<Partial<Completion>> = [];
@@ -218,7 +218,7 @@ describe('Mixins', () => {
                             notExp.push(createComp(badStr, rng, tsFrom));
                             asserter.suggested(exp);
                             asserter.notSuggested(notExp);
-                        }
+                        },
                     ).timeout(10000);
                 });
             });
@@ -235,7 +235,7 @@ describe('Mixins', () => {
                             const rng = createRange(12, 15, 12, 15 + i);
                             const asserter = asserters.getCompletions(
                                 'mixins/imported-mixins.st.css',
-                                prefix
+                                prefix,
                             );
                             const exp: Array<Partial<Completion>> = [];
                             const notExp: Array<Partial<Completion>> = [];
@@ -250,7 +250,7 @@ describe('Mixins', () => {
 
                             asserter.suggested(exp);
                             asserter.notSuggested(notExp);
-                        }
+                        },
                     ).timeout(10000);
 
                     it(
@@ -259,7 +259,7 @@ describe('Mixins', () => {
                             const rng = createRange(11, 46, 11, 46 + i);
                             const asserter = asserters.getCompletions(
                                 'mixins/imported-mixins-single-value.st.css',
-                                prefix
+                                prefix,
                             );
                             const exp: Array<Partial<Completion>> = [];
                             const notExp: Array<Partial<Completion>> = [];
@@ -273,14 +273,14 @@ describe('Mixins', () => {
 
                             asserter.suggested(exp);
                             asserter.notSuggested(notExp);
-                        }
+                        },
                     ).timeout(10000);
                 });
             });
 
             it('should not complete mixins inside a mixin param list', () => {
                 const asserter = asserters.getCompletions(
-                    'mixins/imported-mixins-in-param-list.st.css'
+                    'mixins/imported-mixins-in-param-list.st.css',
                 );
                 const rng = createRange(0, 0, 0, 0);
                 const notExp: Array<Partial<Completion>> = [];

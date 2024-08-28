@@ -64,7 +64,7 @@ export type CachedModuleEntity =
 export type StylableResolverCache = Map<string, CachedModuleEntity>;
 
 export interface CSSResolveMaybe<
-    T extends StylableSymbol | STStructure.PartSymbol = StylableSymbol
+    T extends StylableSymbol | STStructure.PartSymbol = StylableSymbol,
 > {
     _kind: 'css';
     symbol: T | undefined;
@@ -106,12 +106,12 @@ export type ReportError = (
     extendPath: Array<CSSResolve<ClassSymbol | ElementSymbol>>,
     meta: StylableMeta,
     name: string,
-    isElement: boolean
+    isElement: boolean,
 ) => void;
 
 function isInPath(
     extendPath: Array<CSSResolve<ClassSymbol | ElementSymbol>>,
-    { symbol: { name: name1 }, meta: { source: source1 } }: CSSResolve<ClassSymbol | ElementSymbol>
+    { symbol: { name: name1 }, meta: { source: source1 } }: CSSResolve<ClassSymbol | ElementSymbol>,
 ) {
     return extendPath.find(({ symbol: { name }, meta: { source } }) => {
         return name1 === name && source === source1;
@@ -126,7 +126,7 @@ export class StylableResolver {
         protected fileProcessor: FileProcessor<StylableMeta>,
         protected requireModule: (resolvedPath: string) => any,
         protected moduleResolver: ModuleResolver,
-        protected cache?: StylableResolverCache
+        protected cache?: StylableResolverCache,
     ) {}
     public getModule({
         context,
@@ -201,7 +201,7 @@ export class StylableResolver {
     public resolveImported(
         imported: Imported,
         name: string,
-        subtype: 'mappedSymbols' | 'mappedKeyframes' | STSymbol.Namespaces = 'mappedSymbols'
+        subtype: 'mappedSymbols' | 'mappedKeyframes' | STSymbol.Namespaces = 'mappedSymbols',
     ): CSSResolveMaybe | JSResolve | null {
         const res = this.getModule(imported);
         if (res.value === null) {
@@ -214,8 +214,8 @@ export class StylableResolver {
                 subtype === `mappedSymbols`
                     ? `main`
                     : subtype === 'mappedKeyframes'
-                    ? `keyframes`
-                    : subtype;
+                      ? `keyframes`
+                      : subtype;
             name = !name && namespace === `main` ? meta.root : name;
             const symbol = STSymbol.getAll(meta, namespace)[name];
             return {
@@ -270,7 +270,7 @@ export class StylableResolver {
     }
     public deepResolve(
         maybeImport: StylableSymbol | undefined,
-        path: StylableSymbol[] = []
+        path: StylableSymbol[] = [],
     ): CSSResolveMaybe | JSResolve | null {
         let resolved = this.resolve(maybeImport);
         while (
@@ -300,7 +300,7 @@ export class StylableResolver {
     public resolveSymbolOrigin(
         symbol: StylableSymbol | undefined,
         meta: StylableMeta,
-        path: StylableSymbol[] = []
+        path: StylableSymbol[] = [],
     ): CSSResolve | null {
         if (!symbol || !meta) {
             return null;
@@ -387,8 +387,8 @@ export class StylableResolver {
                             meta,
                             name,
                             diagnostics,
-                            deepResolved as CSSResolve<ClassSymbol>
-                        )
+                            deepResolved as CSSResolve<ClassSymbol>,
+                        ),
                     );
                     break;
                 case `element`:
@@ -442,7 +442,7 @@ export class StylableResolver {
         meta: StylableMeta,
         nameOrSymbol: string | ClassSymbol | ElementSymbol,
         isElement = false,
-        reportError?: ReportError
+        reportError?: ReportError,
     ): CSSResolvePath {
         const name = typeof nameOrSymbol === `string` ? nameOrSymbol : nameOrSymbol.name;
         const symbol =
@@ -513,7 +513,7 @@ function validateClassResolveExtends(
     meta: StylableMeta,
     name: string,
     diagnostics: Diagnostics,
-    deepResolved: CSSResolve<ClassSymbol>
+    deepResolved: CSSResolve<ClassSymbol>,
 ): ReportError | undefined {
     return (res, extend) => {
         const decl = findRule(meta.sourceAst, '.' + name);
@@ -551,7 +551,7 @@ function validateClassResolveExtends(
 
 export function createSymbolResolverWithCache(
     resolver: StylableResolver,
-    diagnostics: Diagnostics
+    diagnostics: Diagnostics,
 ) {
     const cache = new WeakMap<StylableMeta, MetaResolvedSymbols>();
     return (meta: StylableMeta): MetaResolvedSymbols => {
@@ -568,7 +568,7 @@ function resolveByNamespace<NS extends STSymbol.Namespaces>(
     meta: StylableMeta,
     symbol: StylableSymbol,
     resolver: StylableResolver,
-    type: NS
+    type: NS,
 ): CSSResolve<STSymbol.SymbolByNamespace<NS>> | undefined {
     const current = { meta, symbol };
     while ('import' in current.symbol && current.symbol.import) {

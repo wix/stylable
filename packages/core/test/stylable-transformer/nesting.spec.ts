@@ -89,7 +89,7 @@ describe('transformer/nesting', () => {
                     */
                     &:onlyX {}
                 }
-            `
+            `,
         );
     });
     describe('experimentalSelectorInference=false', () => {
@@ -106,7 +106,7 @@ describe('transformer/nesting', () => {
                 .part {
                     /* 
                         @transform-error(first) ${cssPseudoClassDiagnostics.UNKNOWN_STATE_USAGE(
-                            'x'
+                            'x',
                         )}
                         @rule(first) :x 
                     */
@@ -114,7 +114,7 @@ describe('transformer/nesting', () => {
 
                     /* 
                         @transform-error(after combinator) ${cssPseudoClassDiagnostics.UNKNOWN_STATE_USAGE(
-                            'x'
+                            'x',
                         )}
                         @rule(after combinator) .entry__root :x 
                     */
@@ -129,7 +129,7 @@ describe('transformer/nesting', () => {
             `,
                 {
                     stylableConfig: { experimentalSelectorInference: false },
-                }
+                },
             );
         });
     });

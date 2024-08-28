@@ -60,7 +60,7 @@ describe('Stylable postcss transform (General)', () => {
             
                 /* 
                     @transform-error(unknown state) ${cssPseudoClassDiagnostics.UNKNOWN_STATE_USAGE(
-                        'state'
+                        'state',
                     )}
                     @rule(unknown state) :state 
                 */
@@ -68,12 +68,12 @@ describe('Stylable postcss transform (General)', () => {
     
                 /* 
                     @transform-error(unknown pseudo-element) ${transformerStringDiagnostics.UNKNOWN_PSEUDO_ELEMENT(
-                        `class`
+                        `class`,
                     )}
                     @rule(unknown pseudo-element) ::class 
                 */
                 ::class {}
-            `
+            `,
         );
     });
     it('should reset inferred selector after combinator', () => {
@@ -105,7 +105,7 @@ describe('Stylable postcss transform (General)', () => {
                 
                 /* @rule(element) *::part */
                 *::part {}
-            `
+            `,
         );
     });
     describe('experimentalSelectorInference=false', () => {
@@ -127,7 +127,7 @@ describe('Stylable postcss transform (General)', () => {
                     Comp ::class {}
                 `,
                 },
-                { stylableConfig: { experimentalSelectorInference: false } }
+                { stylableConfig: { experimentalSelectorInference: false } },
             );
         });
         it('should continue inferred selector after universal', () => {
@@ -142,7 +142,7 @@ describe('Stylable postcss transform (General)', () => {
                 /* @rule(element) * .entry__part */
                 *::part {}
             `,
-                { stylableConfig: { experimentalSelectorInference: false } }
+                { stylableConfig: { experimentalSelectorInference: false } },
             );
         });
     });

@@ -120,7 +120,7 @@ const {
 
 const log = createLogger(
     (_, ...messages) => console.log('[Stylable code formatter]', ...messages),
-    () => console.clear()
+    () => console.clear(),
 );
 
 if (debug) {
@@ -169,7 +169,7 @@ function formatStylesheet(filePath: string) {
                   newline_between_rules: newlineBetweenRules,
                   preserve_newlines: perserveNewlines,
                   selector_separator_newline: selectorSeparatorNewline,
-              }
+              },
           );
 
     if (newText.length) {

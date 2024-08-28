@@ -46,7 +46,7 @@ describe('Namespace Directive', () => {
                     @st-namespace "comp";
                 `),
             },
-            filePath
+            filePath,
         );
 
         expect(diagnostics).to.eql([]);

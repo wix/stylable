@@ -58,7 +58,7 @@ function bundle(options) {
                 'enhanced-resolve/lib/ResolverFactory.js': path.join(
                     options.absWorkingDir,
                     'src',
-                    'enhanced-resolve-alias.ts'
+                    'enhanced-resolve-alias.ts',
                 ),
             },
             ...options,

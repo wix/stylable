@@ -22,7 +22,7 @@ export const defaultFeatureFlags: FeatureFlags = {
 export type SelectorNodeContext = [
     index: number,
     nodes: ImmutableSelectorNode[],
-    parents: ImmutableSelectorNode[]
+    parents: ImmutableSelectorNode[],
 ];
 
 export interface FeatureContext {
@@ -53,7 +53,7 @@ export interface FeatureHooks<T extends NodeTypes = NodeTypes> {
         atRule: postcss.AtRule;
         analyzeRule: (
             rule: postcss.Rule,
-            options: { isScoped: boolean; originalNode: postcss.AtRule | postcss.Rule }
+            options: { isScoped: boolean; originalNode: postcss.AtRule | postcss.Rule },
         ) => boolean;
     }) => void;
     analyzeSelectorNode: (options: {
@@ -159,7 +159,7 @@ const defaultHooks: FeatureHooks<NodeTypes> = {
     },
 };
 export function createFeature<T extends NodeTypes>(
-    hooks: Partial<FeatureHooks<T>>
+    hooks: Partial<FeatureHooks<T>>,
 ): FeatureHooks<T> {
     return {
         ...defaultHooks,

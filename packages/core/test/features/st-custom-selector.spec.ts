@@ -62,13 +62,13 @@ describe('features/st-custom-selector', () => {
     it('should handle unknown custom selector', () => {
         testStylableCore(`
             /* @analyze-error(in custom) word(:--unknown) ${customSelectorDiagnostics.UNKNOWN_CUSTOM_SELECTOR(
-                ':--unknown'
+                ':--unknown',
             )} */
             @custom-selector :--x .before:--unknown.after;
 
             /* 
                 @transform-error(in selector) word(--unknown)  ${pseudoClassDiagnostics.UNKNOWN_STATE_USAGE(
-                    '--unknown'
+                    '--unknown',
                 )} 
                 @rule .entry__before:--unknown.entry__after {}
             */
@@ -96,7 +96,7 @@ describe('features/st-custom-selector', () => {
 
         expect(
             meta.diagnostics.reports.length,
-            'only a single unscoped diagnostic for span'
+            'only a single unscoped diagnostic for span',
         ).to.eql(1);
     });
     it('should transform multiple selector intersection', () => {

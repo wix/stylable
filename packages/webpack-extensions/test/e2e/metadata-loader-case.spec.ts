@@ -5,7 +5,7 @@ import { getSheetContentAndHash } from './utils';
 
 const project = 'metadata-loader-case';
 const projectDir = dirname(
-    require.resolve(`@stylable/webpack-extensions/test/e2e/projects/${project}/webpack.config`)
+    require.resolve(`@stylable/webpack-extensions/test/e2e/projects/${project}/webpack.config`),
 );
 
 describe(`(${project})`, () => {
@@ -18,7 +18,7 @@ describe(`(${project})`, () => {
         },
         before,
         afterEach,
-        after
+        after,
     );
 
     it('should create metadata for stylesheet entry contains every import as source and map imports to hashes', () => {

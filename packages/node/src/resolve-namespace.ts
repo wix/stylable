@@ -10,7 +10,7 @@ import { findPackageJson } from './find-package-json';
 export function resolveNamespaceFactory(
     hashSalt = '',
     prefix = '',
-    options: Partial<Omit<CreateNamespaceOptions, 'hashSalt' | 'prefix'>> = {}
+    options: Partial<Omit<CreateNamespaceOptions, 'hashSalt' | 'prefix'>> = {},
 ) {
     return createNamespaceStrategyNode({ hashSalt, prefix, ...options });
 }
@@ -19,7 +19,7 @@ export const packageJsonLookupCache = new Map<string, string>();
 
 export function createNamespaceStrategyNode(
     options: Partial<CreateNamespaceOptions> = {},
-    devMode?: boolean
+    devMode?: boolean,
 ) {
     return createNamespaceStrategy({
         normalizePath(packageRoot: string, stylesheetPath: string) {
@@ -28,7 +28,7 @@ export function createNamespaceStrategyNode(
         getPackageInfo: (stylesheetPath) => {
             const configPath = findPackageJson(
                 dirname(stylesheetPath),
-                packageJsonLookupCache
+                packageJsonLookupCache,
             )?.packageJsonPath;
             if (!configPath) {
                 throw new Error(`Could not find package.json for ${stylesheetPath}`);

@@ -6,7 +6,7 @@ const { getStyleElementsMetadata } = browserFunctions;
 
 const project = 'dual-mode-esm';
 const projectDir = dirname(
-    require.resolve(`@stylable/webpack-plugin/test/e2e/projects/${project}/webpack.config`)
+    require.resolve(`@stylable/webpack-plugin/test/e2e/projects/${project}/webpack.config`),
 );
 
 describe(`(${project})`, () => {
@@ -21,7 +21,7 @@ describe(`(${project})`, () => {
         },
         before,
         afterEach,
-        after
+        after,
     );
 
     it('output same styles depth with both integrations', async () => {

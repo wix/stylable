@@ -14,7 +14,7 @@ async function generateJsModule(sheetSource: string, filePath: string) {
 }
 async function initiateModuleFactory() {
     const defaultConfig = await loadStylableConfigEsm(process.cwd(), (potentialConfigModule: any) =>
-        potentialConfigModule.defaultConfig?.(fs)
+        potentialConfigModule.defaultConfig?.(fs),
     );
     return stylableModuleFactory(
         {
@@ -25,7 +25,7 @@ async function initiateModuleFactory() {
         },
         {
             moduleType: 'esm',
-        }
+        },
     );
 }
 
@@ -44,7 +44,7 @@ export interface LoaderResult {
 export async function load(
     url: string,
     context: LoaderContext,
-    next: (specifier: string, context: LoaderContext) => Promise<LoaderResult>
+    next: (specifier: string, context: LoaderContext) => Promise<LoaderResult>,
 ): Promise<LoaderResult> {
     if (defaultStylableMatcher(url)) {
         const filePath = fileURLToPath(url);

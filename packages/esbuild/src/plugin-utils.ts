@@ -37,13 +37,13 @@ export function clearCaches(stylable: Stylable) {
 export function processAssetsStubs(moduleCode: string) {
     return moduleCode.replace(
         /\\"http:\/\/__stylable_url_asset_(.*?)__\\"/g,
-        (_$0, $1) => `" + JSON.stringify(__css_asset_${Number($1)}__) + "`
+        (_$0, $1) => `" + JSON.stringify(__css_asset_${Number($1)}__) + "`,
     );
 }
 export function processAssetsAndApplyStubs(
     imports: { from: string; defaultImport?: string }[],
     res: StylableResults,
-    stylable: Stylable
+    stylable: Stylable,
 ) {
     processUrlDependencies({
         meta: res.meta,
@@ -80,7 +80,7 @@ export function enableEsbuildMetafile(build: PluginBuild, cssInjection: string) 
     if (cssInjection === 'css') {
         if (build.initialOptions.metafile === false) {
             console.warn(
-                "'stylable-esbuild-plugin' requires the 'metafile' configuration option to be enabled for CSS injection. Since it appears to be disabled, we will automatically enable it for you. Please note that this is necessary for proper plugin functionality."
+                "'stylable-esbuild-plugin' requires the 'metafile' configuration option to be enabled for CSS injection. Since it appears to be disabled, we will automatically enable it for you. Please note that this is necessary for proper plugin functionality.",
             );
         }
         build.initialOptions.metafile = true;
@@ -126,7 +126,7 @@ export function buildUsageMapping(metafile: Metafile, stylable: Stylable): Optim
                     ...usage,
                 ]
                     .map((e) => e.path)
-                    .join('\n')}`
+                    .join('\n')}`,
             );
         }
     }
@@ -153,7 +153,7 @@ export function esbuildEmitDiagnostics(res: StylableResults, diagnosticsMode: Di
         },
         res.meta,
         diagnosticsMode,
-        res.meta.source
+        res.meta.source,
     );
     return { errors, warnings };
 }
@@ -211,7 +211,7 @@ export function sortMarkersByDepth(
     css: string,
     stylable: Stylable,
     idForMap: IdForPath,
-    { usageMapping, globalMappings }: OptimizationMapping
+    { usageMapping, globalMappings }: OptimizationMapping,
 ) {
     const extracted: { depth: number; css: string; path: string }[] = [];
     const leftOverCss = css.replace(
@@ -224,14 +224,14 @@ export function sortMarkersByDepth(
                 path: idForMap.getPath(parseInt(pathId, 10)) || '',
             });
             return '';
-        }
+        },
     );
 
     const sorted = sortModulesByDepth(
         extracted,
         (m) => m.depth,
         (_) => '',
-        -1
+        -1,
     );
 
     return (
@@ -240,7 +240,7 @@ export function sortMarkersByDepth(
             .map((m) =>
                 usageMapping && globalMappings
                     ? removeUnusedComponents(m.css, stylable, usageMapping, globalMappings[m.path])
-                    : m.css
+                    : m.css,
             )
             .join('')
     );
@@ -275,7 +275,7 @@ function removeUnusedComponents(
     stylable: Stylable,
     usageMapping: Record<string, boolean>,
     // global mapping per stylable meta
-    globalMappings: Record<string, boolean>
+    globalMappings: Record<string, boolean>,
 ) {
     const ast = parse(css);
     stylable.optimizer?.optimizeAst(
@@ -283,7 +283,7 @@ function removeUnusedComponents(
         ast,
         usageMapping,
         stubExports,
-        globalMappings
+        globalMappings,
     );
     return ast.toString();
 }

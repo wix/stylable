@@ -6,5 +6,5 @@ import { App } from './app';
 createRoot(document.body.appendChild(document.createElement('div'))).render(
     <React.StrictMode>
         <App />
-    </React.StrictMode>
+    </React.StrictMode>,
 );

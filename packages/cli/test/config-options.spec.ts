@@ -212,7 +212,7 @@ describe('Stylable CLI config file options', function () {
                             options: { 
                                 indexFile: 'my-index.st.css',
                                 IndexGenerator: require(${JSON.stringify(
-                                    require.resolve('./fixtures/test-generator')
+                                    require.resolve('./fixtures/test-generator'),
                                 )}).Generator,
                                 outDir: './dist',
                             }
@@ -231,7 +231,7 @@ describe('Stylable CLI config file options', function () {
         expect(stdout, 'has diagnostic error').not.to.match(/error/i);
 
         const indexFileResult = readFileSync(
-            join(tempDir.path, 'dist', 'my-index.st.css')
+            join(tempDir.path, 'dist', 'my-index.st.css'),
         ).toString();
 
         expect(indexFileResult.trim()).to.eql(
@@ -240,7 +240,7 @@ describe('Stylable CLI config file options', function () {
                 '.root Style0{}',
                 ':import {-st-from: "../comp-A.st.css";-st-default:Style1;}',
                 '.root Style1{}',
-            ].join('\n')
+            ].join('\n'),
         );
     });
 
@@ -255,7 +255,7 @@ describe('Stylable CLI config file options', function () {
                             options: { 
                                 indexFile: 'my-index.st.css',
                                 IndexGenerator: require(${JSON.stringify(
-                                    require.resolve('./fixtures/named-exports-generator')
+                                    require.resolve('./fixtures/named-exports-generator'),
                                 )}).Generator,
                                 outDir: './dist',
                             }
@@ -279,7 +279,7 @@ describe('Stylable CLI config file options', function () {
         expect(stdout, 'has diagnostic error').not.to.match(/error/i);
 
         const indexFileResult = readFileSync(
-            join(tempDir.path, 'dist', 'my-index.st.css')
+            join(tempDir.path, 'dist', 'my-index.st.css'),
         ).toString();
 
         expect(indexFileResult.trim()).to.eql(
@@ -288,7 +288,7 @@ describe('Stylable CLI config file options', function () {
                 '.root Style0{}',
                 ':import {-st-from: "../comp-A.st.css";-st-default:Style1;}',
                 '.root Style1{}',
-            ].join('\n')
+            ].join('\n'),
         );
     });
 

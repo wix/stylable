@@ -87,7 +87,7 @@ export function createTransformer(
         replaceValueHook,
         postProcessor,
         onResolve = (resolved) => resolved,
-    }: CreateTransformerOptions = {}
+    }: CreateTransformerOptions = {},
 ): StylableTransformer {
     const { requireModule, fileProcessor, resolvePath } = generateInfra(config, diagnostics);
 
@@ -107,7 +107,7 @@ export function createTransformer(
 export function processSource(
     source: string,
     options: { from?: string } = {},
-    resolveNamespace?: typeof processNamespace
+    resolveNamespace?: typeof processNamespace,
 ) {
     return new StylableProcessor(new Diagnostics(), resolveNamespace, {
         ...defaultFeatureFlags,
@@ -115,7 +115,7 @@ export function processSource(
 }
 
 export function createProcess(
-    fileProcessor: FileProcessor<StylableMeta>
+    fileProcessor: FileProcessor<StylableMeta>,
 ): (path: string) => StylableMeta {
     return (path: string) => fileProcessor.process(path);
 }
@@ -124,7 +124,7 @@ export function createResolveExtendsResults(
     fileSystem: IFileSystem,
     fileToProcess: string,
     classNameToLookup: string,
-    isElement = false
+    isElement = false,
 ) {
     const stylable = new Stylable({
         fileSystem,
@@ -134,13 +134,13 @@ export function createResolveExtendsResults(
     return stylable.resolver.resolveExtends(
         stylable.analyze(fileToProcess),
         classNameToLookup,
-        isElement
+        isElement,
     );
 }
 
 export function generateStylableResult(
     config: Config,
-    diagnostics: Diagnostics = new Diagnostics()
+    diagnostics: Diagnostics = new Diagnostics(),
 ) {
     const { entry } = config;
     if (!isAbsolute(entry || '')) {
@@ -160,7 +160,7 @@ export function generateStylableExports(config: Config) {
 
 export function generateStylableEnvironment(
     content: IDirectoryContents,
-    stylableConfig: Partial<Omit<StylableConfig, 'fileSystem'>> = {}
+    stylableConfig: Partial<Omit<StylableConfig, 'fileSystem'>> = {},
 ) {
     const fs = createMemoryFs(content);
 

@@ -42,7 +42,7 @@ export function moduleFactoryTestKit(files: IDirectoryContents, options: Partial
             fileSystem: fs,
             projectRoot: '/',
         },
-        options
+        options,
     );
 
     return {

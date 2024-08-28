@@ -15,7 +15,7 @@ function evalStylableExtractModule(source: string): [string, StylableExports] {
         'module',
         'exports',
         'require',
-        source.replace('export default ', 'module.exports = ')
+        source.replace('export default ', 'module.exports = '),
     );
     fn(_module, _module.exports);
     return _module.exports as [string, StylableExports];

@@ -22,7 +22,7 @@ describe('@st structure', () => {
         const warnSpy = spyCalls(console, 'warn');
         const filterExpCalls = () =>
             warnSpy.calls.filter(
-                ([msg]) => typeof msg === 'string' && msg === STStructure.experimentalMsg
+                ([msg]) => typeof msg === 'string' && msg === STStructure.experimentalMsg,
             );
 
         // no warn without using @st
@@ -62,7 +62,7 @@ describe('@st structure', () => {
     
                 /* 
                     @transform-error ${transformerStringDiagnostics.UNKNOWN_PSEUDO_ELEMENT(
-                        `customPart`
+                        `customPart`,
                     )}
                     @rule .entry__root::customPart
                 */
@@ -110,7 +110,7 @@ describe('@st structure', () => {
                 @st [abc];
 
                 /* @analyze-error(multi classes) word(.b) ${stStructureDiagnostics.UNEXPECTED_EXTRA_VALUE(
-                    '.b'
+                    '.b',
                 )} */
                 @st .a.b;
             `);
@@ -136,7 +136,7 @@ describe('@st structure', () => {
 
             shouldReportNoDiagnostics(meta);
             expect(exports.classes.abc, 'composed inline def').to.eql(
-                'entry__abc entry__defined-class-inline'
+                'entry__abc entry__defined-class-inline',
             );
         });
         it('should add runtime inherit check (dev mode)', () => {
@@ -163,7 +163,7 @@ describe('@st structure', () => {
                 'entry.st.css' /*extendedFile*/,
                 '.super' /*extendingNode*/,
                 '.entry__super' /*scopedExtendingNode*/,
-                'entry.st.css' /*extendingFile*/
+                'entry.st.css' /*extendingFile*/,
             )
                 .toString()
                 .replace(/\s\s+/g, ' ');
@@ -260,7 +260,7 @@ describe('@st structure', () => {
         it('should report unexpected extra value', () => {
             testStylableCore(`
                 /* @analyze-error word(unexpected value) ${stStructureDiagnostics.UNEXPECTED_EXTRA_VALUE(
-                    'unexpected value'
+                    'unexpected value',
                 )} */
                 @st .empty unexpected value;
             `);
@@ -274,19 +274,19 @@ describe('@st structure', () => {
                 .new {
                     /* @analyze-error(extend) ${classDiagnostics.DISABLED_DIRECTIVE(
                         'new',
-                        '-st-extends'
+                        '-st-extends',
                     )} */
                     -st-extends: old;
 
                     /* @analyze-error(extend) ${classDiagnostics.DISABLED_DIRECTIVE(
                         'new',
-                        '-st-states'
+                        '-st-states',
                     )} */
                     -st-states: xState;
 
                     /* @analyze-error(extend) ${classDiagnostics.DISABLED_DIRECTIVE(
                         'new',
-                        '-st-global'
+                        '-st-global',
                     )} */
                     -st-global: ".xxx";
                 }
@@ -342,12 +342,12 @@ describe('@st structure', () => {
                         @st :bool();
 
                         /* @analyze-error ${stStateDiagnostics.STATE_STARTS_WITH_HYPHEN(
-                            '-dashProxy'
+                            '-dashProxy',
                         )}*/
                         @st :-dashProxy;
 
                         /* @analyze-error ${stStructureDiagnostics.UNEXPECTED_EXTRA_VALUE(
-                            'abc xyz'
+                            'abc xyz',
                         )}*/
                         @st :boolWithExtra abc xyz;
                     }
@@ -373,7 +373,7 @@ describe('@st structure', () => {
 
                     /* @analyze-error word(:conflict) ${stStructureDiagnostics.REDECLARE(
                         'pseudo-state',
-                        ':conflict'
+                        ':conflict',
                     )} */
                     @st :conflict(enum(a, b)) b;
                 }
@@ -596,12 +596,12 @@ describe('@st structure', () => {
 
                         /* @analyze-error word(::duplicate) ${stStructureDiagnostics.REDECLARE(
                             'pseudo-element',
-                            '::duplicate'
+                            '::duplicate',
                         )}*/
                         @st ::duplicate => .b;
                         
                         /* @analyze-error ${stStructureDiagnostics.INVALID_ST_DEF(
-                            ': :invalidSpace => .c'
+                            ': :invalidSpace => .c',
                         )}*/
                         @st : :invalidSpace => .c;
                     }
@@ -699,7 +699,7 @@ describe('@st structure', () => {
 
                     .y {
                         /* @transform-error ${classDiagnostics.CANNOT_EXTEND_UNKNOWN_SYMBOL(
-                            'default'
+                            'default',
                         )} */
                         -st-extends: Default;
                     }

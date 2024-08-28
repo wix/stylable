@@ -45,7 +45,7 @@ interface PostcssTokenizer {
 declare module 'postcss/lib/tokenize' {
     function tokenizer(
         input: import('postcss').Input,
-        options: { ignoreErrors: boolean }
+        options: { ignoreErrors: boolean },
     ): PostcssTokenizer;
     export = tokenizer;
 }
@@ -78,7 +78,7 @@ declare module 'postcss/lib/parser' {
             node: postcss.Node,
             type: string,
             tokens: PostcssToken[],
-            customProperty: boolean
+            customProperty: boolean,
         ): string;
         protected getPosition(offset: number): { offset: number; line: number; column: number };
     }

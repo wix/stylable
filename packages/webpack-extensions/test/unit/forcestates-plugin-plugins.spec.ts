@@ -21,7 +21,7 @@ describe('stylable-forcestates plugins', () => {
         }));
 
         expect((ast.nodes[0] as postcss.Rule).selector).to.equal(
-            '.x.my-state:hover,.x[dfs-my-state][dfs-hover]'
+            '.x.my-state:hover,.x[dfs-my-state][dfs-hover]',
         );
     });
 });

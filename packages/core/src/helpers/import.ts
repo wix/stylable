@@ -18,57 +18,57 @@ export const parseImportMessages = {
     ST_IMPORT_STAR: createDiagnosticReporter(
         '05001',
         'error',
-        () => '@st-import * is not supported'
+        () => '@st-import * is not supported',
     ),
     INVALID_ST_IMPORT_FORMAT: createDiagnosticReporter(
         '05002',
         'error',
-        (errors: string[]) => `Invalid @st-import format:\n - ${errors.join('\n - ')}`
+        (errors: string[]) => `Invalid @st-import format:\n - ${errors.join('\n - ')}`,
     ),
     ST_IMPORT_EMPTY_FROM: createDiagnosticReporter(
         '05003',
         'error',
-        () => '@st-import must specify a valid "from" string value'
+        () => '@st-import must specify a valid "from" string value',
     ),
     EMPTY_IMPORT_FROM: createDiagnosticReporter(
         '05004',
         'error',
-        () => '"-st-from" cannot be empty'
+        () => '"-st-from" cannot be empty',
     ),
     MULTIPLE_FROM_IN_IMPORT: createDiagnosticReporter(
         '05005',
         'warning',
-        () => `cannot define multiple "-st-from" declarations in a single import`
+        () => `cannot define multiple "-st-from" declarations in a single import`,
     ),
     DEFAULT_IMPORT_IS_LOWER_CASE: createDiagnosticReporter(
         '05006',
         'warning',
-        () => 'Default import of a Stylable stylesheet must start with an upper-case letter'
+        () => 'Default import of a Stylable stylesheet must start with an upper-case letter',
     ),
     ILLEGAL_PROP_IN_IMPORT: createDiagnosticReporter(
         '05007',
         'warning',
-        (propName: string) => `"${propName}" css attribute cannot be used inside :import block`
+        (propName: string) => `"${propName}" css attribute cannot be used inside :import block`,
     ),
     FROM_PROP_MISSING_IN_IMPORT: createDiagnosticReporter(
         '05008',
         'error',
-        () => `"-st-from" is missing in :import block`
+        () => `"-st-from" is missing in :import block`,
     ),
     INVALID_NAMED_IMPORT_AS: createDiagnosticReporter(
         '05009',
         'error',
-        (name: string) => `Invalid named import "as" with name "${name}"`
+        (name: string) => `Invalid named import "as" with name "${name}"`,
     ),
     INVALID_NESTED_KEYFRAMES: createDiagnosticReporter(
         '05010',
         'error',
-        (name: string) => `Invalid nested keyframes import "${name}"`
+        (name: string) => `Invalid nested keyframes import "${name}"`,
     ),
     INVALID_NESTED_TYPED_IMPORT: createDiagnosticReporter(
         '05019',
         'warning',
-        (type: string, name: string) => `Invalid nested ${type} import "${name}"`
+        (type: string, name: string) => `Invalid nested ${type} import "${name}"`,
     ),
 };
 
@@ -77,17 +77,17 @@ export const ensureImportsMessages = {
         '16001',
         'error',
         (kind: 'default' | 'named' | 'keyframes', origin: string, override: string) =>
-            `Attempt to override existing ${kind} import symbol. ${origin} -> ${override}`
+            `Attempt to override existing ${kind} import symbol. ${origin} -> ${override}`,
     ),
     PATCH_CONTAINS_NEW_IMPORT_IN_NEW_IMPORT_NONE_MODE: createDiagnosticReporter(
         '16002',
         'error',
-        () => `Attempt to insert new a import in newImport "none" mode`
+        () => `Attempt to insert new a import in newImport "none" mode`,
     ),
 };
 
 export function createAtImportProps(
-    importObj: Partial<Pick<Imported, 'named' | 'keyframes' | 'defaultExport' | 'request'>>
+    importObj: Partial<Pick<Imported, 'named' | 'keyframes' | 'defaultExport' | 'request'>>,
 ): {
     name: string;
     params: string;
@@ -128,7 +128,7 @@ export function ensureModuleImport(
     options: {
         newImport: 'none' | 'st-import' | ':import';
     },
-    diagnostics: Diagnostics = new Diagnostics()
+    diagnostics: Diagnostics = new Diagnostics(),
 ) {
     const patches = createImportPatches(ast, importPatches, options, diagnostics);
     if (!diagnostics.reports.length) {
@@ -142,7 +142,7 @@ function createImportPatches(
     ast: Root,
     importPatches: Array<ImportPatch>,
     { newImport }: { newImport: 'none' | 'st-import' | ':import' },
-    diagnostics: Diagnostics
+    diagnostics: Diagnostics,
 ) {
     const patches: Array<() => void> = [];
     const handled = new Set<ImportPatch>();
@@ -172,7 +172,7 @@ function createImportPatches(
         if (handled.size !== importPatches.length) {
             diagnostics.report(
                 ensureImportsMessages.PATCH_CONTAINS_NEW_IMPORT_IN_NEW_IMPORT_NONE_MODE(),
-                { node: ast }
+                { node: ast },
             );
         }
         return patches;
@@ -196,8 +196,8 @@ function createImportPatches(
                             keyframes: item.keyframes || {},
                             named: item.named || {},
                             request: item.request,
-                        })
-                    )
+                        }),
+                    ),
                 );
             });
         } else {
@@ -225,7 +225,7 @@ function setImportObjectFrom(importPath: string, dirPath: string, importObj: Imp
 export function parseModuleImportStatement(
     node: AtRule | Rule,
     context: string,
-    diagnostics: Diagnostics
+    diagnostics: Diagnostics,
 ) {
     if (node.type === 'atrule') {
         return parseStImport(node, context, diagnostics);
@@ -342,7 +342,7 @@ export function parsePseudoImport(rule: Rule, context: string, diagnostics: Diag
                     const { typedMap, namedMap } = parsePseudoImportNamed(
                         decl.value,
                         decl,
-                        diagnostics
+                        diagnostics,
                     );
                     importObj.named = namedMap;
                     importObj.keyframes = typedMap.keyframes || {};
@@ -369,7 +369,7 @@ export function parsePseudoImport(rule: Rule, context: string, diagnostics: Diag
 export function parsePseudoImportNamed(
     value: string,
     node: postcss.Declaration | postcss.AtRule,
-    diagnostics: Diagnostics
+    diagnostics: Diagnostics,
 ) {
     const namedMap: Record<string, string> = {};
     const typedMap: Record<string, Record<string, string>> = {};
@@ -380,7 +380,7 @@ export function parsePseudoImportNamed(
 }
 
 function createPseudoImportProps(
-    item: Partial<Pick<Imported, 'named' | 'keyframes' | 'defaultExport' | 'request'>>
+    item: Partial<Pick<Imported, 'named' | 'keyframes' | 'defaultExport' | 'request'>>,
 ) {
     const nodes = [];
     const named = generateNamedValue(item);
@@ -392,7 +392,7 @@ function createPseudoImportProps(
             decl({
                 prop: '-st-default',
                 value: item.defaultExport,
-            })
+            }),
         );
     }
     if (named.length) {
@@ -400,7 +400,7 @@ function createPseudoImportProps(
             decl({
                 prop: '-st-named',
                 value: named.join(', '),
-            })
+            }),
         );
     }
 
@@ -479,7 +479,7 @@ function processImports(
     imported: Imported,
     importPatches: Array<ImportPatch>,
     handled: Set<ImportPatch>,
-    diagnostics: Diagnostics
+    diagnostics: Diagnostics,
 ) {
     const ops = ['named', 'keyframes'] as const;
     for (const patch of importPatches) {
@@ -503,11 +503,11 @@ function processImports(
                                 currentSymbol === asName
                                     ? currentSymbol
                                     : `${currentSymbol} as ${asName}`,
-                                symbol === asName ? symbol : `${symbol} as ${asName}`
+                                symbol === asName ? symbol : `${symbol} as ${asName}`,
                             ),
                             {
                                 node: imported.rule,
-                            }
+                            },
                         );
                     } else {
                         imported[op][asName] = symbol;
@@ -523,11 +523,11 @@ function processImports(
                         ensureImportsMessages.ATTEMPT_OVERRIDE_SYMBOL(
                             'default',
                             imported.defaultExport,
-                            patch.defaultExport
+                            patch.defaultExport,
                         ),
                         {
                             node: imported.rule,
-                        }
+                        },
                     );
                 }
             }
@@ -541,7 +541,7 @@ function handleNamedTokens(
     mainBucket: Record<string, string>,
     typedBuckets: Record<string, Record<string, string>> | null,
     node: postcss.Declaration | postcss.AtRule,
-    diagnostics: Diagnostics
+    diagnostics: Diagnostics,
 ) {
     const { nodes } = tokens;
     for (let i = 0; i < nodes.length; i++) {
@@ -570,9 +570,9 @@ function handleNamedTokens(
                 diagnostics.report(
                     parseImportMessages.INVALID_NESTED_TYPED_IMPORT(
                         token.value,
-                        postcssValueParser.stringify(token)
+                        postcssValueParser.stringify(token),
                     ),
-                    { node }
+                    { node },
                 );
             } else {
                 typedBuckets[token.value] ??= {};
@@ -599,7 +599,7 @@ export function tryCollectImportsDeep(
     imports = new Set<string>(),
     onImport: undefined | ((e: ImportEvent) => void) = undefined,
     depth = 1,
-    origin = meta.source
+    origin = meta.source,
 ) {
     for (const { context, request } of meta.getImportStatements()) {
         try {
@@ -618,7 +618,7 @@ export function tryCollectImportsDeep(
                         imports,
                         onImport,
                         depth + 1,
-                        origin
+                        origin,
                     );
                 }
             }

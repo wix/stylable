@@ -30,7 +30,7 @@ export class StylableOptimizer implements IStylableOptimizer {
     public optimize(
         config: OptimizeConfig,
         stylableResults: StylableResults,
-        usageMapping: Record<string, boolean>
+        usageMapping: Record<string, boolean>,
     ) {
         const {
             meta: { globals, targetAst },
@@ -53,7 +53,7 @@ export class StylableOptimizer implements IStylableOptimizer {
         targetAst: Root,
         usageMapping: Record<string, boolean>,
         jsExports: StylableExports,
-        globals: Record<string, boolean>
+        globals: Record<string, boolean>,
     ) {
         if (config.removeComments) {
             this.removeComments(targetAst);
@@ -61,7 +61,7 @@ export class StylableOptimizer implements IStylableOptimizer {
         if ((config as any).removeStylableDirectives !== undefined) {
             // ToDo(major): remove warning
             console.warn(
-                `optimizer "removeStylableDirectives" is no longer required as "-st-*" declarations are removed during transformation`
+                `optimizer "removeStylableDirectives" is no longer required as "-st-*" declarations are removed during transformation`,
             );
         }
         if (config.removeUnusedComponents && usageMapping) {
@@ -77,7 +77,7 @@ export class StylableOptimizer implements IStylableOptimizer {
             usageMapping,
             globals,
             config.shortNamespaces,
-            config.classNameOptimizations
+            config.classNameOptimizations,
         );
     }
 
@@ -88,7 +88,7 @@ export class StylableOptimizer implements IStylableOptimizer {
         usageMapping: Record<string, boolean>,
         globals: Record<string, boolean> = {},
         shortNamespaces?: boolean,
-        classNamespaceOptimizations?: boolean
+        classNamespaceOptimizations?: boolean,
     ) {
         if (!shortNamespaces && !classNamespaceOptimizations) {
             return;
@@ -100,7 +100,7 @@ export class StylableOptimizer implements IStylableOptimizer {
                 usageMapping,
                 globals,
                 shortNamespaces || false,
-                classNamespaceOptimizations || false
+                classNamespaceOptimizations || false,
             );
         });
         const namespaceRegexp = new RegExp(`^(.*?)${delimiter}`);
@@ -118,12 +118,12 @@ export class StylableOptimizer implements IStylableOptimizer {
                             const namespaceMatch = renderedNamed.match(namespaceRegexp);
                             if (!namespaceMatch) {
                                 throw new Error(
-                                    `Stylable class dose not have proper export namespace ${renderedNamed}`
+                                    `Stylable class dose not have proper export namespace ${renderedNamed}`,
                                 );
                             }
                             return renderedNamed.replace(
                                 namespaceRegexp,
-                                `${this.getNamespace(namespaceMatch[1])}${delimiter}`
+                                `${this.getNamespace(namespaceMatch[1])}${delimiter}`,
                             );
                         } else {
                             throw new Error('Invalid optimization config');
@@ -139,7 +139,7 @@ export class StylableOptimizer implements IStylableOptimizer {
         usageMapping: Record<string, boolean>,
         globals: Record<string, boolean> = {},
         shortNamespaces: boolean,
-        classNamespaceOptimizations: boolean
+        classNamespaceOptimizations: boolean,
     ) {
         const ast = parseCssSelector(selector);
 
@@ -155,8 +155,8 @@ export class StylableOptimizer implements IStylableOptimizer {
                             node.value = node.value.replace(
                                 stateRegexp,
                                 `${this.getNamespace(
-                                    possibleStateNamespace[1]
-                                )}${booleanStateDelimiter}`
+                                    possibleStateNamespace[1],
+                                )}${booleanStateDelimiter}`,
                             );
                         }
                     }
@@ -169,12 +169,12 @@ export class StylableOptimizer implements IStylableOptimizer {
                         const namespaceMatch = node.value.match(namespaceRegexp);
                         if (!namespaceMatch) {
                             throw new Error(
-                                `Stylable class dose not have proper namespace ${node.value}`
+                                `Stylable class dose not have proper namespace ${node.value}`,
                             );
                         }
                         node.value = node.value.replace(
                             namespaceRegexp,
-                            `${this.getNamespace(namespaceMatch[1])}${delimiter}`
+                            `${this.getNamespace(namespaceMatch[1])}${delimiter}`,
                         );
                     }
                 }
@@ -194,7 +194,7 @@ export class StylableOptimizer implements IStylableOptimizer {
     private removeUnusedComponents(
         targetAst: Root,
         usageMapping: Record<string, boolean>,
-        shouldComment = false
+        shouldComment = false,
     ) {
         const matchNamespace = new RegExp(`(.+)${delimiter}(.+)`);
         targetAst.walkRules((rule) => {
@@ -217,7 +217,7 @@ export class StylableOptimizer implements IStylableOptimizer {
     private isContainsUnusedParts(
         selectorAst: Selector,
         usageMapping: Record<string, boolean>,
-        matchNamespace: RegExp
+        matchNamespace: RegExp,
     ) {
         // TODO: !!-!-!! last working point
         let isContainsUnusedParts = false;
@@ -311,7 +311,7 @@ export function replaceRecursiveUpIfEmpty(label: string, node: Node) {
     node.replaceWith(
         ...(node.type === 'decl'
             ? createLineByLineComment(node)
-            : createCommentFromNode(label, node))
+            : createCommentFromNode(label, node)),
     );
     if (
         parent &&

@@ -15,7 +15,7 @@ function getCacheKey(
     fileData: string,
     filename: string,
     configString: string,
-    options?: { instrument: boolean }
+    options?: { instrument: boolean },
 ) {
     return (
         fileData +
@@ -50,7 +50,7 @@ export const createTransformer = (options?: StylableJestConfig) => {
         }
     } catch (e) {
         throw new Error(
-            `Failed to load Stylable config from ${options?.configPath || 'unknown'}:\n${e}`
+            `Failed to load Stylable config from ${options?.configPath || 'unknown'}:\n${e}`,
         );
     }
 
@@ -64,7 +64,7 @@ export const createTransformer = (options?: StylableJestConfig) => {
         },
         // ensure the generated module points to our own @stylable/runtime copy
         // this allows @stylable/jest to be used as part of a globally installed CLI
-        { runtimePath: stylableRuntimePath }
+        { runtimePath: stylableRuntimePath },
     );
 
     const process = (source: string, path: string) => {

@@ -25,7 +25,7 @@ describe('Module Factory', () => {
             {
                 [testFile]: '.root {background: red}',
             },
-            { injectCSS: false }
+            { injectCSS: false },
         );
 
         const moduleSource = factory(fs.readFileSync(testFile, 'utf8'), testFile);
@@ -98,7 +98,7 @@ describe('Module Factory', () => {
                 'cssStates',
                 'style',
                 'st',
-            ].sort()
+            ].sort(),
         );
     });
 });

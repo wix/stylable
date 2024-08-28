@@ -11,12 +11,12 @@ export function packageNamespaceFactory(
     }: { dirname(path: string): string; relative(from: string, to: string): string },
     hashSalt = '',
     prefix = '',
-    normalizeVersion = (semver: string) => semver
+    normalizeVersion = (semver: string) => semver,
 ): typeof processNamespace {
     return (
         namespace: string,
         originStylesheetPath: string,
-        stylesheetPath: string = originStylesheetPath
+        stylesheetPath: string = originStylesheetPath,
     ) => {
         const configPath = findConfig('package.json', { cwd: dirname(stylesheetPath) });
         if (!configPath) {
@@ -28,7 +28,7 @@ export function packageNamespaceFactory(
             prefix +
             namespace +
             murmurhash3_32_gc(
-                hashSalt + config.name + '@' + normalizeVersion(config.version) + '/' + fromRoot
+                hashSalt + config.name + '@' + normalizeVersion(config.version) + '/' + fromRoot,
             )
         );
     };

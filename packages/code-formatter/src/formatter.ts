@@ -21,7 +21,7 @@ export function formatDocumentExperimental(source: string, options: Partial<Form
 export function getDocumentFormatting(
     content: string,
     offset?: { start: number; end: number },
-    options?: CSSBeautifyOptions
+    options?: CSSBeautifyOptions,
 ): string {
     const offsetStart = offset?.start || 0;
     const offsetEnd = offset?.end || content.length;
@@ -58,7 +58,7 @@ function removeFormattingExceptions(ast: Root) {
 
 function restoreFormattingExceptions(
     ast: Root,
-    { atRuleChanges, declChanges }: { atRuleChanges: string[]; declChanges: string[] }
+    { atRuleChanges, declChanges }: { atRuleChanges: string[]; declChanges: string[] },
 ) {
     ast.walkAtRules(stImport, (atRule) => {
         atRule.params = atRuleChanges.shift()!;

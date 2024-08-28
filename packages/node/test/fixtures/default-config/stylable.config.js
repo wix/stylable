@@ -1,5 +1,7 @@
 //@ts-check
-const { posix: {join} } = require('path');
+const {
+    posix: { join },
+} = require('path');
 const { createDefaultResolver } = require('@stylable/core');
 
 module.exports = {

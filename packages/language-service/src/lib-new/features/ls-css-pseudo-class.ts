@@ -68,8 +68,8 @@ export function getCompletions(context: LangServiceContext): Completion[] {
                         option,
                         // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
                         normalizeDefinitionSheetLocation(context.meta, inStateParenDef!.meta),
-                        range(pos, { deltaStart: -startDelta })
-                    )
+                        range(pos, { deltaStart: -startDelta }),
+                    ),
                 );
             }
         } else {
@@ -78,11 +78,11 @@ export function getCompletions(context: LangServiceContext): Completion[] {
                 nodeAtCursor,
                 selectorAtCursor,
                 states,
-                context.meta
+                context.meta,
             );
             for (const [name, { state, meta }] of Object.entries(states)) {
                 const isAlreadyUsed = current['pseudo_class']?.find(
-                    (exist) => exist.value === name
+                    (exist) => exist.value === name,
                 );
                 if (isAlreadyUsed) {
                     continue;
@@ -104,8 +104,8 @@ export function getCompletions(context: LangServiceContext): Completion[] {
                         originFile,
                         range(pos, { deltaStart: -startDelta }),
                         stateType,
-                        stateWithParam
-                    )
+                        stateWithParam,
+                    ),
                 );
             }
         }
@@ -114,7 +114,7 @@ export function getCompletions(context: LangServiceContext): Completion[] {
 }
 
 function getEnumParamDef(
-    stateDef?: string | StateParsedValue | TemplateStateParsedValue | null
+    stateDef?: string | StateParsedValue | TemplateStateParsedValue | null,
 ): StateParsedValue | undefined {
     if (!stateDef || typeof stateDef !== 'object') {
         return;
@@ -130,7 +130,7 @@ function suggestCompleteStates(
     nodeAtCursor: ImmutableSelectorNode | null,
     selectorAtCursor: string,
     states: StatesDefs,
-    contextMeta: StylableMeta
+    contextMeta: StylableMeta,
 ) {
     return (
         // prev is not a pseudo class

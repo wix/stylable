@@ -31,7 +31,7 @@ export interface DependencyTemplateContext {
     dependencyTemplates: DependencyTemplates;
 }
 
-type DependencyTemplate = InstanceType<typeof dependencies.ModuleDependency['Template']>;
+type DependencyTemplate = InstanceType<(typeof dependencies.ModuleDependency)['Template']>;
 
 interface InjectDependencyTemplate {
     new (
@@ -40,7 +40,7 @@ interface InjectDependencyTemplate {
         assetsModules: Map<string, NormalModule>,
         runtimeStylesheetId: 'namespace' | 'module',
         runtimeId: string,
-        cssInjection: 'js' | 'css' | 'mini-css' | 'none'
+        cssInjection: 'js' | 'css' | 'mini-css' | 'none',
     ): DependencyTemplate;
 }
 
@@ -113,7 +113,7 @@ export function getWebpackEntities(webpack: Compiler['webpack']): StylableWebpac
             private assetsModules: Map<string, NormalModule>,
             private runtimeStylesheetId: 'namespace' | 'module',
             private runtimeId: string,
-            private cssInjection: 'js' | 'css' | 'mini-css' | 'none'
+            private cssInjection: 'js' | 'css' | 'mini-css' | 'none',
         ) {}
         apply(
             _dependency: StylableRuntimeDependency,
@@ -125,7 +125,7 @@ export function getWebpackEntities(webpack: Compiler['webpack']): StylableWebpac
                 runtime,
                 chunkGraph,
                 dependencyTemplates,
-            }: DependencyTemplateContext
+            }: DependencyTemplateContext,
         ) {
             const stylableBuildData = getStylableBuildData(this.stylableModules, module);
             if (!stylableBuildData.isUsed) {
@@ -146,14 +146,14 @@ export function getWebpackEntities(webpack: Compiler['webpack']): StylableWebpac
 
                 if (!(module instanceof NormalModule)) {
                     throw new Error(
-                        `InjectDependencyTemplate should only be used on stylable modules was found on ${module.identifier()}`
+                        `InjectDependencyTemplate should only be used on stylable modules was found on ${module.identifier()}`,
                     );
                 }
 
                 const id =
                     this.runtimeStylesheetId === 'module'
                         ? JSON.stringify(
-                              runtimeTemplate.requestShortener.contextify(module.resource)
+                              runtimeTemplate.requestShortener.contextify(module.resource),
                           )
                         : JSON.stringify(namespace);
 
@@ -176,11 +176,15 @@ export function getWebpackEntities(webpack: Compiler['webpack']): StylableWebpac
     registerSerialization(
         webpack,
         StylableRuntimeDependency,
-        (ctx) => [ctx.read()] as [StylableBuildMeta]
+        (ctx) => [ctx.read()] as [StylableBuildMeta],
     );
 
     /* The request is empty for both dependencies and it will be overridden by the de-serialization process */
-    registerSerialization(webpack, UnusedDependency, () => ['', 0 , undefined] as ['', 0 , undefined]);
+    registerSerialization(
+        webpack,
+        UnusedDependency,
+        () => ['', 0, undefined] as ['', 0, undefined],
+    );
     registerSerialization(webpack, CSSURLDependency, () => [''] as [string]);
 
     entities = {
@@ -200,9 +204,9 @@ export function getWebpackEntities(webpack: Compiler['webpack']): StylableWebpac
 function replacePlaceholder(
     source: sources.ReplaceSource,
     replacementPoint: string,
-    value: string
+    value: string,
 ) {
-    // we calculate the replacement from the original source. this way order does not matter 
+    // we calculate the replacement from the original source. this way order does not matter
     const t: any = source.original();
     const t1 = t.source ? t.source() : String(t);
     const i = t1.indexOf(replacementPoint);
@@ -223,7 +227,7 @@ type Serializable = {
 function registerSerialization<T extends Serializable>(
     webpack: Compiler['webpack'],
     Type: T,
-    getArgs: (context: SerializationContext) => ConstructorParameters<T>
+    getArgs: (context: SerializationContext) => ConstructorParameters<T>,
 ) {
     webpack.util.serialization.register(Type, __filename, Type.name, {
         serialize(instance: InstanceType<T>, context: SerializationContext) {

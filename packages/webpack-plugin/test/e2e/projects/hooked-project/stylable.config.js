@@ -14,10 +14,10 @@ module.exports.webpackPlugin = function (options) {
                                     decl.clone({
                                         value: decl.value.replace(
                                             /hook_var_(\d+)/,
-                                            'rgb($1, 0, 0)'
+                                            'rgb($1, 0, 0)',
                                         ),
-                                    })
-                                )
+                                    }),
+                                ),
                             );
                         });
                         actions.forEach((action) => action());

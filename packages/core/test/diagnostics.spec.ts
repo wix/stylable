@@ -52,7 +52,7 @@ describe('diagnostics: warnings and errors', () => {
 
                     }
                 `,
-                    [{ message: '"Something" component is not imported', file: 'main.css' }]
+                    [{ message: '"Something" component is not imported', file: 'main.css' }],
                 );
             });
 
@@ -64,7 +64,7 @@ describe('diagnostics: warnings and errors', () => {
                     }
                     .|
                 `,
-                    [{ message: 'identifier expected', file: 'main.css' }]
+                    [{ message: 'identifier expected', file: 'main.css' }],
                 );
             });
             it('should return warning for unterminated ":"', () => {
@@ -75,7 +75,7 @@ describe('diagnostics: warnings and errors', () => {
                     }
                     :|
                 `,
-                    [{ message: 'identifier expected', file: 'main.css' }]
+                    [{ message: 'identifier expected', file: 'main.css' }],
                 );
             });
             it('should return warning for className without rule area', () => {
@@ -86,7 +86,7 @@ describe('diagnostics: warnings and errors', () => {
                     }
                     .gaga|
                 `,
-                    [{ message: '{ expected', file: 'main.css' }]
+                    [{ message: '{ expected', file: 'main.css' }],
                 );
             });
         });
@@ -109,7 +109,7 @@ describe('diagnostics: warnings and errors', () => {
                         severity: `error`,
                         message: cssTypeDiagnostics.INVALID_FUNCTIONAL_SELECTOR(
                             `[attr]`,
-                            `attribute`
+                            `attribute`,
                         ),
                         file: `main.css`,
                     },
@@ -135,7 +135,7 @@ describe('diagnostics: warnings and errors', () => {
                     .gaga{
                         color:red|
                 `,
-                    [{ message: '; expected', file: 'main.css' }]
+                    [{ message: '; expected', file: 'main.css' }],
                 );
             });
         });
@@ -150,7 +150,7 @@ describe('diagnostics: warnings and errors', () => {
                         color|
                     }
                 `,
-                    [{ message: ': expected', file: 'main.css' }]
+                    [{ message: ': expected', file: 'main.css' }],
                 );
                 expectAnalyzeDiagnostics(
                     `
@@ -161,7 +161,7 @@ describe('diagnostics: warnings and errors', () => {
                         color:|
                     }
                 `,
-                    [{ message: 'property value expected', file: 'main.css' }]
+                    [{ message: 'property value expected', file: 'main.css' }],
                 );
                 // todo: add cases for any unterminated selectors (direct descendant, etc...)
             });
@@ -172,7 +172,7 @@ describe('diagnostics: warnings and errors', () => {
                         |hello|:yossi;
                     }
                 `,
-                    [{ message: 'unknown rule "hello"', file: 'main.css' }]
+                    [{ message: 'unknown rule "hello"', file: 'main.css' }],
                 );
             });
 
@@ -183,7 +183,7 @@ describe('diagnostics: warnings and errors', () => {
 
                     }
                 `,
-                    [{ message: 'illegal character <', file: 'main.css' }]
+                    [{ message: 'illegal character <', file: 'main.css' }],
                 );
             });
 
@@ -194,7 +194,7 @@ describe('diagnostics: warnings and errors', () => {
                         |-st-something|:true;
                     }
                 `,
-                    [{ message: 'unknown directive "-st-something"', file: 'main.css' }]
+                    [{ message: 'unknown directive "-st-something"', file: 'main.css' }],
                 );
             });
         });
@@ -213,7 +213,7 @@ describe('diagnostics: warnings and errors', () => {
                                 'global pseudo elements are not allowed, you can use ".root::before" instead',
                             file: 'main.css',
                         },
-                    ]
+                    ],
                 );
             });
 
@@ -302,11 +302,11 @@ describe('diagnostics: warnings and errors', () => {
                         {
                             message:
                                 generalStringDiagnostics.FORBIDDEN_DEF_IN_COMPLEX_SELECTOR(
-                                    '-st-extends'
+                                    '-st-extends',
                                 ),
                             file: 'main.css',
                         },
-                    ]
+                    ],
                 );
             });
         });
@@ -331,7 +331,7 @@ describe('diagnostics: warnings and errors', () => {
                             message: cssClassDiagnostics.OVERRIDE_TYPED_RULE(`-st-extends`, 'root'),
                             file: 'main.css',
                         },
-                    ]
+                    ],
                 );
             });
         });
@@ -370,7 +370,7 @@ describe('diagnostics: warnings and errors', () => {
                         message: 'conflicting extends matching same target [SheetB.my-a]',
                         file: 'main.css',
                     },
-                ]
+                ],
             );
         });
 
@@ -380,7 +380,7 @@ describe('diagnostics: warnings and errors', () => {
                     `
                     .root button {}
                 `,
-                    []
+                    [],
                 );
             });
 
@@ -390,7 +390,7 @@ describe('diagnostics: warnings and errors', () => {
                     .class {}
                     .class button {}
                 `,
-                    []
+                    [],
                 );
             });
 
@@ -409,7 +409,7 @@ describe('diagnostics: warnings and errors', () => {
                             message: cssClassDiagnostics.UNSCOPED_CLASS('Blah'),
                             file: 'main.css',
                         },
-                    ]
+                    ],
                 );
             });
 
@@ -426,7 +426,7 @@ describe('diagnostics: warnings and errors', () => {
 
                     .cls:not(:someState) .classNeedsScoping {}  
                 `,
-                    []
+                    [],
                 );
             });
 
@@ -446,7 +446,7 @@ describe('diagnostics: warnings and errors', () => {
                     }
 
                 `,
-                    []
+                    [],
                 );
             });
 
@@ -460,7 +460,7 @@ describe('diagnostics: warnings and errors', () => {
                             message: cssTypeDiagnostics.UNSCOPED_TYPE_SELECTOR('button'),
                             file: 'main.css',
                         },
-                    ]
+                    ],
                 );
             });
 
@@ -474,7 +474,7 @@ describe('diagnostics: warnings and errors', () => {
                             message: cssTypeDiagnostics.UNSCOPED_TYPE_SELECTOR('button'),
                             file: 'main.css',
                         },
-                    ]
+                    ],
                 );
             });
         });

@@ -21,7 +21,7 @@ export interface RollupRunnerOptions {
 }
 const rootNodeModulesFromHere = join(
     dirname(require.resolve('../../../../../package.json')),
-    'node_modules'
+    'node_modules',
 );
 export function rollupRunner({
     projectPath,
@@ -105,7 +105,7 @@ export function rollupRunner({
         ready,
         async act(
             action: (done: Promise<RollupWatcherEvent>) => Promise<void> | void,
-            options?: ActAndWaitOptions
+            options?: ActAndWaitOptions,
         ) {
             return await actAndWaitForBuild(watcher, action, options);
         },

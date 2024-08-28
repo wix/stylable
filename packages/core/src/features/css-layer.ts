@@ -26,33 +26,33 @@ export const diagnostics = {
     MISSING_LAYER_NAME_INSIDE_GLOBAL: createDiagnosticReporter(
         '19001',
         'warning',
-        () => `"@layer" missing parameter inside "${GLOBAL_FUNC}()"`
+        () => `"@layer" missing parameter inside "${GLOBAL_FUNC}()"`,
     ),
     LAYER_SORT_STATEMENT_WITH_STYLE: createDiagnosticReporter(
         '19002',
         'error',
-        () => `"@layer" ordering statement cannot have a style block`
+        () => `"@layer" ordering statement cannot have a style block`,
     ),
     RESERVED_KEYWORD: createDiagnosticReporter(
         '19003',
         'error',
-        (name: string) => `"@layer" name cannot be reserved word "${name}"`
+        (name: string) => `"@layer" name cannot be reserved word "${name}"`,
     ),
     NOT_IDENT: createDiagnosticReporter(
         '19004',
         'error',
-        (name: string) => `"@layer" expected ident, but got "${name}"`
+        (name: string) => `"@layer" expected ident, but got "${name}"`,
     ),
     RECONFIGURE_IMPORTED: createDiagnosticReporter(
         '19005',
         'error',
-        (name: string) => `cannot reconfigure imported layer "${name}"`
+        (name: string) => `cannot reconfigure imported layer "${name}"`,
     ),
     UNKNOWN_IMPORTED_LAYER: createDiagnosticReporter(
         '19006',
         'error',
         (name: string, path: string) =>
-            `cannot resolve imported layer "${name}" from stylesheet "${path}"`
+            `cannot resolve imported layer "${name}" from stylesheet "${path}"`,
     ),
 };
 
@@ -105,7 +105,7 @@ export const hooks = createFeature<{
                 atRule.params,
                 context.diagnostics,
                 atRule,
-                context.meta.type === 'stylable'
+                context.meta.type === 'stylable',
             );
             if (analyzedParams.multiple && atRule.nodes) {
                 context.diagnostics.report(diagnostics.LAYER_SORT_STATEMENT_WITH_STYLE(), {
@@ -146,7 +146,7 @@ export const hooks = createFeature<{
                     {
                         node: symbol.import.rule,
                         word: symbol.name,
-                    }
+                    },
                 );
             }
         }
@@ -188,7 +188,7 @@ export function getAll(meta: StylableMeta): Record<string, LayerSymbol> {
 }
 export function getDefinition(
     meta: StylableMeta,
-    name: string
+    name: string,
 ): postcss.AtRule | postcss.Rule | undefined {
     const analyzeMetaData = plugableRecord.getUnsafe(meta.data, dataKey);
     return analyzeMetaData.layerDefs[name];
@@ -198,7 +198,7 @@ function parseLayerParams(
     params: string,
     report: Diagnostics,
     atRule: postcss.AtRule,
-    isStylable: boolean
+    isStylable: boolean,
 ) {
     const names: string[] = [];
     const globals: Record<string, true> = {};
@@ -317,7 +317,7 @@ function analyzeCSSImportLayer(context: FeatureContext, importAtRule: postcss.At
 function transformCSSImportLayer(
     _context: FeatureContext,
     importAtRule: postcss.AtRule,
-    resolved: Record<string, ResolvedLayer>
+    resolved: Record<string, ResolvedLayer>,
 ) {
     const ast = valueParser(importAtRule.params).nodes;
     for (let i = 0; i < ast.length; ++i) {

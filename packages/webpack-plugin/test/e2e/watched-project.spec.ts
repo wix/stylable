@@ -7,7 +7,7 @@ const { writeFile, rename } = promises;
 
 const project = 'watched-project';
 const projectDir = dirname(
-    require.resolve(`@stylable/webpack-plugin/test/e2e/projects/${project}/webpack.config`)
+    require.resolve(`@stylable/webpack-plugin/test/e2e/projects/${project}/webpack.config`),
 );
 
 describe(`(${project})`, () => {
@@ -22,7 +22,7 @@ describe(`(${project})`, () => {
         },
         before,
         afterEach,
-        after
+        after,
     );
     it('renders css', async () => {
         const { page } = await projectRunner.openInBrowser();
@@ -36,7 +36,7 @@ describe(`(${project})`, () => {
         });
 
         expect(styleElements[0].css!.replace(/\s\s*/gm, ' ').trim()).to.match(
-            /\.index\d+__root \{ color: red; font-size: 3em; z-index: 1; \}/
+            /\.index\d+__root \{ color: red; font-size: 3em; z-index: 1; \}/,
         );
 
         await projectRunner.actAndWaitForRecompile(
@@ -44,7 +44,7 @@ describe(`(${project})`, () => {
             () => {
                 return writeFile(
                     join(projectRunner.testDir, 'src', 'mixin-b.st.css'),
-                    '.b{ color: green; }'
+                    '.b{ color: green; }',
                 );
             },
             async () => {
@@ -53,12 +53,12 @@ describe(`(${project})`, () => {
                     browserFunctions.getStyleElementsMetadata,
                     {
                         includeCSSContent: true,
-                    }
+                    },
                 );
                 expect(styleElements[0].css!.replace(/\s\s*/gm, ' ').trim()).to.match(
-                    /\.index\d+__root \{ color: green; font-size: 3em; z-index: 1; \}/
+                    /\.index\d+__root \{ color: green; font-size: 3em; z-index: 1; \}/,
                 );
-            }
+            },
         );
     });
 
@@ -68,14 +68,14 @@ describe(`(${project})`, () => {
             () => {
                 return rename(
                     join(projectRunner.testDir, 'src', 'index.st.css'),
-                    join(projectRunner.testDir, 'src', 'xxx.st.css')
+                    join(projectRunner.testDir, 'src', 'xxx.st.css'),
                 );
             },
             () => {
                 // if we got here we finished to recompile with the missing file.
                 // when this test is broken the compiler had en error and exit the process.
                 expect('finish recompile');
-            }
+            },
         );
     });
 });

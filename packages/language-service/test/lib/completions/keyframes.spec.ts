@@ -12,7 +12,7 @@ describe('keyframes', () => {
                     @keyframes st-global(abc) {}
                 `),
             },
-            filePath
+            filePath,
         );
 
         expect(diagnostics).to.eql([]);

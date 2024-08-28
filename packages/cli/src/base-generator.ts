@@ -56,16 +56,18 @@ export class IndexGenerator {
             this.log('[Generator Index]', `Add file: ${filePath}`);
             this.indexFileOutput.set(
                 normalizeRelative(
-                    this.fs.relative(this.fs.dirname(this.indexFileTargetPath), filePath)
+                    this.fs.relative(this.fs.dirname(this.indexFileTargetPath), filePath),
                 ),
-                reExports
+                reExports,
             );
         }
     }
 
     public removeEntryFromIndex(filePath: string) {
         this.indexFileOutput.delete(
-            normalizeRelative(this.fs.relative(this.fs.dirname(this.indexFileTargetPath), filePath))
+            normalizeRelative(
+                this.fs.relative(this.fs.dirname(this.indexFileTargetPath), filePath),
+            ),
         );
     }
 
@@ -75,7 +77,7 @@ export class IndexGenerator {
 
         await tryRun(
             () => fs.promises.writeFile(this.indexFileTargetPath, '\n' + indexFileContent + '\n'),
-            'Write Index File Error'
+            'Write Index File Error',
         );
 
         this.log('[Generator Index]', 'creating index file: ' + this.indexFileTargetPath);
@@ -137,14 +139,14 @@ export function reExportsAllSymbols(filePath: string, generator: IndexGenerator)
             acc[name] = `${rootExport}__${name}`;
             return acc;
         },
-        {}
+        {},
     );
     const vars = Object.keys(STSymbol.getAllByType(meta, `cssVar`)).reduce<Record<string, string>>(
         (acc, varName) => {
             acc[varName] = `--${rootExport}__${varName.slice(2)}`;
             return acc;
         },
-        {}
+        {},
     );
     const keyframes = Object.keys(STSymbol.getAllByType(meta, `keyframes`)).reduce<
         Record<string, string>
