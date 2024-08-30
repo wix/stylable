@@ -1,0 +1,9 @@
+:vars {
+  key: "value";
+}
+.root {
+  --cssVar: green;
+  color: red;
+}
+
+@keyframes test {}
