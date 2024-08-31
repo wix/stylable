@@ -66,7 +66,6 @@ export function getCompletions(context: LangServiceContext): Completion[] {
                 completions.push(
                     stateEnumCompletion(
                         option,
-                        // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
                         normalizeDefinitionSheetLocation(context.meta, inStateParenDef!.meta),
                         range(pos, { deltaStart: -startDelta }),
                     ),

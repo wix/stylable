@@ -19,8 +19,8 @@ function getRequire() {
         'experimental-loader',
     ];
 
-    for (const package of packages) {
-        packagesSet.add(dirname(require.resolve(`@stylable/${package}/package.json`)));
+    for (const packageName of packages) {
+        packagesSet.add(dirname(require.resolve(`@stylable/${packageName}/package.json`)));
     }
 
     // we get this env variable from ./.vscode/launch.json (f5 - Mocha Current)

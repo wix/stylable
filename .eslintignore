@@ -1,9 +1,0 @@
-node_modules
-cjs
-esm
-umd
-dist
-fixtures
-packages/create-stylable-app/template
-packages/create-stylable-app/typings/template.d.ts
-packages/runtime/stylesheet.d.ts

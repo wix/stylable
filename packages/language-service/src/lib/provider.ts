@@ -295,8 +295,7 @@ export class Provider {
         ) {
             if (temp) {
                 /* This is here because typescript does not recognize size effects during the if statement */
-                // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
-                const name = (temp as any).name;
+                const name = (temp as { name: string }).name;
                 defs.push(
                     new ProviderLocation(
                         meta.source,

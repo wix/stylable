@@ -296,7 +296,6 @@ export function addCSSProperty({
         if (existing) {
             // already defined
             return;
-            // eslint-disable-next-line no-constant-condition
         } else if (context.meta.type === 'stylable' && context.meta.flags.strictCustomProperty) {
             // strict mode
             context.diagnostics.report(diagnostics.UNDEFINED_CSS_CUSTOM_PROP(name), {

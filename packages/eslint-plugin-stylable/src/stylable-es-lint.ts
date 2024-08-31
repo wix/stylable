@@ -56,7 +56,7 @@ export default createRule({
                 if (!importRequest) {
                     return;
                 }
-                const fileName = context.getFilename();
+                const fileName = context.filename;
                 const dirName = path.dirname(fileName);
                 const fullPath = moduleResolver(dirName, importRequest);
                 const meta = stylable.analyze(fullPath);
@@ -74,15 +74,18 @@ export default createRule({
                     const exportName = imported.name as keyof typeof exports;
 
                     if (exportName in exports) {
-                        const variable = context.getScope().variables.find((varDefs) => {
-                            if (varDefs.defs.length === 0) {
-                                return;
-                            }
-                            const { type } = varDefs.defs[varDefs.defs.length - 1];
-                            return (
-                                local.name === varDefs.name && type === DefinitionType.ImportBinding
-                            );
-                        });
+                        const variable = context.sourceCode
+                            .getScope(node)
+                            .variables.find((varDefs) => {
+                                if (varDefs.defs.length === 0) {
+                                    return;
+                                }
+                                const { type } = varDefs.defs[varDefs.defs.length - 1];
+                                return (
+                                    local.name === varDefs.name &&
+                                    type === DefinitionType.ImportBinding
+                                );
+                            });
 
                         if (!variable) {
                             return;
@@ -145,7 +148,6 @@ function getStylableRequest(importStatement: esTree.ImportDeclaration) {
 }
 
 function getMemberAccessor(
-    // eslint-disable-next-line @typescript-eslint/no-redundant-type-constituents
     property: esTree.PrivateIdentifier | esTree.Expression,
     isComputed: boolean,
 ) {
