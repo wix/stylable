@@ -30,10 +30,6 @@ export function loadStylableConfig<T>(
     return undefined;
 }
 
-// use eval to preserve esm import from typescript compiling
-// it to require, because of our current build to cjs
-const esmImport: (url: URL) => any = eval(`(path) => import(path)`);
-
 export async function loadStylableConfigEsm<T>(
     context: string,
     extract: (config: any) => T,
@@ -44,7 +40,7 @@ export async function loadStylableConfigEsm<T>(
     let config;
     if (path) {
         try {
-            config = await esmImport(pathToFileURL(path));
+            config = await import(pathToFileURL(path).href);
         } catch (e) {
             throw new Error(
                 `Failed to load "stylable.config.js" from ${path}\n${(e as Error)?.stack}`,

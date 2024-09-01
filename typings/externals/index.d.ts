@@ -3,6 +3,12 @@ declare module 'enhanced-resolve/lib/ResolverFactory.js' {
     export = ResolverFactory;
 }
 
+declare module 'vlq' {
+    // can be removed if https://github.com/Rich-Harris/vlq/pull/19 is merged/released
+    const VLQ: typeof import('../../node_modules/vlq/types');
+    export = VLQ;
+}
+
 declare module 'is-vendor-prefixed' {
     function isVendorPrefixed(value: string): boolean;
     export = isVendorPrefixed;
