@@ -1,9 +1,9 @@
-import { dirname, join } from 'node:path';
-import { readFileSync, symlinkSync, writeFileSync } from 'node:fs';
 import fs from '@file-services/node';
-import { BuildContext, BuildOptions, context, Plugin } from 'esbuild';
 import { createTempDirectorySync, runServer } from '@stylable/e2e-test-kit';
-
+import { BuildContext, BuildOptions, context, Plugin } from 'esbuild';
+import { readFileSync, symlinkSync, writeFileSync } from 'node:fs';
+import { dirname, join } from 'node:path';
+import { pathToFileURL } from 'node:url';
 import playwright from 'playwright-core';
 
 type BuildFn = (
@@ -48,7 +48,7 @@ export class ESBuildTestKit {
             this.options.log &&
                 console.log(`created temp project ${projectDir} and linked node_modules`);
         }
-        const moduleExports = await import(buildFile);
+        const moduleExports = await import(pathToFileURL(buildFile).href);
         const run = moduleExports[buildExport || 'run'] as BuildFn;
         if (!run) {
             throw new Error(`could not find ${buildExport || 'run'} export in ${buildFile}`);
