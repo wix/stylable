@@ -18,7 +18,7 @@
     "prettify": "npx prettier . --write"
   },
   "devDependencies": {
-    "@eslint/js": "^9.9.1",
+    "@eslint/js": "^9.10.0",
     "@file-services/memory": "^9.4.1",
     "@file-services/node": "^9.4.1",
     "@file-services/path": "^9.4.1",
@@ -53,7 +53,7 @@
     "create-listening-server": "^2.1.0",
     "css-loader": "^7.1.2",
     "esbuild": "^0.23.1",
-    "eslint": "^9.9.1",
+    "eslint": "^9.10.0",
     "eslint-config-prettier": "^9.1.0",
     "file-loader": "^6.2.0",
     "html-webpack-plugin": "^5.6.0",
