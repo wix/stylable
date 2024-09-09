@@ -978,7 +978,7 @@ export class InferredSelector {
         if (this.resolveSet.size !== 1) {
             return [];
         }
-        return this.resolveSet.values().next().value;
+        return this.resolveSet.values().next().value!;
     }
 }
 

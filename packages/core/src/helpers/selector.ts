@@ -36,7 +36,7 @@ export function parseSelectorWithCache(
 ): ImmutableSelectorList {
     if (!selectorAstCache.has(selector)) {
         if (selectorAstCache.size > 10000) {
-            selectorAstCache.delete(selectorAstCache.keys().next().value);
+            selectorAstCache.delete(selectorAstCache.keys().next().value!);
         }
         selectorAstCache.set(selector, parseCssSelector(selector));
     }
