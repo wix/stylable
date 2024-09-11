@@ -9,7 +9,7 @@
   "dependencies": {
     "@stylable/core": "^6.1.1",
     "@tokey/css-selector-parser": "^0.6.2",
-    "lightningcss": "^1.26.0",
+    "lightningcss": "^1.27.0",
     "postcss": "^8.4.45"
   },
   "files": [
