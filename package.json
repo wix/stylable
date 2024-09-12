@@ -70,7 +70,7 @@
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "rimraf": "^5.0.7",
-    "rollup": "^4.21.2",
+    "rollup": "^4.21.3",
     "source-map": "^0.7.4",
     "source-map-loader": "^5.0.0",
     "style-loader": "^4.0.0",
