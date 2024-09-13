@@ -38,7 +38,7 @@
     "@types/lodash.clonedeepwith": "^4.5.9",
     "@types/lodash.upperfirst": "^4.3.9",
     "@types/mime": "^3.0.4",
-    "@types/mocha": "^10.0.7",
+    "@types/mocha": "^10.0.8",
     "@types/node": "18",
     "@types/postcss-safe-parser": "^5.0.4",
     "@types/react": "^18.3.5",
