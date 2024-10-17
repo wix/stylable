@@ -71,7 +71,9 @@ export default createRule({
                 );
 
                 namedImports.forEach(({ imported, local }) => {
-                    const exportName = imported.name as keyof typeof exports;
+                    const exportName = (
+                        imported.type === AST_NODE_TYPES.Identifier ? imported.name : imported.value
+                    ) as keyof typeof exports;
 
                     if (exportName in exports) {
                         const variable = context.sourceCode
