@@ -27,7 +27,7 @@
     "!*/tsconfig.{json,tsbuildinfo}"
   ],
   "engines": {
-    "node": ">=18.12.0"
+    "node": ">=20"
   },
   "publishConfig": {
     "access": "public"
