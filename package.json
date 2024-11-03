@@ -38,7 +38,7 @@
     "@types/lodash.upperfirst": "^4.3.9",
     "@types/mime": "^3.0.4",
     "@types/mocha": "^10.0.9",
-    "@types/node": "18",
+    "@types/node": "20",
     "@types/postcss-safe-parser": "^5.0.4",
     "@types/react": "^18.3.12",
     "@types/react-dom": "^18.3.1",
@@ -82,7 +82,7 @@
     "yargs": "^17.7.2"
   },
   "engines": {
-    "node": ">=18.12.0"
+    "node": ">=20"
   },
   "repository": "git@github.com:wix/stylable.git",
   "author": "Wix.com",
