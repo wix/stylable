@@ -1,8 +1,9 @@
-import path from 'path';
-import { promises } from 'fs';
-import type { SpawnOptions } from 'child_process';
+import type { SpawnOptions } from 'node:child_process';
+import { promises } from 'node:fs';
+import path from 'node:path';
+import { pathToFileURL } from 'node:url';
 import validatePackageName from 'validate-npm-package-name';
-import { statSafe, spawnSafe, directoryDeepChildren, executeWithProgress } from './helpers';
+import { directoryDeepChildren, executeWithProgress, spawnSafe, statSafe } from './helpers';
 
 const templateDefinitionFileName = 'template.js';
 
@@ -36,9 +37,11 @@ export async function createProjectFromTemplate({
 }: CreateProjectFromTemplateOptions) {
     const templateDefinitionPath = path.join(templatePath, templateDefinitionFileName);
 
-    const { dependencies, devDependencies, packageJson, postinstall } = (await import(
-        templateDefinitionPath
-    )) as TemplateDefinition;
+    const {
+        default: { dependencies, devDependencies, packageJson, postinstall },
+    } = (await import(pathToFileURL(templateDefinitionPath).href)) as {
+        default: TemplateDefinition;
+    };
 
     // package name validation
     const targetDirectoryName = path.basename(targetDirectoryPath);

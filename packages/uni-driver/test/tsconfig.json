@@ -6,6 +6,7 @@
   },
   "references": [
     { "path": "../../dom-test-kit/src" },
+    { "path": "../../dom-test-kit/test" },
     { "path": "../../core-test-kit/src" },
     { "path": "../src" }
   ]
