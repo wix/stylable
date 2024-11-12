@@ -132,7 +132,13 @@ export function replaceMappedCSSAssetPlaceholders({
                     throw new Error('Missing asset module build info for ' + resourcePath);
                 }
 
-                if (assetModule.buildInfo.dataUrl) {
+                if (assetModuleSource && assetModule.buildInfo.dataUrl) {
+                    if ('generateDataUri' in assetModule.generator!) {
+                        const assetGenerator = assetModule.generator as {
+                            generateDataUri(m: NormalModule): string;
+                        };
+                        return assetGenerator.generateDataUri(assetModule);
+                    }
                     // Investigate using the data map from getData currently there is an unknown in term from escaping keeping extractDataUrlFromAssetModuleSource
                     return extractDataUrlFromAssetModuleSource(
                         assetModuleSource.source().toString(),
