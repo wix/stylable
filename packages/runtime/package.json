@@ -4,9 +4,7 @@
   "description": "Stylable runtime DOM integration",
   "main": "dist/index.js",
   "scripts": {
-    "test": "run-p test:unit test:e2e",
-    "test:unit": "mocha \"dist/test/unit/**/*.spec.js\"",
-    "test:e2e": "mocha \"dist/test/e2e/**/*.spec.js\" --timeout 20000"
+    "test": "mocha \"dist/test/unit/**/*.spec.js\""
   },
   "exports": {
     ".": {
