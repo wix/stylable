@@ -16,7 +16,8 @@ export default [
       'packages/language-service/test/fixtures/server-cases/mixins/',
       'packages/runtime/stylesheet.d.ts',
       'packages/webpack-plugin/test/e2e/projects/',
-      '.temp/'
+      '.temp/',
+      'typings/'
     ],
   },
   pluginJs.configs.recommended,
