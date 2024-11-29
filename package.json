@@ -15,7 +15,7 @@
     "test:integrations": "npm run test -- --i",
     "test:core-packages": "npm run test -- --cp",
     "test:coverage:dev": "npm run build && c8 -x 'packages/*/dist/test' -r html-spa npm run test && serve coverage",
-    "prettify": "npx prettier . --write"
+    "prettify": "prettier . --write"
   },
   "devDependencies": {
     "@file-services/memory": "^9.4.1",

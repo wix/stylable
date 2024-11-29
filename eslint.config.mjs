@@ -17,7 +17,7 @@ export default [
       'packages/runtime/stylesheet.d.ts',
       'packages/webpack-plugin/test/e2e/projects/',
       '.temp/',
-      'typings/'
+      'typings/',
     ],
   },
   pluginJs.configs.recommended,
