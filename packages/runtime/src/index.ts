@@ -56,7 +56,7 @@ function createStateClass(namespace: string, stateName: string, stateValue: Stat
 }
 
 export function classesRuntime(namespace: string): string {
-    var classNames = [];
+    var classNames: string[] = [];
 
     for (var i = 1; i < arguments.length; i++) {
         // eslint-disable-next-line prefer-rest-params
