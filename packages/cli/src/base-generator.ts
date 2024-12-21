@@ -71,12 +71,12 @@ export class IndexGenerator {
         );
     }
 
-    public async generateIndexFile(fs: IFileSystem) {
+    public generateIndexFile(fs: IFileSystem) {
         const indexFileContent = this.generateIndexSource();
         ensureDirectory(fs.dirname(this.indexFileTargetPath), fs);
 
-        await tryRun(
-            () => fs.promises.writeFile(this.indexFileTargetPath, '\n' + indexFileContent + '\n'),
+        tryRun(
+            () => fs.writeFileSync(this.indexFileTargetPath, '\n' + indexFileContent + '\n'),
             'Write Index File Error',
         );
 

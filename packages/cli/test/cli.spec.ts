@@ -16,7 +16,6 @@ import { diagnosticBankReportToStrings } from '@stylable/core-test-kit';
 const stVarDiagnostics = diagnosticBankReportToStrings(STVar.diagnostics);
 
 describe('Stylable Cli', function () {
-    this.timeout(25000);
     let tempDir: ITempDirectory;
     const testNsrPath = require.resolve('./fixtures/test-ns-resolver');
 

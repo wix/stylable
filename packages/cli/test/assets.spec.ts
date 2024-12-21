@@ -4,7 +4,7 @@ import { build } from '@stylable/cli';
 import { createMemoryFs } from '@file-services/memory';
 
 describe('assets', function () {
-    it('should copy imported relative native css', async () => {
+    it('should copy imported relative native css', () => {
         const fs = createMemoryFs({
             '/package.json': `{"name": "test", "version": "0.0.0"}`,
             '/src/entry.st.css': `
@@ -31,7 +31,7 @@ describe('assets', function () {
             },
         });
 
-        await build(
+        build(
             {
                 srcDir: 'src',
                 outDir: 'dist',
@@ -56,7 +56,7 @@ describe('assets', function () {
             'custom-resolved.css',
         ]);
     });
-    it('should create and link native CSS in JS module', async () => {
+    it('should create and link native CSS in JS module', () => {
         const fs = createMemoryFs({
             '/package.json': `{"name": "test", "version": "0.0.0"}`,
             '/src/entry.st.css': `
@@ -70,7 +70,7 @@ describe('assets', function () {
             requireModule: () => ({}),
         });
 
-        await build(
+        build(
             {
                 srcDir: 'src',
                 outDir: 'dist',

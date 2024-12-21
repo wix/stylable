@@ -9,7 +9,7 @@ const log = () => {
 };
 
 describe('build index', () => {
-    it('should create index file importing all matched stylesheets in srcDir', async () => {
+    it('should create index file importing all matched stylesheets in srcDir', () => {
         const fs = createMemoryFs({
             '/compA.st.css': `
                .a{}
@@ -25,7 +25,7 @@ describe('build index', () => {
             requireModule: () => ({}),
         });
 
-        await build(
+        build(
             {
                 outDir: '.',
                 srcDir: '.',
@@ -51,7 +51,7 @@ describe('build index', () => {
             ].join('\n'),
         );
     });
-    it('should create index file importing all matched stylesheets in outDir (outputSources)', async () => {
+    it('should create index file importing all matched stylesheets in outDir (outputSources)', () => {
         const fs = createMemoryFs({
             src: {
                 '/compA.st.css': `
@@ -69,7 +69,7 @@ describe('build index', () => {
             requireModule: () => ({}),
         });
 
-        await build(
+        build(
             {
                 outDir: './dist',
                 srcDir: './src',
@@ -97,7 +97,7 @@ describe('build index', () => {
         );
     });
 
-    it('should create index file importing all matched stylesheets in srcDir when has output cjs files', async () => {
+    it('should create index file importing all matched stylesheets in srcDir when has output cjs files', () => {
         const fs = createMemoryFs({
             src: {
                 '/compA.st.css': `
@@ -115,7 +115,7 @@ describe('build index', () => {
             requireModule: () => ({}),
         });
 
-        await build(
+        build(
             {
                 outDir: '.',
                 srcDir: '.',
@@ -142,7 +142,7 @@ describe('build index', () => {
             ].join('\n'),
         );
     });
-    it('should create index file using a the default generator', async () => {
+    it('should create index file using a the default generator', () => {
         const fs = createMemoryFs({
             '/comp-A.st.css': `
                .a{}
@@ -158,7 +158,7 @@ describe('build index', () => {
             requireModule: () => ({}),
         });
 
-        await build(
+        build(
             {
                 outDir: '.',
                 srcDir: '.',
@@ -184,7 +184,7 @@ describe('build index', () => {
             ].join('\n'),
         );
     });
-    it('should create index file using a custom generator', async () => {
+    it('should create index file using a custom generator', () => {
         const fs = createMemoryFs({
             '/comp-A.st.css': `
                .a{}
@@ -200,7 +200,7 @@ describe('build index', () => {
             requireModule: () => ({}),
         });
 
-        await build(
+        build(
             {
                 outDir: '.',
                 srcDir: '.',
@@ -227,7 +227,7 @@ describe('build index', () => {
             ].join('\n'),
         );
     });
-    it('should create index file when srcDir is parent directory of outDir', async () => {
+    it('should create index file when srcDir is parent directory of outDir', () => {
         const fs = createMemoryFs({
             dist: {
                 'c/compA.st.css': `
@@ -245,7 +245,7 @@ describe('build index', () => {
             requireModule: () => ({}),
         });
 
-        await build(
+        build(
             {
                 outDir: '.',
                 srcDir: './dist',
@@ -273,7 +273,7 @@ describe('build index', () => {
             ].join('\n'),
         );
     });
-    it('custom generator is able to filter files from the index', async () => {
+    it('custom generator is able to filter files from the index', () => {
         const fs = createMemoryFs({
             '/comp-A.st.css': `
                .a{}
@@ -289,7 +289,7 @@ describe('build index', () => {
             requireModule: () => ({}),
         });
 
-        await build(
+        build(
             {
                 outDir: '.',
                 srcDir: '.',
@@ -311,7 +311,7 @@ describe('build index', () => {
             ':import {-st-from: "./comp-A.st.css";-st-default:Style0;}\n.root Style0{}',
         );
     });
-    it('should create index file using a custom generator with named exports generation and @st-namespace', async () => {
+    it('should create index file using a custom generator with named exports generation and @st-namespace', () => {
         const fs = createMemoryFs({
             '/comp-A.st.css': `
                 :vars {
@@ -333,7 +333,7 @@ describe('build index', () => {
             requireModule: () => ({}),
         });
 
-        await build(
+        build(
             {
                 outDir: '.',
                 srcDir: '.',
@@ -363,7 +363,7 @@ describe('build index', () => {
             ].join('\n'),
         );
     });
-    it('should create non-existing folders in path to the generated indexFile', async () => {
+    it('should create non-existing folders in path to the generated indexFile', () => {
         const fs = createMemoryFs({
             '/comp.st.css': `
                .a{}
@@ -375,7 +375,7 @@ describe('build index', () => {
             fileSystem: fs,
             requireModule: () => ({}),
         });
-        await build(
+        build(
             {
                 outDir: './some-dir/other-dir/',
                 srcDir: '.',
@@ -398,7 +398,7 @@ describe('build index', () => {
             ),
         );
     });
-    it('should handle name collisions by failing', async () => {
+    it('should handle name collisions by failing', () => {
         const fs = createMemoryFs({
             '/comp.st.css': `
                .a{}
@@ -415,7 +415,7 @@ describe('build index', () => {
         });
         const diagnosticsManager = new DiagnosticsManager();
 
-        await build(
+        build(
             {
                 outDir: '.',
                 srcDir: '.',

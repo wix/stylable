@@ -2,7 +2,7 @@ import { createMemoryFs } from '@file-services/memory';
 import type { IFileSystem } from '@file-services/types';
 import { expect } from 'chai';
 import { waitFor } from 'promise-assist';
-import { DirectoryProcessService } from '@stylable/cli';
+import { createWatchService, DirectoryProcessService, type WatchService } from '@stylable/cli';
 import { logCalls } from '@stylable/core-test-kit';
 
 const project1 = {
@@ -27,13 +27,15 @@ const project1 = {
 describe('DirectoryWatchService', () => {
     describe('Empty project', () => {
         let fs: IFileSystem;
+        let watchService: WatchService;
 
         beforeEach(() => {
             fs = createMemoryFs({ dist: {} });
+            watchService = createWatchService(fs);
         });
 
         it('should watch added files', async () => {
-            const watcher = new DirectoryProcessService(fs, {
+            const watcher = new DirectoryProcessService(fs, watchService, {
                 watchMode: true,
                 fileFilter: isTemplateFile,
                 processFiles(watcher, affectedFiles) {
@@ -54,7 +56,7 @@ describe('DirectoryWatchService', () => {
                 },
             });
 
-            await watcher.init('/');
+            watcher.init('/');
 
             fs.writeFileSync('/0.template.js', `output('0()')`);
 
@@ -94,7 +96,7 @@ describe('DirectoryWatchService', () => {
         it('should handle directory added after watch started', async () => {
             const changeSpy = logCalls();
 
-            const watcher = new DirectoryProcessService(fs, {
+            const watcher = new DirectoryProcessService(fs, watchService, {
                 watchMode: true,
                 fileFilter: isTemplateFile,
                 processFiles(watcher, affectedFiles, _, changeOrigin) {
@@ -119,7 +121,7 @@ describe('DirectoryWatchService', () => {
                 },
             });
 
-            await watcher.init('/');
+            watcher.init('/');
 
             // Nothing happened
             expect(changeSpy.callCount, 'not been called').to.equal(0);
@@ -139,7 +141,7 @@ describe('DirectoryWatchService', () => {
         });
 
         it('should handle delete files', async () => {
-            new DirectoryProcessService(fs, {
+            const watcher = new DirectoryProcessService(fs, watchService, {
                 watchMode: true,
                 fileFilter: isTemplateFile,
                 processFiles(watcher, affectedFiles) {
@@ -158,6 +160,8 @@ describe('DirectoryWatchService', () => {
                     };
                 },
             });
+
+            watcher.init('/');
 
             fs.writeFileSync('0.template.js', 'output(`0()`)');
 
@@ -173,7 +177,7 @@ describe('DirectoryWatchService', () => {
         });
 
         it('should handle delete dirs', async () => {
-            const watcher = new DirectoryProcessService(fs, {
+            const watcher = new DirectoryProcessService(fs, watchService, {
                 watchMode: true,
                 fileFilter: isTemplateFile,
                 processFiles(watcher, affectedFiles) {
@@ -192,6 +196,8 @@ describe('DirectoryWatchService', () => {
                     };
                 },
             });
+
+            watcher.init('/');
 
             fs.ensureDirectorySync('/test/deep');
 
@@ -214,15 +220,17 @@ describe('DirectoryWatchService', () => {
 
     describe('Basic watcher init/change API (project1)', () => {
         let fs: IFileSystem;
+        let watchService: WatchService;
 
         beforeEach(() => {
             fs = createMemoryFs(project1);
+            watchService = createWatchService(fs);
         });
 
-        it('should report affectedFiles and no changeOrigin when watch started', async () => {
+        it('should report affectedFiles and no changeOrigin when watch started', () => {
             const changeSpy = logCalls();
 
-            const watcher = new DirectoryProcessService(fs, {
+            const watcher = new DirectoryProcessService(fs, watchService, {
                 watchMode: true,
                 fileFilter: isTemplateFile,
                 processFiles(_watcher, affectedFiles, _, changeOrigin) {
@@ -237,7 +245,7 @@ describe('DirectoryWatchService', () => {
                 },
             });
 
-            await watcher.init('/');
+            watcher.init('/');
 
             expect(changeSpy.callCount, 'called once').to.equal(1);
 
@@ -254,8 +262,8 @@ describe('DirectoryWatchService', () => {
             ]);
         });
 
-        it('should allow hooks to fill in the invalidationMap', async () => {
-            const watcher = new DirectoryProcessService(fs, {
+        it('should allow hooks to fill in the invalidationMap', () => {
+            const watcher = new DirectoryProcessService(fs, watchService, {
                 watchMode: true,
                 fileFilter: isTemplateFile,
                 processFiles(watcher, affectedFiles) {
@@ -272,7 +280,7 @@ describe('DirectoryWatchService', () => {
                 },
             });
 
-            await watcher.init('/');
+            watcher.init('/');
 
             expectInvalidationMap(watcher, {
                 '/0.template.js': [],
@@ -284,7 +292,7 @@ describe('DirectoryWatchService', () => {
 
         it('should report change for all files affected by the changeOrigin', async () => {
             const changeSpy = logCalls();
-            const watcher = new DirectoryProcessService(fs, {
+            const watcher = new DirectoryProcessService(fs, watchService, {
                 watchMode: true,
                 fileFilter: isTemplateFile,
                 processFiles(watcher, affectedFiles, _, changeOrigin) {
@@ -305,7 +313,7 @@ describe('DirectoryWatchService', () => {
                 },
             });
 
-            await watcher.init('/');
+            watcher.init('/');
 
             changeSpy.resetHistory();
 

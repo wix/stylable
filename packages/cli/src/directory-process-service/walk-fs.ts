@@ -13,13 +13,13 @@ export interface DirectoryItem {
  * @param directoryPath directory to iterate into.
  * @param basePath base directory to compute relative paths from. defaults to `directoryPath`.
  */
-export async function* directoryDeepChildren(
+export function* directoryDeepChildren(
     fs: IFileSystem,
     directoryPath: string,
     filterItem: (item: DirectoryItem) => boolean = returnsTrue,
     basePath = directoryPath,
-): AsyncGenerator<DirectoryItem, void, unknown> {
-    for (const item of await fs.promises.readdir(directoryPath, {
+): Generator<DirectoryItem> {
+    for (const item of fs.readdirSync(directoryPath, {
         withFileTypes: true,
     })) {
         const itemName = item.name;

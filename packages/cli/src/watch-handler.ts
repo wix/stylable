@@ -1,15 +1,13 @@
-import type { IFileSystem, IWatchEvent, WatchEventListener } from '@file-services/types';
+import type { IFileSystem, IWatchEvent } from '@file-services/types';
 import type { Stylable } from '@stylable/core';
 import type { StylableResolverCache } from '@stylable/core/dist/index-internal';
 import type { BuildContext } from './types';
 import decache from 'decache';
-import {
-    createWatchEvent,
-    DirectoryProcessService,
-} from './directory-process-service/directory-process-service';
+import { DirectoryProcessService } from './directory-process-service/directory-process-service';
 import { createDefaultLogger, levels, Log } from './logger';
 import { buildMessages } from './messages';
 import { DiagnosticsManager } from './diagnostics-manager';
+import { createWatchEvent, type WatchService } from './watch-service';
 
 export interface WatchHandlerOptions {
     log?: Log;
@@ -42,6 +40,8 @@ export class WatchHandler {
 
     constructor(
         private fileSystem: IFileSystem,
+        private watchService: WatchService,
+
         private options: WatchHandlerOptions = {},
     ) {
         this.resolverCache = this.options.resolverCache ?? new Map();
@@ -50,7 +50,7 @@ export class WatchHandler {
             this.options.diagnosticsManager ?? new DiagnosticsManager({ log: this.log });
     }
 
-    public readonly listener = async (event: IWatchEvent) => {
+    public readonly listener = (event: IWatchEvent) => {
         this.log(buildMessages.CHANGE_EVENT_TRIGGERED(event.path));
 
         if (this.generatedFiles.has(event.path)) {
@@ -72,7 +72,7 @@ export class WatchHandler {
                 files.set(path, createWatchEvent(path, this.fileSystem));
             }
 
-            const { hasChanges, generatedFiles } = await service.handleWatchChange(files, event);
+            const { hasChanges, generatedFiles } = service.handleWatchChange(files, event);
 
             if (hasChanges) {
                 if (!foundChanges) {
@@ -126,19 +126,20 @@ export class WatchHandler {
 
     public start() {
         this.log(buildMessages.START_WATCHING(), levels.info);
-        this.fileSystem.watchService.addGlobalListener(this.listener as WatchEventListener);
+        this.watchService.addGlobalListener(this.listener);
     }
 
-    public async stop() {
+    public stop() {
         this.log(buildMessages.STOP_WATCHING(), levels.info);
         this.diagnosticsManager.clear();
-        this.fileSystem.watchService.removeGlobalListener(this.listener as WatchEventListener);
+        this.watchService.removeGlobalListener(this.listener);
 
         for (const { service } of this.builds) {
-            await service.dispose();
+            service.dispose();
         }
 
         this.builds = [];
+        this.watchService.dispose();
     }
 
     private invalidateCache(filePath: string) {

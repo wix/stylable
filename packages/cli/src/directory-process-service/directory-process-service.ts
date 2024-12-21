@@ -1,5 +1,5 @@
-import nodeFs from '@file-services/node';
 import type { IFileSystem, IWatchEvent } from '@file-services/types';
+import { createWatchEvent, type WatchService } from '../watch-service';
 import { directoryDeepChildren, DirectoryItem } from './walk-fs';
 
 export interface DirectoryProcessServiceOptions {
@@ -8,7 +8,7 @@ export interface DirectoryProcessServiceOptions {
         affectedFiles: Set<string>,
         deletedFiles: Set<string>,
         changeOrigin?: IWatchEvent,
-    ): Promise<{ generatedFiles: Set<string> }> | { generatedFiles: Set<string> };
+    ): { generatedFiles: Set<string> };
     directoryFilter?(directoryPath: string): boolean;
     fileFilter?(filePath: string): boolean;
     onError?(error: Error): void;
@@ -24,6 +24,7 @@ export class DirectoryProcessService {
     public watchedDirectoryFiles = new Map<string, Set<string>>();
     constructor(
         private fs: IFileSystem,
+        private watchService: WatchService,
         private options: DirectoryProcessServiceOptions = {},
     ) {
         if (this.options.watchMode && !this.options.watchOptions?.skipInitialWatch) {
@@ -31,32 +32,32 @@ export class DirectoryProcessService {
         }
     }
     public startWatch() {
-        this.fs.watchService.addGlobalListener(this.watchHandler);
+        this.watchService.addGlobalListener(this.watchHandler);
     }
-    public async dispose() {
+    public dispose() {
         for (const path of this.watchedDirectoryFiles.keys()) {
-            await this.fs.watchService.unwatchPath(path);
+            this.watchService.unwatchPath(path);
         }
 
         this.invalidationMap.clear();
         this.watchedDirectoryFiles.clear();
     }
-    public async init(directoryPath: string) {
-        await this.watchPath(directoryPath);
+    public init(directoryPath: string, shouldProcess = true): Set<string> {
+        this.watchDirectory(directoryPath);
         const items = directoryDeepChildren(this.fs, directoryPath, this.filterWatchItems);
         const affectedFiles = new Set<string>();
-        for await (const item of items) {
+        for (const item of items) {
             if (item.type === 'directory') {
-                await this.watchPath(item.path);
+                this.watchDirectory(item.path);
             } else if (item.type === 'file') {
                 affectedFiles.add(item.path);
                 this.addFileToWatchedDirectory(item.path);
                 this.registerInvalidateOnChange(item.path);
             }
         }
-        if (affectedFiles.size) {
+        if (shouldProcess && affectedFiles.size) {
             try {
-                await this.options.processFiles?.(this, affectedFiles, new Set());
+                this.options.processFiles?.(this, affectedFiles, new Set());
             } catch (error) {
                 this.options.onError?.(error as Error);
             }
@@ -94,27 +95,27 @@ export class DirectoryProcessService {
             fileSet.add(filePathToInvalidate);
         }
     }
-    private watchPath(directoryPath: string) {
+    private watchDirectory(directoryPath: string) {
         if (!this.options.watchMode) {
             return;
         }
         this.watchedDirectoryFiles.set(directoryPath, new Set());
-        return this.fs.watchService.watchPath(directoryPath);
+        return this.watchService.watchPath(directoryPath);
     }
-    public async handleWatchChange(
+    public handleWatchChange(
         files: Map<string, IWatchEvent>,
         originalEvent: IWatchEvent,
-    ): Promise<{
+    ): {
         hasChanges: boolean;
         generatedFiles: Set<string>;
-    }> {
+    } {
         const affectedFiles = new Set<string>();
         const deletedFiles = new Set<string>();
 
         for (const event of files.values()) {
             if (event.stats?.isDirectory()) {
                 if (this.options.directoryFilter?.(event.path) ?? true) {
-                    for (const filePath of await this.init(event.path)) {
+                    for (const filePath of this.init(event.path, false)) {
                         affectedFiles.add(filePath);
                     }
                 }
@@ -163,7 +164,7 @@ export class DirectoryProcessService {
         }
 
         if (this.options.processFiles && (affectedFiles.size || deletedFiles.size)) {
-            const { generatedFiles } = await this.options.processFiles(
+            const { generatedFiles } = this.options.processFiles(
                 this,
                 affectedFiles,
                 deletedFiles,
@@ -203,7 +204,11 @@ export class DirectoryProcessService {
             files.set(file, createWatchEvent(file, this.fs));
         }
 
-        this.handleWatchChange(files, event).catch((error) => this.options.onError?.(error));
+        try {
+            this.handleWatchChange(files, event);
+        } catch (error) {
+            this.options.onError?.(error as Error);
+        }
     };
     private filterWatchItems = (event: DirectoryItem): boolean => {
         const { fileFilter, directoryFilter } = this.options;
@@ -213,12 +218,5 @@ export class DirectoryProcessService {
             return true;
         }
         return false;
-    };
-}
-
-export function createWatchEvent(filePath: string, fs = nodeFs): IWatchEvent {
-    return {
-        path: filePath,
-        stats: fs.existsSync(filePath) ? fs.statSync(filePath) : null,
     };
 }
