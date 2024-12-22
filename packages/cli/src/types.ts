@@ -3,6 +3,7 @@ import type { Stylable } from '@stylable/core';
 import type { IndexGenerator } from './base-generator';
 import type { DiagnosticsManager, DiagnosticsMode } from './diagnostics-manager';
 import type { Log } from './logger';
+import type { WatchService } from './watch-service';
 
 export type PartialBuildOptions = Partial<BuildOptions>;
 
@@ -48,7 +49,7 @@ export type STCProjects = ProjectEntity[];
 export type ResolveRequests = (
     projects: Array<RawProjectEntity>,
     context: ResolveProjectsContext,
-) => Promise<STCProjects> | STCProjects;
+) => STCProjects;
 
 export interface ResolveProjectsContext {
     rootDir: string;
@@ -186,6 +187,10 @@ export interface BuildContext {
     projectRoot: string;
     /** provide a custom file-system for the build */
     fs: IFileSystem;
+
+    /** optional watch service to use when watching */
+    watchService?: WatchService;
+
     /** provide Stylable instance */
     stylable: Stylable;
     /** log function */

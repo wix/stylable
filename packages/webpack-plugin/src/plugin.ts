@@ -221,19 +221,16 @@ export class StylableWebpackPlugin {
             this.createStcBuilder(compiler);
         });
 
-        compiler.hooks.beforeRun.tapPromise(StylableWebpackPlugin.name, async () => {
-            await this.stcBuilder?.build();
+        compiler.hooks.beforeRun.tap(StylableWebpackPlugin.name, () => {
+            this.stcBuilder?.build();
         });
 
-        compiler.hooks.watchRun.tapPromise(
-            { name: StylableWebpackPlugin.name, stage: 0 },
-            async (compiler) => {
-                await this.stcBuilder?.rebuild([
-                    ...(compiler.modifiedFiles ?? []),
-                    ...(compiler.removedFiles ?? []),
-                ]);
-            },
-        );
+        compiler.hooks.watchRun.tap({ name: StylableWebpackPlugin.name, stage: 0 }, (compiler) => {
+            this.stcBuilder?.rebuild([
+                ...(compiler.modifiedFiles ?? []),
+                ...(compiler.removedFiles ?? []),
+            ]);
+        });
 
         compiler.hooks.thisCompilation.tap(StylableWebpackPlugin.name, (compilation) => {
             /**

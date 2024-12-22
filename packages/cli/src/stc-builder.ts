@@ -1,7 +1,6 @@
 import { nodeFs } from '@file-services/node';
 import { buildStylable } from './build-stylable';
 import { DiagnosticsManager } from './diagnostics-manager';
-import { createWatchEvent } from './directory-process-service/directory-process-service';
 import { createLogger, Log } from './logger';
 import type { IFileSystem } from '@file-services/types';
 import type { DiagnosticMessages } from './report-diagnostics';
@@ -12,6 +11,7 @@ import {
     EmitDiagnosticsContext,
     reportDiagnostic,
 } from '@stylable/core/dist/index-internal';
+import { createWatchEvent } from './watch-service';
 
 export type STCBuilderFileSystem = Pick<IFileSystem, 'existsSync' | 'realpathSync' | 'join'>;
 
@@ -80,7 +80,7 @@ export class STCBuilder {
      *
      * @param modifiedFiles {Iterable<string>} list of absolute file path that have been modified since the last build execution.
      */
-    public rebuild = async (modifiedFiles: Iterable<string> = []): Promise<void> => {
+    public rebuild = (modifiedFiles: Iterable<string> = []): void => {
         if (this.watchHandler) {
             return this.rebuildModifiedFiles(modifiedFiles);
         } else {
@@ -91,8 +91,8 @@ export class STCBuilder {
     /**
      * Executes a fresh build of the Stylable project.
      */
-    public build = async () => {
-        const buildOutput = await buildStylable(this.rootDir, {
+    public build = () => {
+        const buildOutput = buildStylable(this.rootDir, {
             diagnosticsManager: this.diagnosticsManager,
             log: this.log,
             configFilePath: this.configFilePath,
@@ -182,7 +182,7 @@ export class STCBuilder {
      * Executes an incremental build of modified files.
      * @param modifiedFiles {Iterable<string>} list of absolute file path that have been modified since the last build execution.
      */
-    private rebuildModifiedFiles = async (modifiedFiles: Iterable<string>) => {
+    private rebuildModifiedFiles = (modifiedFiles: Iterable<string>) => {
         if (!this.watchHandler) {
             throw createSTCBuilderError(diagnostics.INVALID_WATCH_HANDLER('handleWatchedFiles'));
         }
@@ -190,9 +190,10 @@ export class STCBuilder {
         for (const filePath of modifiedFiles) {
             const event = createWatchEvent(
                 this.fs.existsSync(filePath) ? this.fs.realpathSync(filePath) : filePath,
+                nodeFs,
             );
 
-            await this.watchHandler.listener(event);
+            this.watchHandler.listener(event);
         }
     };
 }

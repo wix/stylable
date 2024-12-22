@@ -8,7 +8,6 @@ import {
 } from '@stylable/e2e-test-kit';
 
 describe('Stylable CLI config presets', function () {
-    this.timeout(25000);
     let tempDir: ITempDirectory;
 
     beforeEach(async () => {

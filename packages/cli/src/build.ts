@@ -14,8 +14,9 @@ import { sortModulesByDepth } from '@stylable/build-tools';
 import { StylableOptimizer } from '@stylable/optimizer';
 import type { Stylable } from '@stylable/core';
 import type { IFileSystem } from '@file-services/types';
+import { createWatchService } from './watch-service';
 
-export async function build(
+export function build(
     {
         srcDir,
         outDir,
@@ -49,6 +50,7 @@ export async function build(
         identifier = _projectRoot,
         watch,
         fs,
+        watchService = createWatchService(fs),
         stylable,
         log,
         outputFiles = new Map(),
@@ -87,7 +89,7 @@ export async function build(
         fs,
     );
 
-    const service = new DirectoryProcessService(fs, {
+    const service = new DirectoryProcessService(fs, watchService, {
         watchMode: watch,
         autoResetInvalidations: true,
         watchOptions: {
@@ -129,7 +131,7 @@ export async function build(
                 throw error;
             }
         },
-        async processFiles(_, affectedFiles, deletedFiles, changeOrigin) {
+        processFiles(_, affectedFiles, deletedFiles, changeOrigin) {
             if (changeOrigin) {
                 // handle deleted files by removing their generated content
                 if (deletedFiles.size) {
@@ -196,7 +198,7 @@ export async function build(
             // rewire invalidations
             updateWatcherDependencies(affectedFiles);
             // rebuild assets from aggregated content: index files and assets
-            await buildAggregatedEntities(affectedFiles, processGeneratedFiles);
+            buildAggregatedEntities(affectedFiles, processGeneratedFiles);
             // rebundle
             if (bundle) {
                 tryRun(() => {
@@ -242,7 +244,7 @@ export async function build(
         },
     });
 
-    await service.init(fullSrcDir);
+    service.init(fullSrcDir);
 
     if (sourceFiles.size === 0) {
         log(mode, buildMessages.BUILD_SKIPPED(isMultiPackagesProject ? identifier : undefined));
@@ -362,9 +364,9 @@ export async function build(
         });
     }
 
-    async function buildAggregatedEntities(affectedFiles: Set<string>, generated: Set<string>) {
+    function buildAggregatedEntities(affectedFiles: Set<string>, generated: Set<string>) {
         if (indexFileGenerator) {
-            await indexFileGenerator.generateIndexFile(fs);
+            indexFileGenerator.generateIndexFile(fs);
 
             generated.add(indexFileGenerator.indexFileTargetPath);
             outputFiles.set(indexFileGenerator.indexFileTargetPath, affectedFiles);

@@ -14,7 +14,6 @@ import { diagnosticBankReportToStrings } from '@stylable/core-test-kit';
 const stVarDiagnostics = diagnosticBankReportToStrings(STVar.diagnostics);
 
 describe('Stylable CLI config multiple projects', function () {
-    this.timeout(25000);
     let tempDir: ITempDirectory;
 
     beforeEach(async () => {

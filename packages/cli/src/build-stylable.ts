@@ -1,4 +1,4 @@
-import { nodeFs as fs } from '@file-services/node';
+import { nodeFs } from '@file-services/node';
 import { Stylable, StylableConfig } from '@stylable/core';
 import { StylableResolverCache, validateDefaultConfig } from '@stylable/core/dist/index-internal';
 import { build } from './build';
@@ -12,6 +12,7 @@ import { DiagnosticsManager } from './diagnostics-manager';
 import { createDefaultLogger, levels } from './logger';
 import type { BuildContext, BuildOptions } from './types';
 import { WatchHandler } from './watch-handler';
+import { createWatchService } from './watch-service';
 
 export interface BuildStylableContext
     extends Partial<Pick<BuildContext, 'fs' | 'watch' | 'log'>>,
@@ -28,12 +29,12 @@ export interface BuildStylableContext
     };
 }
 
-export async function buildStylable(
+export function buildStylable(
     rootDir: string,
     {
         defaultOptions = createDefaultOptions(),
         overrideBuildOptions = {},
-        fs: fileSystem = fs,
+        fs = nodeFs,
         log = createDefaultLogger(),
         watch = false,
         resolverCache = new Map(),
@@ -59,8 +60,9 @@ export async function buildStylable(
     const { config } = resolveConfig(rootDir, fs, configFilePath) || {};
     validateDefaultConfig(config?.defaultConfig);
 
-    const projects = await projectsConfig(rootDir, overrideBuildOptions, defaultOptions, config);
-    const watchHandler = new WatchHandler(fileSystem, {
+    const projects = projectsConfig(rootDir, overrideBuildOptions, defaultOptions, config);
+    const watchService = createWatchService(fs);
+    const watchHandler = new WatchHandler(fs, watchService, {
         log,
         resolverCache,
         outputFiles,
@@ -89,7 +91,7 @@ export async function buildStylable(
             }
 
             const stylable = new Stylable({
-                fileSystem,
+                fileSystem: fs,
                 requireModule,
                 projectRoot,
                 resolverCache,
@@ -102,11 +104,12 @@ export async function buildStylable(
                     requireModule('@stylable/node').resolveNamespace,
             });
 
-            const { service, generatedFiles } = await build(buildOptions, {
+            const { service, generatedFiles } = build(buildOptions, {
                 watch,
                 stylable,
                 log,
-                fs: fileSystem,
+                fs,
+                watchService,
                 rootDir,
                 projectRoot,
                 outputFiles,

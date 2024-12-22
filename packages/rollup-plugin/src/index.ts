@@ -98,7 +98,7 @@ export function stylableRollupPlugin({
     let configFromFile: ReturnType<typeof resolveStcConfig> | undefined;
     return {
         name: 'Stylable',
-        async buildStart() {
+        buildStart() {
             extracted = extracted || new Map();
             emittedAssets = emittedAssets || new Map();
 
@@ -139,7 +139,7 @@ export function stylableRollupPlugin({
                         watchMode: this.meta.watchMode,
                     });
 
-                    await stcBuilder.build();
+                    stcBuilder.build();
 
                     for (const sourceDirectory of stcBuilder.getProjectsSources()) {
                         this.addWatchFile(sourceDirectory);
@@ -155,9 +155,9 @@ export function stylableRollupPlugin({
                 }
             }
         },
-        async watchChange(id) {
+        watchChange(id) {
             if (stcBuilder) {
-                await stcBuilder.rebuild([id]);
+                stcBuilder.rebuild([id]);
 
                 stcBuilder.reportDiagnostics(
                     {

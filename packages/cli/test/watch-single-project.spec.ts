@@ -1,32 +1,25 @@
-import { errorMessages, buildMessages } from '@stylable/cli/dist/messages';
+import { buildMessages, errorMessages } from '@stylable/cli/dist/messages';
 import { STImport } from '@stylable/core/dist/features';
 import {
     createCliTester,
+    createTempDirectory,
     escapeRegExp,
+    ITempDirectory,
     loadDirSync,
     populateDirectorySync,
     writeToExistingFile,
-    createTempDirectory,
-    ITempDirectory,
 } from '@stylable/e2e-test-kit';
 import { expect } from 'chai';
-import { realpathSync, renameSync, rmSync, unlinkSync, promises } from 'fs';
-import { join, sep } from 'path';
+import { promises, renameSync, rmSync, unlinkSync } from 'node:fs';
+import { join, sep } from 'node:path';
 
 const { writeFile } = promises;
 
 describe('Stylable Cli Watch - Single project', function () {
-    /**
-     * https://github.com/livereload/livereload-site/blob/master/livereload.com/_articles/troubleshooting/os-x-fsevents-bug-may-prevent-monitoring-of-certain-folders.md
-     */
-    this.retries(2);
-
     let tempDir: ITempDirectory;
     const { run, cleanup } = createCliTester();
     beforeEach(async () => {
         tempDir = await createTempDirectory();
-        // This is used to make the output paths matching consistent since we use the real path in the logs of the CLI
-        tempDir.path = realpathSync(tempDir.path);
     });
     afterEach(async () => {
         cleanup();
@@ -529,7 +522,7 @@ describe('Stylable Cli Watch - Single project', function () {
                     ),
                     action() {
                         return {
-                            sleep: 2000,
+                            sleep: 100,
                         };
                     },
                 },

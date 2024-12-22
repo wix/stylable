@@ -16,7 +16,7 @@ import { resolveNpmRequests } from './resolve-requests';
 import type { StylableConfig } from '@stylable/core';
 import type { IFileSystem } from '@file-services/types';
 
-interface StylableRuntimeConfigs {
+export interface StylableRuntimeConfigs {
     stcConfig?: Configuration<string> | undefined;
     defaultConfig?: Pick<
         StylableConfig,
@@ -28,12 +28,12 @@ interface StylableRuntimeConfigs {
     >;
 }
 
-export async function projectsConfig(
+export function projectsConfig(
     rootDir: string,
     overrideBuildOptions: Partial<BuildOptions>,
     defaultOptions: BuildOptions = createDefaultOptions(),
     config?: StylableRuntimeConfigs,
-): Promise<STCProjects> {
+): STCProjects {
     const topLevelOptions = mergeBuildOptions(
         defaultOptions,
         config?.stcConfig?.options,
@@ -42,29 +42,21 @@ export async function projectsConfig(
 
     validateOptions(topLevelOptions);
 
-    let projects: STCProjects;
-
-    if (isMultipleConfigProject(config)) {
-        const { entities } = processProjects(config.stcConfig, {
-            defaultOptions: topLevelOptions,
-        });
-
-        projects = await resolveProjectsRequests({
-            rootDir,
-            entities,
-            resolveRequests:
-                config.stcConfig.projectsOptions?.resolveRequests ?? resolveNpmRequests,
-        });
-    } else {
-        projects = [
-            {
-                projectRoot: rootDir,
-                options: [topLevelOptions],
-            },
-        ];
-    }
-
-    return projects;
+    return isMultipleConfigProject(config)
+        ? resolveProjectsRequests({
+              rootDir,
+              entities: processProjects(config.stcConfig, {
+                  defaultOptions: topLevelOptions,
+              }).entities,
+              resolveRequests:
+                  config.stcConfig.projectsOptions?.resolveRequests ?? resolveNpmRequests,
+          })
+        : [
+              {
+                  projectRoot: rootDir,
+                  options: [topLevelOptions],
+              },
+          ];
 }
 
 export function resolveConfig(context: string, fs: IFileSystem, request?: string) {
@@ -110,7 +102,7 @@ function isMultipleConfigProject(
     return Boolean(config?.stcConfig?.projects);
 }
 
-async function resolveProjectsRequests({
+function resolveProjectsRequests({
     entities,
     rootDir,
     resolveRequests,
@@ -118,7 +110,7 @@ async function resolveProjectsRequests({
     rootDir: string;
     entities: Array<RawProjectEntity>;
     resolveRequests: ResolveRequests;
-}): Promise<STCProjects> {
+}): STCProjects {
     const context: ResolveProjectsContext = { rootDir };
 
     return resolveRequests(entities, context);
