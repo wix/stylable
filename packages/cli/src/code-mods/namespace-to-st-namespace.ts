@@ -1,6 +1,6 @@
 import { STNamespace } from '@stylable/core/dist/index-internal';
 import type * as postcss from 'postcss';
-import type { CodeMod } from './types';
+import type { CodeMod } from './types.js';
 
 export const namespaceToStNamespace: CodeMod = ({ ast }) => {
     let changed = false;

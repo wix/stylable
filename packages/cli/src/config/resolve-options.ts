@@ -1,9 +1,9 @@
 import { nodeFs } from '@file-services/node';
 import type { Arguments } from 'yargs';
 import yargs from 'yargs';
-import { createGenerator } from '../build';
-import { removeUndefined } from '../helpers';
-import type { CliArguments, BuildOptions, PartialBuildOptions } from '../types';
+import { createGenerator } from '../build.js';
+import { removeUndefined } from '../helpers.js';
+import type { CliArguments, BuildOptions, PartialBuildOptions } from '../types.js';
 
 const { join } = nodeFs;
 

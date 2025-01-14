@@ -1,14 +1,14 @@
-import { createFeature, FeatureContext } from './feature';
-import * as STSymbol from './st-symbol';
-import * as STImport from './st-import';
-import type { StylableMeta } from '../stylable-meta';
-import { plugableRecord } from '../helpers/plugable-record';
-import { namespace } from '../helpers/namespace';
-import { globalValueFromFunctionNode, GLOBAL_FUNC } from '../helpers/global';
-import { CSSWideKeywords } from '../native-reserved-lists';
+import { createFeature, FeatureContext } from './feature.js';
+import * as STSymbol from './st-symbol.js';
+import * as STImport from './st-import.js';
+import type { StylableMeta } from '../stylable-meta.js';
+import { plugableRecord } from '../helpers/plugable-record.js';
+import { namespace } from '../helpers/namespace.js';
+import { globalValueFromFunctionNode, GLOBAL_FUNC } from '../helpers/global.js';
+import { CSSWideKeywords } from '../native-reserved-lists.js';
 import valueParser from 'postcss-value-parser';
 import type * as postcss from 'postcss';
-import { createDiagnosticReporter, Diagnostics } from '../diagnostics';
+import { createDiagnosticReporter, Diagnostics } from '../diagnostics.js';
 
 export interface LayerSymbol {
     _kind: 'layer';

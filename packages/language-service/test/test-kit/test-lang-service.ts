@@ -8,7 +8,7 @@ import { CompletionItem, TextEdit } from 'vscode-languageserver';
 import { TextDocument } from 'vscode-css-languageservice';
 import { URI } from 'vscode-uri';
 import { expect } from 'chai';
-import fs from '@file-services/node';
+import { nodeFs as fs } from '@file-services/node';
 
 export interface TestOptions {
     testOnNativeFileSystem: string;

@@ -1,4 +1,4 @@
-import { createFeature } from './feature';
+import { createFeature } from './feature.js';
 
 // HOOKS
 

@@ -7,9 +7,9 @@ import webpack from 'webpack';
 import { nodeFs } from '@file-services/node';
 import { symlinkSync, existsSync, realpathSync } from 'fs';
 import { deferred, waitFor, timeout } from 'promise-assist';
-import { runServer } from './run-server';
-import { createTempDirectorySync } from './file-system-helpers';
-import { loadDirSync } from './file-system-helpers';
+import { runServer } from './run-server.js';
+import { createTempDirectorySync } from './file-system-helpers.js';
+import { loadDirSync } from './file-system-helpers.js';
 import { execSync } from 'child_process';
 
 export interface Options {

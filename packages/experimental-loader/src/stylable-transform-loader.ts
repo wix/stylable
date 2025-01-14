@@ -5,10 +5,10 @@ import {
     DiagnosticsMode,
     tryCollectImportsDeep,
 } from '@stylable/core/dist/index-internal';
-import { Warning, CssSyntaxError } from './warning';
-import { getStylable } from './cached-stylable-factory';
-import { createRuntimeTargetCode } from './create-runtime-target-code';
-import { addBuildInfo } from './add-build-info';
+import { Warning, CssSyntaxError } from './warning.js';
+import { getStylable } from './cached-stylable-factory.js';
+import { createRuntimeTargetCode } from './create-runtime-target-code.js';
+import { addBuildInfo } from './add-build-info.js';
 import { createWebpackResolver } from '@stylable/webpack-plugin';
 import type { LoaderDefinition, LoaderContext } from 'webpack';
 

@@ -11,21 +11,21 @@ export {
     createForceStateMatchers,
     createForceStatesContext,
     mutateWithForceStates,
-} from './stylable-forcestates-plugin';
+} from './stylable-forcestates-plugin.js';
 export {
     GetLogicModule,
     HTMLSnapshotPlugin,
     HTMLSnapshotPluginOptions,
-} from './stylable-html-snapshot';
-export { MetadataOptions, StylableMetadataPlugin } from './stylable-metadata-plugin';
+} from './stylable-html-snapshot.js';
+export { MetadataOptions, StylableMetadataPlugin } from './stylable-metadata-plugin.js';
 export {
     ComponentConfig,
     ComponentMetadataBuilder,
     ComponentsMetadata,
     LocalComponentConfig,
     Preset,
-} from './component-metadata-builder';
-export { hashContent } from './hash-content-util';
-export { LoaderOptions, metadataLoaderLocation } from './stylable-metadata-loader';
-export { Options, StylableManifestPlugin } from './stylable-manifest-plugin';
-export { Manifest, Metadata } from './types';
+} from './component-metadata-builder.js';
+export { hashContent } from './hash-content-util.js';
+export { LoaderOptions, metadataLoaderLocation } from './stylable-metadata-loader.js';
+export { Options, StylableManifestPlugin } from './stylable-manifest-plugin.js';
+export { Manifest, Metadata } from './types.js';

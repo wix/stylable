@@ -1,4 +1,4 @@
-import { createDiagnosticReporter } from '../diagnostics';
+import { createDiagnosticReporter } from '../diagnostics.js';
 
 export const generalDiagnostics = {
     INVALID_FUNCTIONAL_SELECTOR: createDiagnosticReporter(

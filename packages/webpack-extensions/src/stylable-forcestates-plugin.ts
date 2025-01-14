@@ -10,7 +10,7 @@ import {
 } from '@tokey/css-selector-parser';
 import cloneDeep from 'lodash.clonedeep';
 import type * as postcss from 'postcss';
-export * from './create-forcestate-matchers';
+export * from './create-forcestate-matchers.js';
 
 // This transformation is applied on target AST code
 // Not Stylable source AST

@@ -8,7 +8,7 @@ import { parseForEditing } from '@stylable/language-service/dist/lib-new/edit-ti
 import { stringifySelectorAst } from '@tokey/css-selector-parser';
 import { stringifyCSSValue } from '@tokey/css-value-parser';
 import { deindent } from '@stylable/core-test-kit';
-import { assertRule } from '../test-kit/postcss-node-asserts';
+import { assertRule } from '../test-kit/postcss-node-asserts.js';
 
 function setupWithCursor(source: string, options: { deindent?: boolean } = {}) {
     const deindented = options.deindent === false ? source : deindent(source);

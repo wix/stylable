@@ -1,8 +1,8 @@
-import { defaultStylableMatcher } from './common';
-import fs from '@file-services/node';
+import { defaultStylableMatcher } from './common.js';
+import { nodeFs as fs } from '@file-services/node';
 import { stylableModuleFactory } from '@stylable/module-utils';
 import { loadStylableConfigEsm } from '@stylable/build-tools';
-import { resolveNamespace } from './resolve-namespace';
+import { resolveNamespace } from './resolve-namespace.js';
 import { fileURLToPath } from 'url';
 
 let createModule: ReturnType<typeof stylableModuleFactory>;

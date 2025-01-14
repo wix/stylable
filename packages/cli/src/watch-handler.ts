@@ -1,13 +1,13 @@
 import type { IFileSystem, IWatchEvent } from '@file-services/types';
 import type { Stylable } from '@stylable/core';
 import type { StylableResolverCache } from '@stylable/core/dist/index-internal';
-import type { BuildContext } from './types';
+import type { BuildContext } from './types.js';
 import decache from 'decache';
-import { DirectoryProcessService } from './directory-process-service/directory-process-service';
-import { createDefaultLogger, levels, Log } from './logger';
-import { buildMessages } from './messages';
-import { DiagnosticsManager } from './diagnostics-manager';
-import { createWatchEvent, type WatchService } from './watch-service';
+import { DirectoryProcessService } from './directory-process-service/directory-process-service.js';
+import { createDefaultLogger, levels, Log } from './logger.js';
+import { buildMessages } from './messages.js';
+import { DiagnosticsManager } from './diagnostics-manager.js';
+import { createWatchEvent, type WatchService } from './watch-service.js';
 
 export interface WatchHandlerOptions {
     log?: Log;

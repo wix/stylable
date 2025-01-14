@@ -2,7 +2,7 @@ import { StylableProjectRunner } from '@stylable/e2e-test-kit';
 import { expect } from 'chai';
 import { dirname, join } from 'path';
 import { EOL } from 'os';
-import { getSheetContentAndHash } from './utils';
+import { getSheetContentAndHash } from './utils.js';
 
 const project = 'manifest-plugin';
 const projectDir = dirname(

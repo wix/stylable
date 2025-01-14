@@ -1,4 +1,4 @@
-import nodeResolve from '@rollup/plugin-node-resolve';
+import { nodeResolve } from '@rollup/plugin-node-resolve';
 import { RollupWatchOptions, RollupWatcherEvent, watch } from 'rollup';
 import { loadDirSync, runServer } from '@stylable/e2e-test-kit';
 import playwright from 'playwright-core';
@@ -8,7 +8,7 @@ import {
     actAndWaitForBuild,
     waitForWatcherFinish,
     ActAndWaitOptions,
-} from './test-helpers';
+} from './test-helpers.js';
 import { dirname, join } from 'path';
 import html from '@rollup/plugin-html';
 

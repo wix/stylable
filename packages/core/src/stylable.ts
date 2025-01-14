@@ -1,28 +1,39 @@
-import type { CacheItem, FileProcessor, MinimalFS } from './cached-process-file';
-import { createStylableFileProcessor } from './create-stylable-processor';
-import { Diagnostics } from './diagnostics';
-import { CssParser, cssParse } from './parser';
-import { type processNamespace, StylableProcessor } from './stylable-processor';
-import type { StylableMeta } from './stylable-meta';
-import { StylableResolverCache, StylableResolver, CachedModuleEntity } from './stylable-resolver';
+import type { CacheItem, FileProcessor, MinimalFS } from './cached-process-file.js';
+import { createStylableFileProcessor } from './create-stylable-processor.js';
+import { Diagnostics } from './diagnostics.js';
+import { CssParser, cssParse } from './parser.js';
+import { type processNamespace, StylableProcessor } from './stylable-processor.js';
+import type { StylableMeta } from './stylable-meta.js';
+import {
+    StylableResolverCache,
+    StylableResolver,
+    CachedModuleEntity,
+} from './stylable-resolver.js';
 import {
     ResolvedElement,
     StylableResults,
     StylableTransformer,
     TransformerOptions,
     TransformHooks,
-} from './stylable-transformer';
-import type { IStylableOptimizer, ModuleResolver } from './types';
+} from './stylable-transformer.js';
+import type { IStylableOptimizer, ModuleResolver } from './types.js';
 import {
     createDefaultResolver,
     IRequestResolverOptions,
     IResolutionFileSystem,
-} from './module-resolver';
-import { STImport, STScope, STVar, STMixin, CSSClass, CSSCustomProperty } from './features';
-import { Dependency, visitMetaCSSDependencies } from './visit-meta-css-dependencies';
+} from './module-resolver.js';
+import {
+    STImport,
+    STScope,
+    STVar,
+    STMixin,
+    CSSClass,
+    CSSCustomProperty,
+} from './features/index.js';
+import { Dependency, visitMetaCSSDependencies } from './visit-meta-css-dependencies.js';
 import * as postcss from 'postcss';
-import { warnOnce } from './helpers/deprecation';
-import { defaultFeatureFlags, type FeatureFlags } from './features/feature';
+import { warnOnce } from './helpers/deprecation.js';
+import { defaultFeatureFlags, type FeatureFlags } from './features/feature.js';
 
 export interface StylableConfigBase {
     projectRoot: string;

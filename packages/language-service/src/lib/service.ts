@@ -21,18 +21,18 @@ import {
 } from 'vscode-languageserver';
 import { URI } from 'vscode-uri';
 
-import { ProviderPosition, ProviderRange } from './completion-providers';
-import { CssService } from './css-service';
-import { dedupeRefs } from './dedupe-refs';
-import { createDiagnosis } from './diagnosis';
-import { getColorPresentation, resolveDocumentColors } from './feature/color-provider';
-import { format, StylableLangServiceFormattingOptions } from './feature/formatting';
-import { Provider } from './provider';
-import { getRefs, getRenameRefs } from './provider';
-import { typescriptSupport } from './typescript-support';
-import type { ExtendedTsLanguageService } from './types';
-import { LangServiceContext } from '../lib-new/lang-service-context';
-import { wrapAndCatchErrors } from './utils/wrap-and-log';
+import { ProviderPosition, ProviderRange } from './completion-providers.js';
+import { CssService } from './css-service.js';
+import { dedupeRefs } from './dedupe-refs.js';
+import { createDiagnosis } from './diagnosis.js';
+import { getColorPresentation, resolveDocumentColors } from './feature/color-provider.js';
+import { format, StylableLangServiceFormattingOptions } from './feature/formatting.js';
+import { Provider } from './provider.js';
+import { getRefs, getRenameRefs } from './provider.js';
+import { typescriptSupport } from './typescript-support.js';
+import type { ExtendedTsLanguageService } from './types.js';
+import { LangServiceContext } from '../lib-new/lang-service-context.js';
+import { wrapAndCatchErrors } from './utils/wrap-and-log.js';
 
 export interface StylableLanguageServiceOptions {
     fs: IFileSystem;

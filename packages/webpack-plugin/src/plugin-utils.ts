@@ -18,12 +18,12 @@ import type {
     StylableBuildMeta,
     WebpackCreateHash,
     WebpackOutputOptions,
-} from './types';
+} from './types.js';
 import type { IStylableOptimizer, StylableResolverCache } from '@stylable/core/dist/index-internal';
 import decache from 'decache';
 import { CalcDepthContext, getCSSViewModule } from '@stylable/build-tools';
 import { join, parse } from 'path';
-import { ReExt } from './re-ext-plugin';
+import { ReExt } from './re-ext-plugin.js';
 
 export function* uniqueFilterMap<T, O = T>(
     iter: Iterable<T>,

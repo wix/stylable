@@ -1,5 +1,5 @@
 import { expect } from 'chai';
-import { ESBuildTestKit } from '../esbuild-testkit';
+import { ESBuildTestKit } from '../esbuild-testkit.js';
 import type { Page, Response } from 'playwright-core';
 import { sep } from 'node:path';
 

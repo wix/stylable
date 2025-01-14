@@ -1,15 +1,15 @@
-import { createFeature } from './feature';
-import { plugableRecord } from '../helpers/plugable-record';
+import { createFeature } from './feature.js';
+import { plugableRecord } from '../helpers/plugable-record.js';
 import {
     walkSelector,
     stringifySelector,
     parseSelectorWithCache,
     flattenFunctionalSelector,
     isCompRoot,
-} from '../helpers/selector';
-import type { StylableMeta } from '../stylable-meta';
+} from '../helpers/selector.js';
+import type { StylableMeta } from '../stylable-meta.js';
 import type { ImmutableSelectorNode, SelectorList } from '@tokey/css-selector-parser';
-import { createDiagnosticReporter } from '../diagnostics';
+import { createDiagnosticReporter } from '../diagnostics.js';
 import type * as postcss from 'postcss';
 
 const dataKey = plugableRecord.key<{

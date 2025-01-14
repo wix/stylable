@@ -9,7 +9,7 @@ import {
     STCustomState,
     TemplateStateParsedValue,
 } from '@stylable/core/dist/index-internal';
-import type { ProviderPosition } from '../completion-providers';
+import type { ProviderPosition } from '../completion-providers.js';
 
 // Goes over an '-st-states' declaration value
 // parses the state and position to resolve if inside a state with a parameter

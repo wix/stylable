@@ -5,9 +5,9 @@ import type { Color, ColorInformation, ColorPresentation } from 'vscode-css-lang
 import type { ColorPresentationParams } from 'vscode-languageserver-protocol';
 import { TextDocument } from 'vscode-languageserver-textdocument';
 import { URI } from 'vscode-uri';
-import { ProviderPosition, ProviderRange } from '../completion-providers';
-import type { CssService } from '../css-service';
-import { fixAndProcess } from '../provider';
+import { ProviderPosition, ProviderRange } from '../completion-providers.js';
+import type { CssService } from '../css-service.js';
+import { fixAndProcess } from '../provider.js';
 
 export function resolveDocumentColors(
     stylable: Stylable,

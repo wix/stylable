@@ -1,15 +1,15 @@
-import { createFeature, FeatureContext } from './feature';
-import * as STSymbol from './st-symbol';
-import * as STImport from './st-import';
-import type { Imported } from './st-import';
-import type { StylableMeta } from '../stylable-meta';
-import { plugableRecord } from '../helpers/plugable-record';
-import { isInConditionalGroup } from '../helpers/rule';
-import { namespace } from '../helpers/namespace';
-import { globalValue, GLOBAL_FUNC } from '../helpers/global';
+import { createFeature, FeatureContext } from './feature.js';
+import * as STSymbol from './st-symbol.js';
+import * as STImport from './st-import.js';
+import type { Imported } from './st-import.js';
+import type { StylableMeta } from '../stylable-meta.js';
+import { plugableRecord } from '../helpers/plugable-record.js';
+import { isInConditionalGroup } from '../helpers/rule.js';
+import { namespace } from '../helpers/namespace.js';
+import { globalValue, GLOBAL_FUNC } from '../helpers/global.js';
 import type * as postcss from 'postcss';
 import postcssValueParser from 'postcss-value-parser';
-import { createDiagnosticReporter } from '../diagnostics';
+import { createDiagnosticReporter } from '../diagnostics.js';
 
 export interface KeyframesSymbol {
     _kind: 'keyframes';

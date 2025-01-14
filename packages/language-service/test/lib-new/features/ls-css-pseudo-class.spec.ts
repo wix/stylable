@@ -1,5 +1,5 @@
 import { Command } from 'vscode-languageserver';
-import { testLangService } from '../../test-kit/test-lang-service';
+import { testLangService } from '../../test-kit/test-lang-service.js';
 import { createTempDirectorySync } from '@stylable/core-test-kit';
 
 const triggerCompletion = Command.create('additional', 'editor.action.triggerSuggest');

@@ -8,7 +8,7 @@ import {
     StylableModuleSchema,
     stylableVar,
 } from '@stylable/schema-extract';
-import { mockNamespace } from './mock-namespace';
+import { mockNamespace } from './mock-namespace.js';
 
 describe('cssDocs extraction', () => {
     it('should extract cssDocs description and tags for a simple class', () => {

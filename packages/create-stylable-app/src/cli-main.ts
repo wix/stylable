@@ -1,6 +1,6 @@
 import path from 'path';
 import yargs from 'yargs';
-import { createProjectFromTemplate } from './create-project';
+import { createProjectFromTemplate } from './create-project.js';
 
 const argv = yargs()
     .usage('npm init stylable-app <project-name>')

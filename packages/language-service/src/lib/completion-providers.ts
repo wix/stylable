@@ -38,20 +38,20 @@ import {
     topLevelDirectives,
     valueCompletion,
     valueDirective,
-} from './completion-types';
-import { resolveStateTypeOrValidator } from './feature/pseudo-class';
+} from './completion-types.js';
+import { resolveStateTypeOrValidator } from './feature/pseudo-class.js';
 import {
     extractJsModifierReturnType,
     extractTsSignature,
     getExistingNames,
     isDirective,
     isInValue,
-} from './provider';
-import type { ExtendedTsLanguageService } from './types';
-import { isComment, isDeclaration } from './utils/postcss-ast-utils';
-import type { CursorPosition } from './utils/selector-analyzer';
-import type { LangServiceContext } from '../lib-new/lang-service-context';
-import * as cssPseudoClass from '../lib-new/features/ls-css-pseudo-class';
+} from './provider.js';
+import type { ExtendedTsLanguageService } from './types.js';
+import { isComment, isDeclaration } from './utils/postcss-ast-utils.js';
+import type { CursorPosition } from './utils/selector-analyzer.js';
+import type { LangServiceContext } from '../lib-new/lang-service-context.js';
+import * as cssPseudoClass from '../lib-new/features/ls-css-pseudo-class.js';
 
 export interface PluginCompletionOptions {
     context: LangServiceContext;

@@ -1,8 +1,8 @@
-export { Options, attachHook } from './require-hook';
+export { Options, attachHook } from './require-hook.js';
 export {
     resolveNamespace,
     resolveNamespaceFactory,
     createNamespaceStrategyNode,
     packageJsonLookupCache,
-} from './resolve-namespace';
-export { FileSystem, findFiles } from './find-files';
+} from './resolve-namespace.js';
+export { FileSystem, findFiles } from './find-files.js';

@@ -1,5 +1,5 @@
 import { expect } from 'chai';
-import { moduleFactoryTestKit } from './test-kit';
+import { moduleFactoryTestKit } from './test-kit.js';
 
 describe('Module Factory', () => {
     it('should create a module for a single (no import/resolution) stylable file', () => {

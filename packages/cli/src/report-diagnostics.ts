@@ -1,5 +1,5 @@
 import type { Diagnostic } from '@stylable/core';
-import { levels, Log } from './logger';
+import { levels, Log } from './logger.js';
 
 export interface CLIDiagnostic extends Diagnostic {
     line?: number;

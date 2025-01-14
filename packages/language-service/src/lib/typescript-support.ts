@@ -1,7 +1,7 @@
 import type { IFileSystemSync } from '@file-services/types';
 import { createBaseHost, createLanguageServiceHost } from '@file-services/typescript';
 import ts from 'typescript';
-import type { ExtendedTsLanguageService } from './types';
+import type { ExtendedTsLanguageService } from './types.js';
 
 export function typescriptSupport(fileSystem: IFileSystemSync) {
     let openedFiles: string[] = [];

@@ -1,9 +1,9 @@
 import type { IFileSystem } from '@file-services/types';
 import type { Stylable } from '@stylable/core';
-import type { IndexGenerator } from './base-generator';
-import type { DiagnosticsManager, DiagnosticsMode } from './diagnostics-manager';
-import type { Log } from './logger';
-import type { WatchService } from './watch-service';
+import type { IndexGenerator } from './base-generator.js';
+import type { DiagnosticsManager, DiagnosticsMode } from './diagnostics-manager.js';
+import type { Log } from './logger.js';
+import type { WatchService } from './watch-service.js';
 
 export type PartialBuildOptions = Partial<BuildOptions>;
 

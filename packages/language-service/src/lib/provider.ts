@@ -50,25 +50,25 @@ import {
     TopLevelDirectivePlugin,
     ValueCompletionPlugin,
     ValueDirectivePlugin,
-} from './completion-providers';
-import { topLevelDirectives } from './completion-types';
-import type { Completion } from './completion-types';
+} from './completion-providers.js';
+import { topLevelDirectives } from './completion-types.js';
+import type { Completion } from './completion-types.js';
 import {
     createStateTypeSignature,
     createStateValidatorSignature,
     resolveStateParams,
     resolveStateTypeOrValidator,
-} from './feature/pseudo-class';
-import type { ExtendedTsLanguageService } from './types';
-import { isInNode, isRoot, isSelector, pathFromPosition } from './utils/postcss-ast-utils';
+} from './feature/pseudo-class.js';
+import type { ExtendedTsLanguageService } from './types.js';
+import { isInNode, isRoot, isSelector, pathFromPosition } from './utils/postcss-ast-utils.js';
 import {
     parseSelector,
     SelectorChunk,
     SelectorInternalChunk,
     SelectorQuery,
-} from './utils/selector-analyzer';
-import type { LangServiceContext } from '../lib-new/lang-service-context';
-import { StImportPlugin } from '../lib-new/features/ls-st-import';
+} from './utils/selector-analyzer.js';
+import type { LangServiceContext } from '../lib-new/lang-service-context.js';
+import { StImportPlugin } from '../lib-new/features/ls-st-import.js';
 
 function findLast<T>(
     arr: T[],

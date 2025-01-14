@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 import { createRange } from '@stylable/language-service/dist/lib/completion-providers';
-import { getFormattingEdits } from '../test-kit/asserters';
+import { getFormattingEdits } from '../test-kit/asserters.js';
 import { deindent } from '@stylable/core-test-kit';
 
 describe('Formatting', () => {

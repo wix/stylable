@@ -6,7 +6,7 @@ import {
     StylableConfig,
     createDefaultResolver,
 } from '@stylable/core';
-import { createJavascriptRequireModule } from './test-stylable-core';
+import { createJavascriptRequireModule } from './test-stylable-core.js';
 import {
     FileProcessor,
     StylableProcessor,

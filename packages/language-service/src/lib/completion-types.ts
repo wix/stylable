@@ -1,5 +1,5 @@
 import type { StylableSymbol } from '@stylable/core';
-import type { ProviderRange } from './completion-providers';
+import type { ProviderRange } from './completion-providers.js';
 import { stringifySelectorAst } from '@tokey/css-selector-parser';
 
 export class Completion {

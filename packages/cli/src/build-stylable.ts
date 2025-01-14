@@ -1,18 +1,18 @@
 import { nodeFs } from '@file-services/node';
 import { Stylable, StylableConfig } from '@stylable/core';
 import { StylableResolverCache, validateDefaultConfig } from '@stylable/core/dist/index-internal';
-import { build } from './build';
-import { projectsConfig, resolveConfig } from './config/projects-config';
+import { build } from './build.js';
+import { projectsConfig, resolveConfig } from './config/projects-config.js';
 import {
     createBuildIdentifier,
     createDefaultOptions,
     hasStylableCSSOutput,
-} from './config/resolve-options';
-import { DiagnosticsManager } from './diagnostics-manager';
-import { createDefaultLogger, levels } from './logger';
-import type { BuildContext, BuildOptions } from './types';
-import { WatchHandler } from './watch-handler';
-import { createWatchService } from './watch-service';
+} from './config/resolve-options.js';
+import { DiagnosticsManager } from './diagnostics-manager.js';
+import { createDefaultLogger, levels } from './logger.js';
+import type { BuildContext, BuildOptions } from './types.js';
+import { WatchHandler } from './watch-handler.js';
+import { createWatchService } from './watch-service.js';
 
 export interface BuildStylableContext
     extends Partial<Pick<BuildContext, 'fs' | 'watch' | 'log'>>,

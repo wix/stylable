@@ -1,5 +1,5 @@
 import { expect } from 'chai';
-import { ESBuildTestKit } from '../esbuild-testkit';
+import { ESBuildTestKit } from '../esbuild-testkit.js';
 
 describe('Stylable ESBuild plugin', () => {
     const tk = new ESBuildTestKit();

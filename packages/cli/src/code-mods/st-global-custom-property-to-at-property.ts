@@ -1,7 +1,7 @@
 import { CSSVarSymbol, Diagnostics, validateCustomPropertyName } from '@stylable/core';
 import { CSSCustomProperty } from '@stylable/core/dist/index-internal';
 import type { AtRule } from 'postcss';
-import type { CodeMod } from './types';
+import type { CodeMod } from './types.js';
 
 export const stGlobalCustomPropertyToAtProperty: CodeMod = ({ ast, diagnostics, postcss }) => {
     let changed = false;

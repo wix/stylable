@@ -3,7 +3,7 @@ import {
     importDirectives,
     rulesetDirectives,
 } from '@stylable/language-service/dist/lib/completion-types';
-import * as asserters from '../../test-kit/completions-asserters';
+import * as asserters from '../../test-kit/completions-asserters.js';
 
 describe('Inner Directives', () => {
     describe('should complete -st-from inside import selector ', () => {

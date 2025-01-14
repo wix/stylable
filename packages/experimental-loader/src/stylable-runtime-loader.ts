@@ -1,7 +1,7 @@
 import type { LoaderDefinition } from 'webpack';
 import type { StylableExports } from '@stylable/core/dist/index-internal';
-import { createRuntimeTargetCode } from './create-runtime-target-code';
-import { addBuildInfo } from './add-build-info';
+import { createRuntimeTargetCode } from './create-runtime-target-code.js';
+import { addBuildInfo } from './add-build-info.js';
 
 function evalStylableExtractModule(source: string): [string, StylableExports] {
     if (!source) {

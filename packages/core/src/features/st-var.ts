@@ -1,21 +1,21 @@
-import { createFeature, FeatureContext, FeatureTransformContext } from './feature';
-import { unbox, Box, deprecatedStFunctions, boxString } from '../custom-values';
-import { generalDiagnostics } from './diagnostics';
-import * as STSymbol from './st-symbol';
-import type { StylableMeta } from '../stylable-meta';
-import { createSymbolResolverWithCache, CSSResolve } from '../stylable-resolver';
-import { EvalValueData, EvalValueResult, StylableEvaluator } from '../functions';
-import { isChildOfAtRule } from '../helpers/rule';
-import { walkSelector } from '../helpers/selector';
-import { stringifyFunction, getStringValue, strategies } from '../helpers/value';
-import { stripQuotation } from '../helpers/string';
+import { createFeature, FeatureContext, FeatureTransformContext } from './feature.js';
+import { unbox, Box, deprecatedStFunctions, boxString } from '../custom-values.js';
+import { generalDiagnostics } from './diagnostics.js';
+import * as STSymbol from './st-symbol.js';
+import type { StylableMeta } from '../stylable-meta.js';
+import { createSymbolResolverWithCache, CSSResolve } from '../stylable-resolver.js';
+import { EvalValueData, EvalValueResult, StylableEvaluator } from '../functions.js';
+import { isChildOfAtRule } from '../helpers/rule.js';
+import { walkSelector } from '../helpers/selector.js';
+import { stringifyFunction, getStringValue, strategies } from '../helpers/value.js';
+import { stripQuotation } from '../helpers/string.js';
 import type { ImmutablePseudoClass, PseudoClass } from '@tokey/css-selector-parser';
 import type * as postcss from 'postcss';
-import { processDeclarationFunctions } from '../process-declaration-functions';
-import { createDiagnosticReporter, Diagnostics } from '../diagnostics';
-import type { ParsedValue } from '../types';
-import type { Stylable } from '../stylable';
-import type { RuntimeStVar } from '../stylable-transformer';
+import { processDeclarationFunctions } from '../process-declaration-functions.js';
+import { createDiagnosticReporter, Diagnostics } from '../diagnostics.js';
+import type { ParsedValue } from '../types.js';
+import type { Stylable } from '../stylable.js';
+import type { RuntimeStVar } from '../stylable-transformer.js';
 import postcssValueParser from 'postcss-value-parser';
 
 export interface VarSymbol {

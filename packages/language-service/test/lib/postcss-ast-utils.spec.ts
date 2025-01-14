@@ -2,7 +2,7 @@ import { getAtRuleByPosition } from '@stylable/language-service/dist/lib/utils/p
 import { topLevelDirectives } from '@stylable/language-service/dist/lib/completion-types';
 import { expect } from 'chai';
 import postcss from 'postcss';
-import { getCaretPosition } from '../test-kit/asserters';
+import { getCaretPosition } from '../test-kit/asserters.js';
 
 function getCSSAndPosition(css: string) {
     const pos = getCaretPosition(css);

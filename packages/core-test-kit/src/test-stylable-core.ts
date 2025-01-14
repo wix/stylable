@@ -1,4 +1,4 @@
-import { testInlineExpects } from './inline-expectation';
+import { testInlineExpects } from './inline-expectation.js';
 import { Stylable, StylableConfig, StylableResults } from '@stylable/core';
 import { createMemoryFs } from '@file-services/memory';
 import type { IDirectoryContents, IFileSystem } from '@file-services/types';

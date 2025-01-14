@@ -1,4 +1,4 @@
-import type { Invalid } from './invalid-node';
+import type { Invalid } from './invalid-node.js';
 import BaseStringifier from 'postcss/lib/stringifier';
 import type * as postcss from 'postcss';
 

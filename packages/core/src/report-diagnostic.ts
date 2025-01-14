@@ -1,5 +1,5 @@
-import type { Diagnostic } from './diagnostics';
-import type { StylableMeta } from './stylable-meta';
+import type { Diagnostic } from './diagnostics.js';
+import type { StylableMeta } from './stylable-meta.js';
 
 export interface EmitDiagnosticsContext {
     emitError(e: Error): void;

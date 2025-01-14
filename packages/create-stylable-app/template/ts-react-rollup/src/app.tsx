@@ -1,6 +1,6 @@
 import type React from 'react';
 import { st, classes } from './app.st.css';
-import { Header } from './header';
+import { Header } from './header.js';
 
 export interface AppProps {
     className?: string;

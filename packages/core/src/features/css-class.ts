@@ -1,15 +1,15 @@
-import { createFeature, FeatureContext, FeatureTransformContext } from './feature';
-import { generalDiagnostics } from './diagnostics';
-import * as STSymbol from './st-symbol';
-import type { StylableSymbol } from './st-symbol';
-import type { ImportSymbol } from './st-import';
-import type { ElementSymbol } from './css-type';
-import type * as STStructure from './st-structure';
-import * as STCustomState from './st-custom-state';
-import { getOriginDefinition } from '../helpers/resolve';
-import { namespace } from '../helpers/namespace';
-import { namespaceEscape, unescapeCSS } from '../helpers/escape';
-import { getNamedArgs } from '../helpers/value';
+import { createFeature, FeatureContext, FeatureTransformContext } from './feature.js';
+import { generalDiagnostics } from './diagnostics.js';
+import * as STSymbol from './st-symbol.js';
+import type { StylableSymbol } from './st-symbol.js';
+import type { ImportSymbol } from './st-import.js';
+import type { ElementSymbol } from './css-type.js';
+import type * as STStructure from './st-structure.js';
+import * as STCustomState from './st-custom-state.js';
+import { getOriginDefinition } from '../helpers/resolve.js';
+import { namespace } from '../helpers/namespace.js';
+import { namespaceEscape, unescapeCSS } from '../helpers/escape.js';
+import { getNamedArgs } from '../helpers/value.js';
 import {
     convertToClass,
     stringifySelector,
@@ -17,11 +17,11 @@ import {
     parseSelectorWithCache,
     convertToPseudoClass,
     convertToSelector,
-} from '../helpers/selector';
-import { getAlias } from '../stylable-utils';
-import type { StylableMeta } from '../stylable-meta';
-import { validateRuleStateDefinition } from '../helpers/custom-state';
-import type { Stylable } from '../stylable';
+} from '../helpers/selector.js';
+import { getAlias } from '../stylable-utils.js';
+import type { StylableMeta } from '../stylable-meta.js';
+import { validateRuleStateDefinition } from '../helpers/custom-state.js';
+import type { Stylable } from '../stylable.js';
 import {
     ImmutableClass,
     Class,
@@ -32,9 +32,9 @@ import {
 } from '@tokey/css-selector-parser';
 import * as postcss from 'postcss';
 import { basename } from 'path';
-import { createDiagnosticReporter } from '../diagnostics';
+import { createDiagnosticReporter } from '../diagnostics.js';
 import postcssValueParser from 'postcss-value-parser';
-import { plugableRecord } from '../helpers/plugable-record';
+import { plugableRecord } from '../helpers/plugable-record.js';
 
 export interface StPartDirectives extends STStructure.HasParts, Partial<STCustomState.HasStates> {
     '-st-root'?: boolean;

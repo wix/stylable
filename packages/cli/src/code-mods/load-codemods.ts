@@ -1,10 +1,10 @@
-import type { CodeMod } from './types';
-import type { Log } from '../logger';
+import type { CodeMod } from './types.js';
+import type { Log } from '../logger.js';
 
 // Builtin codemods
-import { stImportToAtImport } from './st-import-to-at-import';
-import { stGlobalCustomPropertyToAtProperty } from './st-global-custom-property-to-at-property';
-import { namespaceToStNamespace } from './namespace-to-st-namespace';
+import { stImportToAtImport } from './st-import-to-at-import.js';
+import { stGlobalCustomPropertyToAtProperty } from './st-global-custom-property-to-at-property.js';
+import { namespaceToStNamespace } from './namespace-to-st-namespace.js';
 
 export const registeredMods: Map<string, CodeMod> = new Map([
     ['st-import-to-at-import', stImportToAtImport],

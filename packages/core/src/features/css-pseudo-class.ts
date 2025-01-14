@@ -1,8 +1,8 @@
-import { createFeature } from './feature';
-import { nativePseudoClasses } from '../native-reserved-lists';
-import * as STCustomState from './st-custom-state';
-import * as CSSType from './css-type';
-import { createDiagnosticReporter } from '../diagnostics';
+import { createFeature } from './feature.js';
+import { nativePseudoClasses } from '../native-reserved-lists.js';
+import * as STCustomState from './st-custom-state.js';
+import * as CSSType from './css-type.js';
+import { createDiagnosticReporter } from '../diagnostics.js';
 import type { Selector } from '@tokey/css-selector-parser';
 import isVendorPrefixed from 'is-vendor-prefixed';
 

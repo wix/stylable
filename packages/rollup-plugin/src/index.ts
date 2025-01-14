@@ -1,5 +1,5 @@
 import type { Plugin } from 'rollup';
-import fs from '@file-services/node';
+import { nodeFs as fs } from '@file-services/node';
 import { join, parse } from 'path';
 import { Stylable, StylableConfig, generateStylableJSModuleSource } from '@stylable/core';
 import {
@@ -17,7 +17,7 @@ import {
 import { packageJsonLookupCache, resolveNamespace as resolveNamespaceNode } from '@stylable/node';
 import { StylableOptimizer } from '@stylable/optimizer';
 import decache from 'decache';
-import { emitAssets, generateCssString, getDefaultMode } from './plugin-utils';
+import { emitAssets, generateCssString, getDefaultMode } from './plugin-utils.js';
 import { resolveConfig as resolveStcConfig, STCBuilder } from '@stylable/cli';
 
 export interface StylableRollupPluginOptions {

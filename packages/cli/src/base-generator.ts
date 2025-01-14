@@ -4,8 +4,8 @@ import type { Stylable } from '@stylable/core';
 import { STSymbol } from '@stylable/core/dist/index-internal';
 import camelcase from 'lodash.camelcase';
 import upperfirst from 'lodash.upperfirst';
-import { normalizeRelative, ensureDirectory, tryRun } from './build-tools';
-import { createDefaultLogger, Log } from './logger';
+import { normalizeRelative, ensureDirectory, tryRun } from './build-tools.js';
+import { createDefaultLogger, Log } from './logger.js';
 
 export interface ReExports {
     root: string;

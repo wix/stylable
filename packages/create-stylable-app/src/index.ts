@@ -3,4 +3,4 @@ export {
     TemplateCommand,
     TemplateDefinition,
     createProjectFromTemplate,
-} from './create-project';
+} from './create-project.js';

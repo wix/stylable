@@ -1,18 +1,18 @@
 import path from 'path';
 import { parseImports } from '@tokey/imports-parser';
-import { createDiagnosticReporter, Diagnostics } from '../diagnostics';
-import type { Imported } from '../features';
+import { createDiagnosticReporter, Diagnostics } from '../diagnostics.js';
+import type { Imported } from '../features/index.js';
 import { Root, decl, Declaration, atRule, rule, Rule, AtRule } from 'postcss';
-import { stripQuotation } from '../helpers/string';
-import { isCompRoot } from './selector';
-import type { ParsedValue } from '../types';
-import type { StylableMeta } from '../stylable-meta';
+import { stripQuotation } from '../helpers/string.js';
+import { isCompRoot } from './selector.js';
+import type { ParsedValue } from '../types.js';
+import type { StylableMeta } from '../stylable-meta.js';
 import type * as postcss from 'postcss';
 import postcssValueParser, {
     ParsedValue as PostCSSParsedValue,
     FunctionNode,
 } from 'postcss-value-parser';
-import type { StylableResolver } from '../stylable-resolver';
+import type { StylableResolver } from '../stylable-resolver.js';
 
 export const parseImportMessages = {
     ST_IMPORT_STAR: createDiagnosticReporter(

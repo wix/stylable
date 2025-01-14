@@ -1,14 +1,14 @@
-import { createFeature, FeatureContext } from './feature';
-import { generalDiagnostics } from './diagnostics';
-import * as STSymbol from './st-symbol';
-import type { ImportSymbol } from './st-import';
-import * as CSSClass from './css-class';
-import type { StylableMeta } from '../stylable-meta';
-import { isCompRoot, stringifySelector } from '../helpers/selector';
-import { getOriginDefinition } from '../helpers/resolve';
+import { createFeature, FeatureContext } from './feature.js';
+import { generalDiagnostics } from './diagnostics.js';
+import * as STSymbol from './st-symbol.js';
+import type { ImportSymbol } from './st-import.js';
+import * as CSSClass from './css-class.js';
+import type { StylableMeta } from '../stylable-meta.js';
+import { isCompRoot, stringifySelector } from '../helpers/selector.js';
+import { getOriginDefinition } from '../helpers/resolve.js';
 import type { Type, ImmutableType, ImmutableSelectorNode } from '@tokey/css-selector-parser';
 import type * as postcss from 'postcss';
-import { createDiagnosticReporter } from '../diagnostics';
+import { createDiagnosticReporter } from '../diagnostics.js';
 
 // ToDo: should probably consider removing StylableDirectives from this symbol
 export interface ElementSymbol extends CSSClass.StPartDirectives {

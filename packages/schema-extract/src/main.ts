@@ -12,7 +12,7 @@ import {
     StylableProcessor,
     STCustomState,
 } from '@stylable/core/dist/index-internal';
-import { getCssDocsForSymbol } from './cssdocs';
+import { getCssDocsForSymbol } from './cssdocs.js';
 import {
     MinimalPath,
     SchemaStates,
@@ -21,7 +21,7 @@ import {
     StylableModuleSchema,
     StylableSymbolSchema,
     stylableVar,
-} from './types';
+} from './types.js';
 
 export function extractSchema(
     css: string,

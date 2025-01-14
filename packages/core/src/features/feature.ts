@@ -1,16 +1,16 @@
-import type { StylableMeta } from '../stylable-meta';
+import type { StylableMeta } from '../stylable-meta.js';
 import type {
     InferredSelector,
     ScopeContext,
     StylableExports,
     StylableTransformer,
-} from '../stylable-transformer';
-import type { StylableResolver, MetaResolvedSymbols } from '../stylable-resolver';
-import type { StylableEvaluator, EvalValueData } from '../functions';
+} from '../stylable-transformer.js';
+import type { StylableResolver, MetaResolvedSymbols } from '../stylable-resolver.js';
+import type { StylableEvaluator, EvalValueData } from '../functions.js';
 import type * as postcss from 'postcss';
 import type { ImmutableSelectorNode } from '@tokey/css-selector-parser';
-import type { Diagnostics } from '../diagnostics';
-import type { ParsedValue } from '../types';
+import type { Diagnostics } from '../diagnostics.js';
+import type { ParsedValue } from '../types.js';
 
 export interface FeatureFlags {
     strictCustomProperty: boolean;

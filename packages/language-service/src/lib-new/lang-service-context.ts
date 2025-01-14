@@ -1,8 +1,8 @@
 import { TextDocument } from 'vscode-css-languageservice';
 import { Diagnostics, Stylable, StylableMeta } from '@stylable/core';
-import type { StylableFile } from '../lib/service';
-import { getAstNodeAt } from './ast-from-position';
-import { parseForEditing, ParseReport } from './edit-time-parser';
+import type { StylableFile } from '../lib/service.js';
+import { getAstNodeAt } from './ast-from-position.js';
+import { parseForEditing, ParseReport } from './edit-time-parser.js';
 import {
     parseSelectorWithCache,
     StylableProcessor,

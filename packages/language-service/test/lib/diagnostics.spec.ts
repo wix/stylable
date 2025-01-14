@@ -4,7 +4,7 @@ import { safeParse } from '@stylable/core/dist/index-internal';
 import { StylableLanguageService } from '@stylable/language-service';
 import { expect } from 'chai';
 import { deindent } from '@stylable/core-test-kit';
-import { createDiagnostics } from '../test-kit/diagnostics-setup';
+import { createDiagnostics } from '../test-kit/diagnostics-setup.js';
 
 describe('diagnostics', () => {
     it('should create basic diagnostics', () => {

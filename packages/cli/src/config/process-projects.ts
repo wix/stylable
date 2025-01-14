@@ -6,8 +6,8 @@ import type {
     ProjectEntryValue,
     ProjectEntryValues,
     RawProjectEntity,
-} from '../types';
-import { createDefaultOptions, mergeBuildOptions, validateOptions } from './resolve-options';
+} from '../types.js';
+import { createDefaultOptions, mergeBuildOptions, validateOptions } from './resolve-options.js';
 
 interface ProcessProjectsOptions {
     defaultOptions?: BuildOptions;

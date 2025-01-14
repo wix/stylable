@@ -1,5 +1,5 @@
-import { createDefaultLogger, Log } from './logger';
-import { CLIDiagnostic, DiagnosticMessages, reportDiagnostics } from './report-diagnostics';
+import { createDefaultLogger, Log } from './logger.js';
+import { CLIDiagnostic, DiagnosticMessages, reportDiagnostics } from './report-diagnostics.js';
 
 export type DiagnosticsMode = 'strict' | 'loose';
 

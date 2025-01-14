@@ -1,6 +1,6 @@
 import type { IFileSystem, IWatchEvent } from '@file-services/types';
-import { createWatchEvent, type WatchService } from '../watch-service';
-import { directoryDeepChildren, DirectoryItem } from './walk-fs';
+import { createWatchEvent, type WatchService } from '../watch-service.js';
+import { directoryDeepChildren, DirectoryItem } from './walk-fs.js';
 
 export interface DirectoryProcessServiceOptions {
     processFiles?(

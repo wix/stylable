@@ -1,13 +1,13 @@
 import { tmpdir } from 'os';
 import { mkdtempSync } from 'fs';
-import nodeFs from '@file-services/node';
+import { nodeFs as fs } from '@file-services/node';
 import type { IDirectoryContents, IFileSystem } from '@file-services/types';
 
 export function createTempDirectorySync(prefix = 'temp-') {
-    const path = nodeFs.realpathSync.native(mkdtempSync(nodeFs.join(tmpdir(), prefix)));
-    const remove = () => nodeFs.rmSync(path, { recursive: true, force: true });
+    const path = fs.realpathSync.native(mkdtempSync(fs.join(tmpdir(), prefix)));
+    const remove = () => fs.rmSync(path, { recursive: true, force: true });
 
-    return { path, remove, setContent: copyDirectory.bind(null, nodeFs, path) };
+    return { path, remove, setContent: copyDirectory.bind(null, fs, path) };
 }
 export function copyDirectory(fs: IFileSystem, targetPath: string, content: IDirectoryContents) {
     fs.ensureDirectorySync(targetPath);

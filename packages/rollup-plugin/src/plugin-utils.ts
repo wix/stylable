@@ -1,6 +1,6 @@
 import type { Stylable, StylableMeta } from '@stylable/core';
 import type { PluginContext } from 'rollup';
-import type { StylableRollupPluginOptions } from './index';
+import type { StylableRollupPluginOptions } from './index.js';
 import { processUrlDependencies } from '@stylable/build-tools';
 import fs from 'fs';
 import { basename, extname, isAbsolute, join } from 'path';

@@ -1,11 +1,11 @@
 import path from 'path';
-import { createFeature, FeatureContext } from './feature';
-import { plugableRecord } from '../helpers/plugable-record';
-import { filename2varname, string2varname } from '../helpers/string';
-import { stripQuotation } from '../helpers/string';
+import { createFeature, FeatureContext } from './feature.js';
+import { plugableRecord } from '../helpers/plugable-record.js';
+import { filename2varname, string2varname } from '../helpers/string.js';
+import { stripQuotation } from '../helpers/string.js';
 import valueParser from 'postcss-value-parser';
-import { murmurhash3_32_gc } from '../murmurhash';
-import { createDiagnosticReporter, Diagnostics } from '../diagnostics';
+import { murmurhash3_32_gc } from '../murmurhash.js';
+import { createDiagnosticReporter, Diagnostics } from '../diagnostics.js';
 import type { AtRule } from 'postcss';
 
 export const diagnostics = {

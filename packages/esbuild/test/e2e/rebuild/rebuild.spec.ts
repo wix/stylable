@@ -1,5 +1,5 @@
 import { expect } from 'chai';
-import { ESBuildTestKit } from '../esbuild-testkit';
+import { ESBuildTestKit } from '../esbuild-testkit.js';
 import { sleep } from 'promise-assist';
 
 describe('Stylable ESBuild plugin rebuild on change', function () {

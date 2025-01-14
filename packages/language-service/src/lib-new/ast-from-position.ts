@@ -2,8 +2,8 @@ import type * as postcss from 'postcss';
 import { walk, type ImmutableSelectorNode, ImmutableSelector } from '@tokey/css-selector-parser';
 import * as CSSValue from '@tokey/css-value-parser';
 import { parseSelectorWithCache } from '@stylable/core/dist/index-internal';
-import type { Invalid } from './invalid-node';
-import { AMBIGUITY, ParseForEditingResult } from './edit-time-parser';
+import type { Invalid } from './invalid-node.js';
+import { AMBIGUITY, ParseForEditingResult } from './edit-time-parser.js';
 
 // ToDo: move to tokey
 function walkValue(

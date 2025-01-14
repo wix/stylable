@@ -1,4 +1,4 @@
-import { murmurhash3_32_gc } from '../murmurhash';
+import { murmurhash3_32_gc } from '../murmurhash.js';
 
 export const namespaceDelimiter = '__';
 export function namespace(name: string, namespace: string) {

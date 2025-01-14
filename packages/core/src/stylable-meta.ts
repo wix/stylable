@@ -1,10 +1,10 @@
 import type * as postcss from 'postcss';
-import type { FeatureContext } from './features';
-import type { Diagnostics } from './diagnostics';
+import type { FeatureContext } from './features/index.js';
+import type { Diagnostics } from './diagnostics.js';
 import type { SelectorList } from '@tokey/css-selector-parser';
-import type { PlugableRecord } from './helpers/plugable-record';
-import type { StylableExports } from './stylable-transformer';
-import { getSourcePath } from './stylable-utils';
+import type { PlugableRecord } from './helpers/plugable-record.js';
+import type { StylableExports } from './stylable-transformer.js';
+import { getSourcePath } from './stylable-utils.js';
 import {
     STSymbol,
     STImport,
@@ -23,8 +23,8 @@ import {
     CSSLayer,
     CSSContains,
     STStructure,
-} from './features';
-import type { FeatureFlags } from './features/feature';
+} from './features/index.js';
+import type { FeatureFlags } from './features/feature.js';
 
 const features = [
     STSymbol,

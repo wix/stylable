@@ -1,6 +1,6 @@
 import { basename, join } from 'path';
 import type { Module, Compiler, Compilation, ModuleGraph, NormalModule } from 'webpack';
-import { compileAsEntry, exec } from './compile-as-entry';
+import { compileAsEntry, exec } from './compile-as-entry.js';
 
 import {
     getCSSViewModuleWebpack,

@@ -6,7 +6,7 @@ import {
     convertToSelector,
     matchTypeAndValue,
     isSimpleSelector,
-} from './selector';
+} from './selector.js';
 import {
     Selector,
     ImmutableSelectorNode,
@@ -15,7 +15,7 @@ import {
     SelectorNode,
 } from '@tokey/css-selector-parser';
 import * as postcss from 'postcss';
-import { transformInlineCustomSelectors } from './custom-selector';
+import { transformInlineCustomSelectors } from './custom-selector.js';
 
 export function isChildOfAtRule(rule: postcss.Container, atRuleName: string) {
     let currentParent = rule.parent;

@@ -8,14 +8,14 @@ import { generateDTSContent, generateDTSSourceMap } from '@stylable/module-utils
 import { StylableOptimizer } from '@stylable/optimizer';
 import type { IFileSystem } from '@file-services/types';
 import { hasImportedSideEffects, processUrlDependencies } from '@stylable/build-tools';
-import { ensureDirectory, tryRun } from './build-tools';
-import { nameTemplate } from './name-template';
-import type { Log } from './logger';
-import { DiagnosticsManager, DiagnosticsMode } from './diagnostics-manager';
-import type { CLIDiagnostic } from './report-diagnostics';
-import { errorMessages } from './messages';
-import type { ModuleFormats } from './types';
-import { fileToDataUri } from './file-to-data-uri';
+import { ensureDirectory, tryRun } from './build-tools.js';
+import { nameTemplate } from './name-template.js';
+import type { Log } from './logger.js';
+import { DiagnosticsManager, DiagnosticsMode } from './diagnostics-manager.js';
+import type { CLIDiagnostic } from './report-diagnostics.js';
+import { errorMessages } from './messages.js';
+import type { ModuleFormats } from './types.js';
+import { fileToDataUri } from './file-to-data-uri.js';
 
 export interface BuildCommonOptions {
     fullOutDir: string;

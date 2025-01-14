@@ -1,5 +1,5 @@
-import { overrideNodeStringifier } from './stringifier';
-import { Invalid } from './invalid-node';
+import { overrideNodeStringifier } from './stringifier.js';
+import { Invalid } from './invalid-node.js';
 import tokenizer from 'postcss/lib/tokenize';
 import Parser from 'postcss/lib/parser';
 import * as postcss from 'postcss';

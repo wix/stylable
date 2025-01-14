@@ -1,4 +1,4 @@
-import fs from '@file-services/node';
+import { nodeFs as fs } from '@file-services/node';
 import type { StylableConfig } from '@stylable/core';
 import { validateDefaultConfig } from '@stylable/core/dist/index-internal';
 import { stylableModuleFactory } from '@stylable/module-utils';

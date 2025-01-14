@@ -2,7 +2,7 @@ import { StylableDOMUtil, PartialElement } from '@stylable/dom-test-kit';
 import { DTSKit } from '@stylable/e2e-test-kit';
 import { MinimalDocument } from '@stylable/core-test-kit';
 import { expect } from 'chai';
-import { contractTest } from './contract-test';
+import { contractTest } from './contract-test.js';
 
 const minDoc = new MinimalDocument();
 

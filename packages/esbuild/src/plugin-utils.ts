@@ -2,7 +2,7 @@ import { join, isAbsolute } from 'path';
 import decache from 'decache';
 import type { PluginBuild, Metafile } from 'esbuild';
 import type { Stylable, StylableConfig, StylableMeta, StylableResults } from '@stylable/core';
-import type { ESBuildOptions } from './stylable-esbuild-plugin';
+import type { ESBuildOptions } from './stylable-esbuild-plugin.js';
 import { packageJsonLookupCache } from '@stylable/node';
 import { sortModulesByDepth, processUrlDependencies } from '@stylable/build-tools';
 import { DiagnosticsMode, emitDiagnostics } from '@stylable/core/dist/index-internal';

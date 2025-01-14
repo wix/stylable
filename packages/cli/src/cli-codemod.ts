@@ -1,16 +1,16 @@
 #!/usr/bin/env node
 
-import fs from '@file-services/node';
+import { nodeFs as fs } from '@file-services/node';
 import { resolve } from 'path';
 import yargs from 'yargs';
-import { codeMods } from './code-mods/code-mods';
+import { codeMods } from './code-mods/code-mods.js';
 import {
     loadExternalCodemods,
     loadBuiltInCodemods,
     registeredMods,
-} from './code-mods/load-codemods';
-import { createLogger } from './logger';
-import type { CodeMod } from './code-mods/types';
+} from './code-mods/load-codemods.js';
+import { createLogger } from './logger.js';
+import type { CodeMod } from './code-mods/types.js';
 
 const argv = yargs
     .option('rootDir', {

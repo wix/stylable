@@ -1,8 +1,8 @@
 import { expect } from 'chai';
-import { rollupRunner } from './test-kit/rollup-runner';
-import { getProjectPath } from './test-kit/test-helpers';
+import { rollupRunner } from './test-kit/rollup-runner.js';
+import { getProjectPath } from './test-kit/test-helpers.js';
 import { createDefaultResolver } from '@stylable/core';
-import fs from '@file-services/node';
+import { nodeFs as fs } from '@file-services/node';
 
 describe('StylableRollupPlugin - import native CSS', function () {
     this.timeout(30000);

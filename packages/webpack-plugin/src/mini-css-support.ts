@@ -3,9 +3,9 @@ import {
     replaceMappedCSSAssetPlaceholders,
     getStylableBuildData,
     getStylableBuildMeta,
-} from './plugin-utils';
-import { StylableWebpackPlugin } from './plugin';
-import type { BuildData } from './types';
+} from './plugin-utils.js';
+import { StylableWebpackPlugin } from './plugin.js';
+import type { BuildData } from './types.js';
 
 export function injectCssModules(
     webpack: Compiler['webpack'],

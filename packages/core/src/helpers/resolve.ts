@@ -1,5 +1,5 @@
-import type { ClassSymbol, ElementSymbol, STStructure } from '../features';
-import type { CSSResolve } from '../stylable-resolver';
+import type { ClassSymbol, ElementSymbol, STStructure } from '../features/index.js';
+import type { CSSResolve } from '../stylable-resolver.js';
 
 export function getOriginDefinition<T extends ClassSymbol | ElementSymbol | STStructure.PartSymbol>(
     resolved: CSSResolve<T>[],
