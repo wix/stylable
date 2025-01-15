@@ -3,8 +3,8 @@ import { expect } from 'chai';
 import { URI } from 'vscode-uri';
 
 import { createRange } from '@stylable/language-service/dist/lib/completion-providers';
-import { getReferences } from '../test-kit/asserters';
-import { CASES_PATH } from '../test-kit/stylable-fixtures-lsp';
+import { getReferences } from '../test-kit/asserters.js';
+import { CASES_PATH } from '../test-kit/stylable-fixtures-lsp.js';
 
 describe('References', () => {
     const getCasePath = (innerPath: string) =>

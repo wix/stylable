@@ -1,1 +1,1 @@
-export { stylablePlugin, type ESBuildOptions } from './stylable-esbuild-plugin';
+export { stylablePlugin, type ESBuildOptions } from './stylable-esbuild-plugin.js';

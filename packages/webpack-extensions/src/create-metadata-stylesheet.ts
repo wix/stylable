@@ -1,7 +1,7 @@
 import type { Stylable, StylableMeta } from '@stylable/core';
 import type { Rule, ChildNode, AtRule } from 'postcss';
-import type { Metadata, ResolvedImport } from './types';
-import { hashContent } from './hash-content-util';
+import type { Metadata, ResolvedImport } from './types.js';
+import { hashContent } from './hash-content-util.js';
 
 export function createMetadataForStylesheet(
     stylable: Stylable,

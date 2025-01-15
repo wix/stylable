@@ -3,7 +3,7 @@ import { dirname, join } from 'path';
 import { expect } from 'chai';
 import { StylableProjectRunner } from '@stylable/e2e-test-kit';
 import type { ComponentsMetadata } from '@stylable/webpack-extensions';
-import { getSheetContentAndHash } from './utils';
+import { getSheetContentAndHash } from './utils.js';
 
 const project = 'manifest-plugin';
 const projectDir = dirname(

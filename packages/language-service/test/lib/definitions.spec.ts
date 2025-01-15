@@ -6,8 +6,8 @@ import {
     createRange,
     ProviderPosition,
 } from '@stylable/language-service/dist/lib/completion-providers';
-import * as asserters from '../test-kit/asserters';
-import { CASES_PATH } from '../test-kit/stylable-fixtures-lsp';
+import * as asserters from '../test-kit/asserters.js';
+import { CASES_PATH } from '../test-kit/stylable-fixtures-lsp.js';
 
 describe('Definitions', () => {
     const getCasePath = (innerPath: string) => URI.file(path.join(CASES_PATH, innerPath)).fsPath;

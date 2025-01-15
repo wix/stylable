@@ -1,8 +1,8 @@
 import { findFiles } from '@stylable/node';
 import { dirname, join, relative } from 'path';
 import type { Compilation, Compiler } from 'webpack';
-import { compileAsEntry, exec } from './compile-as-entry';
-import { ComponentConfig, ComponentMetadataBuilder } from './component-metadata-builder';
+import { compileAsEntry, exec } from './compile-as-entry.js';
+import { ComponentConfig, ComponentMetadataBuilder } from './component-metadata-builder.js';
 
 import {
     getCSSViewModuleWebpack,
@@ -12,7 +12,7 @@ import {
     isStylableModule,
     uniqueFilterMap,
 } from '@stylable/webpack-plugin';
-import { hashContent } from './hash-content-util';
+import { hashContent } from './hash-content-util.js';
 
 export interface MetadataOptions {
     name: string;

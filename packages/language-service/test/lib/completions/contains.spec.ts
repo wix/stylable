@@ -1,5 +1,5 @@
 import { expect } from 'chai';
-import { createDiagnostics } from '../../test-kit/diagnostics-setup';
+import { createDiagnostics } from '../../test-kit/diagnostics-setup.js';
 import { deindent } from '@stylable/core-test-kit';
 
 describe('CSS contains', () => {

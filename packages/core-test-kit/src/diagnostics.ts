@@ -2,8 +2,8 @@ import { expect } from 'chai';
 import type { Position } from 'postcss';
 import { Diagnostics, DiagnosticSeverity, StylableMeta, StylableResults } from '@stylable/core';
 import { DiagnosticBase, safeParse, StylableProcessor } from '@stylable/core/dist/index-internal';
-import { deindent } from './deindent';
-import { Config, generateStylableResult } from './generate-test-util';
+import { deindent } from './deindent.js';
+import { Config, generateStylableResult } from './generate-test-util.js';
 
 export interface Diagnostic {
     severity?: DiagnosticSeverity;

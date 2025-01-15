@@ -1,7 +1,7 @@
 import cloneDeepWith from 'lodash.clonedeepwith';
 import postcssValueParser from 'postcss-value-parser';
-import { getFormatterArgs, getNamedArgs, getStringValue } from './helpers/value';
-import type { ParsedValue } from './types';
+import { getFormatterArgs, getNamedArgs, getStringValue } from './helpers/value.js';
+import type { ParsedValue } from './types.js';
 
 export class CustomValueError extends Error {
     constructor(

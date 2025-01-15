@@ -9,7 +9,7 @@ import {
     assertDecl,
     assertInvalid,
     assertComment,
-} from '../test-kit/postcss-node-asserts';
+} from '../test-kit/postcss-node-asserts.js';
 import { expect } from 'chai';
 import { deindent } from '@stylable/core-test-kit';
 

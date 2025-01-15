@@ -1,4 +1,4 @@
-export { StylableWebpackPlugin, StylableWebpackPluginOptions } from './plugin';
+export { StylableWebpackPlugin, StylableWebpackPluginOptions } from './plugin.js';
 export {
     OptimizationMapping,
     createCalcDepthContext,
@@ -34,12 +34,12 @@ export {
     reportNamespaceCollision,
     staticCSSWith,
     uniqueFilterMap,
-} from './plugin-utils';
-export { getImports, getReplacementToken } from './loader-utils';
+} from './plugin-utils.js';
+export { getImports, getReplacementToken } from './loader-utils.js';
 export {
     applyWebpackConfigStylableExcludes,
     bundleServerLibs,
-} from './webpack-config-stylable-excludes';
+} from './webpack-config-stylable-excludes.js';
 export {
     BuildData,
     CompilationParams,
@@ -53,5 +53,5 @@ export {
     StylableLoaderContext,
     WebpackCreateHash,
     WebpackOutputOptions,
-} from './types';
-export { createWebpackResolver } from './legacy-module-resolver';
+} from './types.js';
+export { createWebpackResolver } from './legacy-module-resolver.js';

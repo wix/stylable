@@ -14,10 +14,10 @@ import type {
     RuntimeTemplate,
     StringSortableSet,
     StylableBuildMeta,
-} from './types';
+} from './types.js';
 
-import { getStylableBuildData, replaceMappedCSSAssetPlaceholders } from './plugin-utils';
-import { getReplacementTokenJSON as rtJSON } from './loader-utils';
+import { getStylableBuildData, replaceMappedCSSAssetPlaceholders } from './plugin-utils.js';
+import { getReplacementTokenJSON as rtJSON } from './loader-utils.js';
 
 const entitiesCache = new WeakMap<Compiler['webpack'], StylableWebpackEntities>();
 

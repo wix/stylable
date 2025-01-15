@@ -2,13 +2,13 @@ import { Stylable, StylableMeta } from '@stylable/core';
 import { createWebpackResolver } from '@stylable/webpack-plugin';
 import { STSymbol } from '@stylable/core/dist/index-internal';
 import { resolveNamespace } from '@stylable/node';
-import { createMetadataForStylesheet } from './create-metadata-stylesheet';
-import { hashContent } from './hash-content-util';
+import { createMetadataForStylesheet } from './create-metadata-stylesheet.js';
+import { hashContent } from './hash-content-util.js';
 import { basename } from 'path';
 import { EOL } from 'os';
 import type { Compilation, Compiler, Module } from 'webpack';
-import type { ComponentsMetadata } from './component-metadata-builder';
-import type { Manifest, MetadataList } from './types';
+import type { ComponentsMetadata } from './component-metadata-builder.js';
+import type { Manifest, MetadataList } from './types.js';
 
 export interface Options {
     outputType: 'manifest' | 'fs-manifest';

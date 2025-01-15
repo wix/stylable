@@ -1,7 +1,7 @@
 import { createDefaultResolver } from '@stylable/core';
 import { CSSClass } from '@stylable/core/dist/index-internal';
 import { createTempDirectorySync } from '@stylable/core-test-kit';
-import { testLangService } from '../../test-kit/test-lang-service';
+import { testLangService } from '../../test-kit/test-lang-service.js';
 import { stImportNamedCompletion } from '@stylable/language-service/dist/lib/completion-types';
 import { Command } from 'vscode-languageserver';
 import { parseCssSelector } from '@tokey/css-selector-parser';

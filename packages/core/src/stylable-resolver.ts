@@ -1,6 +1,6 @@
-import type { FileProcessor } from './cached-process-file';
-import type { Diagnostics } from './diagnostics';
-import type { StylableMeta } from './stylable-meta';
+import type { FileProcessor } from './cached-process-file.js';
+import type { Diagnostics } from './diagnostics.js';
+import type { StylableMeta } from './stylable-meta.js';
 import {
     ImportSymbol,
     ClassSymbol,
@@ -18,10 +18,10 @@ import {
     CSSLayer,
     CSSContains,
     STStructure,
-} from './features';
-import { findRule } from './helpers/rule';
-import type { ModuleResolver } from './types';
-import { CustomValueExtension, isCustomValue, stTypes } from './custom-values';
+} from './features/index.js';
+import { findRule } from './helpers/rule.js';
+import type { ModuleResolver } from './types.js';
+import { CustomValueExtension, isCustomValue, stTypes } from './custom-values.js';
 
 export type JsModule = {
     default?: unknown;

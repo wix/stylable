@@ -1,6 +1,6 @@
 import { createRange } from '@stylable/language-service/dist/lib/completion-providers';
 import { topLevelDirectives } from '@stylable/language-service/dist/lib/completion-types';
-import * as asserters from '../../test-kit/completions-asserters';
+import * as asserters from '../../test-kit/completions-asserters.js';
 
 describe('Variables Directive', () => {
     describe('should complete :vars at top level ', () => {

@@ -1,5 +1,5 @@
 import { classes } from './gallery.st.css';
-import { render as Button } from './button';
+import { render as Button } from './button.js';
 const render = () => {
     const gl = document.createElement('div');
     const btn1 = Button('left');

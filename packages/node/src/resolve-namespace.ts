@@ -5,7 +5,7 @@ import {
 } from '@stylable/core';
 import { dirname, relative } from 'path';
 import { existsSync } from 'node:fs';
-import { findPackageJson } from './find-package-json';
+import { findPackageJson } from './find-package-json.js';
 
 export function resolveNamespaceFactory(
     hashSalt = '',

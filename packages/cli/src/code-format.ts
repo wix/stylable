@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 import yargs from 'yargs';
-import fs from '@file-services/node';
+import { nodeFs as fs } from '@file-services/node';
 import { getDocumentFormatting, formatCSS } from '@stylable/code-formatter';
-import { createLogger } from './logger';
+import { createLogger } from './logger.js';
 
 const { join, writeFileSync } = fs;
 

@@ -1,12 +1,12 @@
 import type * as postcss from 'postcss';
 import type { StylableSymbol } from '@stylable/core';
-import { Completion, stImportNamedCompletion, range, Snippet } from '../../lib/completion-types';
-import type { LangServiceContext } from '../lang-service-context';
+import { Completion, stImportNamedCompletion, range, Snippet } from '../../lib/completion-types.js';
+import type { LangServiceContext } from '../lang-service-context.js';
 import path from 'path';
 import { STSymbol } from '@stylable/core/dist/index-internal';
-import type { AstLocationResult } from '../ast-from-position';
+import type { AstLocationResult } from '../ast-from-position.js';
 import type { CSSValueAST } from '@tokey/css-value-parser';
-import type { LangServicePlugin } from '../../lib/completion-providers';
+import type { LangServicePlugin } from '../../lib/completion-providers.js';
 
 export const StImportPlugin: LangServicePlugin = {
     analyzeCaretLocation(context) {

@@ -8,8 +8,8 @@ import {
     ClassStateToken,
     TokenizedDtsEntry,
     tokenizeDTS,
-} from './dts-rough-tokenizer';
-import { SPACING } from './generate-dts';
+} from './dts-rough-tokenizer.js';
+import { SPACING } from './generate-dts.js';
 
 type LineMapping = Array<Array<number>>;
 

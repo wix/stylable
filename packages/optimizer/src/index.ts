@@ -6,5 +6,5 @@ export {
     removeEmptyNodes,
     removeRecursiveUpIfEmpty,
     replaceRecursiveUpIfEmpty,
-} from './stylable-optimizer';
-export { MappedName, Name, NameMapper, Prefix } from './name-mapper';
+} from './stylable-optimizer.js';
+export { MappedName, Name, NameMapper, Prefix } from './name-mapper.js';

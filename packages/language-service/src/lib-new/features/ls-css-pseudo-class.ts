@@ -14,8 +14,8 @@ import {
     stateCompletion,
     stateEnumCompletion,
     range,
-} from '../../lib/completion-types';
-import type { LangServiceContext } from '../lang-service-context';
+} from '../../lib/completion-types.js';
+import type { LangServiceContext } from '../lang-service-context.js';
 
 export function getCompletions(context: LangServiceContext): Completion[] {
     const completions: Completion[] = [];

@@ -1,6 +1,6 @@
 import type * as postcss from 'postcss';
-import type { Box } from './custom-values';
-import type { StylableExports, StylableResults } from './stylable-transformer';
+import type { Box } from './custom-values.js';
+import type { StylableExports, StylableResults } from './stylable-transformer.js';
 
 export interface ParsedValue {
     type: string;

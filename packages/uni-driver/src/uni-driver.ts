@@ -1,4 +1,4 @@
-import type { ElementRemoteApi, MinimalStylesheet, StateValue } from './types';
+import type { ElementRemoteApi, MinimalStylesheet, StateValue } from './types.js';
 
 const stateMiddleDelimiter = '-';
 

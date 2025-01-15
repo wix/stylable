@@ -1,8 +1,8 @@
 import { FileSystem, findFiles } from '@stylable/node';
-import { applyCodeMods } from './apply-code-mods';
+import { applyCodeMods } from './apply-code-mods.js';
 import { relative, join } from 'path';
-import type { ApplyCodeModsResult, ApplyCodeModsSuccess, CodeMod } from './types';
-import type { Log } from '../logger';
+import type { ApplyCodeModsResult, ApplyCodeModsSuccess, CodeMod } from './types.js';
+import type { Log } from '../logger.js';
 import type { Diagnostic } from '@stylable/core';
 
 export interface CodeModsOptions {

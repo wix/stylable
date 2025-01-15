@@ -3,7 +3,7 @@ import {
     IResolutionFileSystem,
     createRequestResolver,
 } from '@file-services/resolve';
-import type { ModuleResolver } from './types';
+import type { ModuleResolver } from './types.js';
 
 export type { IRequestResolverOptions, IResolutionFileSystem };
 

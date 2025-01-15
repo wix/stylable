@@ -2,7 +2,7 @@ import { nodeFs as fs } from '@file-services/node';
 import { join } from 'node:path';
 import { Stylable } from '@stylable/core';
 import { generateDTSContent } from '@stylable/module-utils';
-import { createTempDirectorySync, ITempDirectorySync } from './file-system-helpers';
+import { createTempDirectorySync, ITempDirectorySync } from './file-system-helpers.js';
 import {
     createProgram,
     ModuleKind,

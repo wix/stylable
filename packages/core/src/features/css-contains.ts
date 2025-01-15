@@ -1,12 +1,12 @@
-import { createFeature, FeatureContext } from './feature';
-import * as STSymbol from './st-symbol';
-import * as STImport from './st-import';
-import * as CSSCustomProperty from './css-custom-property';
-import type { StylableMeta } from '../stylable-meta';
-import { createDiagnosticReporter } from '../diagnostics';
-import { plugableRecord } from '../helpers/plugable-record';
-import { namespace } from '../helpers/namespace';
-import { globalValueFromFunctionNode, GLOBAL_FUNC } from '../helpers/global';
+import { createFeature, FeatureContext } from './feature.js';
+import * as STSymbol from './st-symbol.js';
+import * as STImport from './st-import.js';
+import * as CSSCustomProperty from './css-custom-property.js';
+import type { StylableMeta } from '../stylable-meta.js';
+import { createDiagnosticReporter } from '../diagnostics.js';
+import { plugableRecord } from '../helpers/plugable-record.js';
+import { namespace } from '../helpers/namespace.js';
+import { globalValueFromFunctionNode, GLOBAL_FUNC } from '../helpers/global.js';
 import valueParser, { WordNode } from 'postcss-value-parser';
 import type * as postcss from 'postcss';
 

@@ -1,6 +1,6 @@
 import { loadStylableConfig } from '@stylable/build-tools';
-import type { BuildOptions } from '../types';
-import { tryRun } from '../build-tools';
+import type { BuildOptions } from '../types.js';
+import { tryRun } from '../build-tools.js';
 import type {
     Configuration,
     ConfigurationProvider,
@@ -9,10 +9,10 @@ import type {
     ResolveProjectsContext,
     ResolveRequests,
     STCProjects,
-} from '../types';
-import { processProjects } from './process-projects';
-import { createDefaultOptions, mergeBuildOptions, validateOptions } from './resolve-options';
-import { resolveNpmRequests } from './resolve-requests';
+} from '../types.js';
+import { processProjects } from './process-projects.js';
+import { createDefaultOptions, mergeBuildOptions, validateOptions } from './resolve-options.js';
+import { resolveNpmRequests } from './resolve-requests.js';
 import type { StylableConfig } from '@stylable/core';
 import type { IFileSystem } from '@file-services/types';
 

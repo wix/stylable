@@ -1,5 +1,5 @@
 import { expect } from 'chai';
-import { testLangService } from '../../test-kit/test-lang-service';
+import { testLangService } from '../../test-kit/test-lang-service.js';
 
 describe('LS: st-structure', () => {
     // ToDo: refactor legacy flat mode tests cases here

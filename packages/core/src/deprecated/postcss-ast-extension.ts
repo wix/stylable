@@ -1,4 +1,4 @@
-import { setFieldForDeprecation, ignoreDeprecationWarn } from '../helpers/deprecation';
+import { setFieldForDeprecation, ignoreDeprecationWarn } from '../helpers/deprecation.js';
 import { Rule } from 'postcss';
 
 /**

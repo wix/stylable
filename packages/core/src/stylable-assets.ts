@@ -1,6 +1,6 @@
 import path from 'path';
 import type * as postcss from 'postcss';
-import { processDeclarationFunctions } from './process-declaration-functions';
+import { processDeclarationFunctions } from './process-declaration-functions.js';
 
 function isExternal(url: string) {
     return url === '' || url.startsWith('data:') || isUrl(url);

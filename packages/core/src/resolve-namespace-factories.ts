@@ -1,5 +1,5 @@
-import { murmurhash3_32_gc } from './murmurhash';
-import type { processNamespace } from './stylable-processor';
+import { murmurhash3_32_gc } from './murmurhash.js';
+import type { processNamespace } from './stylable-processor.js';
 
 /** @deprecated use createNamespaceStrategy */
 export function packageNamespaceFactory(

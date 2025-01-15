@@ -1,7 +1,7 @@
 import { StylableProjectRunner } from '@stylable/e2e-test-kit';
 import { expect } from 'chai';
 import { dirname, join } from 'path';
-import { getSheetContentAndHash } from './utils';
+import { getSheetContentAndHash } from './utils.js';
 
 const project = 'metadata-loader-case';
 const projectDir = dirname(

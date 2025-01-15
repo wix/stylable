@@ -1,4 +1,4 @@
-import fs from '@file-services/node';
+import { nodeFs as fs } from '@file-services/node';
 import { relative, join, isAbsolute, dirname } from 'path';
 import type { Plugin, PluginBuild } from 'esbuild';
 import {
@@ -12,8 +12,8 @@ import { resolveNamespace as resolveNamespaceNode } from '@stylable/node';
 import { collectImportsWithSideEffects } from '@stylable/build-tools';
 import { resolveConfig, buildDTS } from '@stylable/cli';
 import type { DiagnosticsMode } from '@stylable/core/dist/index-internal';
-import { buildCache } from './build-cache';
-import { wrapDebug } from './debug';
+import { buildCache } from './build-cache.js';
+import { wrapDebug } from './debug.js';
 import {
     applyDefaultOptions,
     debounce,
@@ -31,7 +31,7 @@ import {
     buildUsageMapping,
     sortMarkersByDepth,
     IdForPath,
-} from './plugin-utils';
+} from './plugin-utils.js';
 
 export interface ESBuildOptions {
     /**

@@ -5,24 +5,24 @@ import postcssValueParser, {
 } from 'postcss-value-parser';
 import cssesc from 'cssesc';
 import type { PseudoClass, SelectorList, SelectorNode } from '@tokey/css-selector-parser';
-import { createDiagnosticReporter, Diagnostics } from '../diagnostics';
+import { createDiagnosticReporter, Diagnostics } from '../diagnostics.js';
 import {
     parseSelectorWithCache,
     stringifySelector,
     convertToClass,
     convertToInvalid,
     convertToSelector,
-} from './selector';
-import { groupValues, listOptions } from './value';
-import { stripQuotation } from './string';
-import { evalDeclarationValue } from '../functions';
-import type { StylableMeta } from '../stylable-meta';
-import type { StylableResolver } from '../stylable-resolver';
-import type { ParsedValue } from '../types';
-import { CSSClass } from '../features';
-import { reservedFunctionalPseudoClasses } from '../native-reserved-lists';
+} from './selector.js';
+import { groupValues, listOptions } from './value.js';
+import { stripQuotation } from './string.js';
+import { evalDeclarationValue } from '../functions.js';
+import type { StylableMeta } from '../stylable-meta.js';
+import type { StylableResolver } from '../stylable-resolver.js';
+import type { ParsedValue } from '../types.js';
+import { CSSClass } from '../features/index.js';
+import { reservedFunctionalPseudoClasses } from '../native-reserved-lists.js';
 import { BaseAstNode, stringifyCSSValue } from '@tokey/css-value-parser';
-import { findCustomIdent, findNextCallNode } from './css-value-seeker';
+import { findCustomIdent, findNextCallNode } from './css-value-seeker.js';
 
 export interface MappedStates {
     [s: string]: StateParsedValue | string | TemplateStateParsedValue | null;

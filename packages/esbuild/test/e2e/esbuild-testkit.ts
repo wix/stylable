@@ -1,4 +1,4 @@
-import fs from '@file-services/node';
+import { nodeFs as fs } from '@file-services/node';
 import { createTempDirectorySync, runServer } from '@stylable/e2e-test-kit';
 import { BuildContext, BuildOptions, context, Plugin } from 'esbuild';
 import { readFileSync, symlinkSync, writeFileSync } from 'node:fs';

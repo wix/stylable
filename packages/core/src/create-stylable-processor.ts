@@ -1,9 +1,9 @@
-import { cachedProcessFile, CacheItem, MinimalFS } from './cached-process-file';
-import { cssParse, CssParser } from './parser';
-import { type processNamespace, StylableProcessor } from './stylable-processor';
-import type { StylableMeta } from './stylable-meta';
-import type { Diagnostics } from './diagnostics';
-import { defaultFeatureFlags, type FeatureFlags } from './features/feature';
+import { cachedProcessFile, CacheItem, MinimalFS } from './cached-process-file.js';
+import { cssParse, CssParser } from './parser.js';
+import { type processNamespace, StylableProcessor } from './stylable-processor.js';
+import type { StylableMeta } from './stylable-meta.js';
+import type { Diagnostics } from './diagnostics.js';
+import { defaultFeatureFlags, type FeatureFlags } from './features/feature.js';
 
 export function createStylableFileProcessor({
     fileSystem,

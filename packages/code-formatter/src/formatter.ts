@@ -1,7 +1,7 @@
 import { safeParse } from '@stylable/core/dist/index-internal';
 import { css, CSSBeautifyOptions } from 'js-beautify';
 import type { Root } from 'postcss';
-import { formatCSS, FormatOptions } from './format-css';
+import { formatCSS, FormatOptions } from './format-css.js';
 
 /* new experimental formatter */
 export function formatDocumentExperimental(source: string, options: Partial<FormatOptions>) {

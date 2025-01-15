@@ -1,4 +1,4 @@
-import { CompA } from '../compA/a';
+import { CompA } from '../compA/a.js';
 import { classes } from './b.st.css';
 
 export function CompB() {

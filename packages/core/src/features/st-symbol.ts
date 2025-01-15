@@ -1,16 +1,16 @@
-import { FeatureContext, createFeature } from './feature';
-import type { ImportSymbol } from './st-import';
-import type { VarSymbol } from './st-var';
-import type { ClassSymbol } from './css-class';
-import type { ElementSymbol } from './css-type';
-import type { CSSVarSymbol } from './css-custom-property';
-import type { KeyframesSymbol } from './css-keyframes';
-import type { LayerSymbol } from './css-layer';
-import type { ContainerSymbol } from './css-contains';
-import { plugableRecord } from '../helpers/plugable-record';
-import type { StylableMeta } from '../stylable-meta';
+import { FeatureContext, createFeature } from './feature.js';
+import type { ImportSymbol } from './st-import.js';
+import type { VarSymbol } from './st-var.js';
+import type { ClassSymbol } from './css-class.js';
+import type { ElementSymbol } from './css-type.js';
+import type { CSSVarSymbol } from './css-custom-property.js';
+import type { KeyframesSymbol } from './css-keyframes.js';
+import type { LayerSymbol } from './css-layer.js';
+import type { ContainerSymbol } from './css-contains.js';
+import { plugableRecord } from '../helpers/plugable-record.js';
+import type { StylableMeta } from '../stylable-meta.js';
 import type * as postcss from 'postcss';
-import { createDiagnosticReporter } from '../diagnostics';
+import { createDiagnosticReporter } from '../diagnostics.js';
 
 // SYMBOLS DEFINITION
 

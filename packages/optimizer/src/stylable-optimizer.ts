@@ -8,7 +8,7 @@ import {
 } from '@stylable/core/dist/index-internal';
 import { parseCssSelector, stringifySelectorAst, Selector, walk } from '@tokey/css-selector-parser';
 import postcss, { Root, Rule, Node, Comment } from 'postcss';
-import { NameMapper } from './name-mapper';
+import { NameMapper } from './name-mapper.js';
 import { transform } from 'lightningcss';
 
 const { booleanStateDelimiter } = STCustomState.delimiters;

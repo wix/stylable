@@ -4,7 +4,7 @@ import {
     collectImportsWithSideEffects,
     hasImportedSideEffects,
 } from '@stylable/build-tools';
-import { LOADER_NAME } from './plugin-utils';
+import { LOADER_NAME } from './plugin-utils.js';
 import { isAbsolute, join } from 'path';
 
 export function getReplacementTokenJSON(token: string) {

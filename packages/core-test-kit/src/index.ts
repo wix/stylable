@@ -5,7 +5,7 @@ export {
     findTestLocations,
     shouldReportNoDiagnostics,
     diagnosticBankReportToStrings,
-} from './diagnostics';
+} from './diagnostics.js';
 export {
     Config,
     File,
@@ -20,15 +20,15 @@ export {
     processSource,
     generateStylableEnvironment,
     createResolveExtendsResults,
-} from './generate-test-util';
-export { flatMatch } from './matchers/flat-match';
-export { matchCSSMatchers } from './matchers/match-css';
-export { matchAllRulesAndDeclarations, matchRuleAndDeclaration } from './match-rules';
-export { collectAst } from './collect-ast';
-export { testInlineExpects, testInlineExpectsErrors } from './inline-expectation';
-export { testStylableCore } from './test-stylable-core';
-export { deindent } from './deindent';
-export { MinimalDocument, MinimalElement } from './minimal-dom';
-export { createTempDirectorySync, copyDirectory } from './native-temp-dir';
-export { assertAtRule, assertComment, assertDecl, assertRule } from './postcss-node-asserts';
-export { spyCalls, logCalls } from './spy';
+} from './generate-test-util.js';
+export { flatMatch } from './matchers/flat-match.js';
+export { matchCSSMatchers } from './matchers/match-css.js';
+export { matchAllRulesAndDeclarations, matchRuleAndDeclaration } from './match-rules.js';
+export { collectAst } from './collect-ast.js';
+export { testInlineExpects, testInlineExpectsErrors } from './inline-expectation.js';
+export { testStylableCore } from './test-stylable-core.js';
+export { deindent } from './deindent.js';
+export { MinimalDocument, MinimalElement } from './minimal-dom.js';
+export { createTempDirectorySync, copyDirectory } from './native-temp-dir.js';
+export { assertAtRule, assertComment, assertDecl, assertRule } from './postcss-node-asserts.js';
+export { spyCalls, logCalls } from './spy.js';

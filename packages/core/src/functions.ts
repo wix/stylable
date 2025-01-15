@@ -1,22 +1,26 @@
 import { dirname, relative } from 'path';
 import postcssValueParser from 'postcss-value-parser';
 import type * as postcss from 'postcss';
-import { createDiagnosticReporter, Diagnostics } from './diagnostics';
-import { nativeFunctionsDic } from './native-reserved-lists';
-import { assureRelativeUrlPrefix } from './stylable-assets';
-import type { StylableMeta } from './stylable-meta';
+import { createDiagnosticReporter, Diagnostics } from './diagnostics.js';
+import { nativeFunctionsDic } from './native-reserved-lists.js';
+import { assureRelativeUrlPrefix } from './stylable-assets.js';
+import type { StylableMeta } from './stylable-meta.js';
 import {
     StylableResolver,
     createSymbolResolverWithCache,
     MetaResolvedSymbols,
-} from './stylable-resolver';
-import type { replaceValueHook, RuntimeStVar, StylableTransformer } from './stylable-transformer';
-import { getFormatterArgs, getStringValue, stringifyFunction } from './helpers/value';
-import { unescapeCSS } from './helpers/escape';
-import type { ParsedValue } from './types';
-import type { FeatureTransformContext } from './features/feature';
-import { CSSCustomProperty, STVar } from './features';
-import { unbox, CustomValueError } from './custom-values';
+} from './stylable-resolver.js';
+import type {
+    replaceValueHook,
+    RuntimeStVar,
+    StylableTransformer,
+} from './stylable-transformer.js';
+import { getFormatterArgs, getStringValue, stringifyFunction } from './helpers/value.js';
+import { unescapeCSS } from './helpers/escape.js';
+import type { ParsedValue } from './types.js';
+import type { FeatureTransformContext } from './features/feature.js';
+import { CSSCustomProperty, STVar } from './features/index.js';
+import { unbox, CustomValueError } from './custom-values.js';
 
 export interface EvalValueData {
     value: string;

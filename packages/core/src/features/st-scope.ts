@@ -1,9 +1,9 @@
-import { createFeature } from './feature';
-import { parseSelectorWithCache, scopeNestedSelector } from '../helpers/selector';
-import type { Stylable } from '../stylable';
+import { createFeature } from './feature.js';
+import { parseSelectorWithCache, scopeNestedSelector } from '../helpers/selector.js';
+import type { Stylable } from '../stylable.js';
 import type { ImmutablePseudoClass } from '@tokey/css-selector-parser';
 import * as postcss from 'postcss';
-import type { SRule } from '../deprecated/postcss-ast-extension';
+import type { SRule } from '../deprecated/postcss-ast-extension.js';
 
 export const diagnostics = {
     // INVALID_SCOPING: createDiagnosticReporter(

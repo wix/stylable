@@ -1,23 +1,23 @@
-import { plugableRecord } from '../helpers/plugable-record';
-import { FeatureContext, createFeature } from './feature';
-import type { StylableMeta } from '../stylable-meta';
-import * as STSymbol from './st-symbol';
-import * as STCustomSelector from './st-custom-selector';
-import * as STCustomState from './st-custom-state';
-import type { MappedStates } from './st-custom-state';
-import * as CSSClass from './css-class';
-import { warnOnce } from '../helpers/deprecation';
+import { plugableRecord } from '../helpers/plugable-record.js';
+import { FeatureContext, createFeature } from './feature.js';
+import type { StylableMeta } from '../stylable-meta.js';
+import * as STSymbol from './st-symbol.js';
+import * as STCustomSelector from './st-custom-selector.js';
+import * as STCustomState from './st-custom-state.js';
+import type { MappedStates } from './st-custom-state.js';
+import * as CSSClass from './css-class.js';
+import { warnOnce } from '../helpers/deprecation.js';
 import postcss from 'postcss';
 import { parseCSSValue, stringifyCSSValue, BaseAstNode } from '@tokey/css-value-parser';
-import { parseSelectorWithCache, walkSelector } from '../helpers/selector';
+import { parseSelectorWithCache, walkSelector } from '../helpers/selector.js';
 import {
     ImmutableSelector,
     stringifySelectorAst,
     ImmutablePseudoClass,
     ImmutableSelectorList,
 } from '@tokey/css-selector-parser';
-import { createDiagnosticReporter } from '../diagnostics';
-import { getAlias } from '../stylable-utils';
+import { createDiagnosticReporter } from '../diagnostics.js';
+import { getAlias } from '../stylable-utils.js';
 import {
     findAnything,
     findFatArrow,
@@ -25,7 +25,7 @@ import {
     findNextPseudoClassNode,
     findPseudoElementNode,
     isExactLiteral,
-} from '../helpers/css-value-seeker';
+} from '../helpers/css-value-seeker.js';
 
 export const diagnostics = {
     GLOBAL_MAPPING_LIMITATION: createDiagnosticReporter(

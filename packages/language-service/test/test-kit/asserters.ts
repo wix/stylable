@@ -16,7 +16,7 @@ import { format } from '@stylable/language-service';
 import { ProviderPosition } from '@stylable/language-service/dist/lib/completion-providers';
 import { createMeta, ProviderLocation } from '@stylable/language-service/dist/lib/provider';
 import { pathFromPosition } from '@stylable/language-service/dist/lib/utils/postcss-ast-utils';
-import { CASES_PATH, stylableLSP } from './stylable-fixtures-lsp';
+import { CASES_PATH, stylableLSP } from './stylable-fixtures-lsp.js';
 
 export function getCaretPosition(src: string) {
     const caretPos = src.indexOf('|');

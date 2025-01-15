@@ -1,4 +1,4 @@
-import { ProjectRunner } from './project-runner';
+import { ProjectRunner } from './project-runner.js';
 
 export class StylableProjectRunner extends ProjectRunner {
     protected loadWebpackConfig() {

@@ -3,7 +3,7 @@ import {
     ProviderRange,
 } from '@stylable/language-service/dist/lib/completion-providers';
 import type { Completion } from '@stylable/language-service/dist/lib/completion-types';
-import * as asserters from '../../test-kit/completions-asserters';
+import * as asserters from '../../test-kit/completions-asserters.js';
 
 describe('Custom Selectors', () => {
     describe('Local Selectors', () => {

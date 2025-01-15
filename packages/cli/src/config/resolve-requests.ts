@@ -1,10 +1,10 @@
-import fs from '@file-services/node';
+import { nodeFs as fs } from '@file-services/node';
 import {
     INpmPackage,
     resolveWorkspacePackages,
     sortPackagesByDepth,
 } from '@wixc3/resolve-directory-context';
-import type { RawProjectEntity, ResolveRequests } from '../types';
+import type { RawProjectEntity, ResolveRequests } from '../types.js';
 
 export const resolveNpmRequests: ResolveRequests = (entities, { rootDir }) => {
     const entitiesMap = new Map<string, RawProjectEntity>();

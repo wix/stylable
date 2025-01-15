@@ -1,5 +1,5 @@
 import { createRange } from '@stylable/language-service/dist/lib/completion-providers';
-import * as asserters from '../../test-kit/completions-asserters';
+import * as asserters from '../../test-kit/completions-asserters.js';
 import {
     Completion,
     rulesetDirectives,

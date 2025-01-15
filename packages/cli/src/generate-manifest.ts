@@ -1,7 +1,7 @@
 import type { Stylable } from '@stylable/core';
 import { dirname, relative } from 'path';
-import { ensureDirectory, tryRun } from './build-tools';
-import type { Log } from './logger';
+import { ensureDirectory, tryRun } from './build-tools.js';
+import type { Log } from './logger.js';
 
 export function generateManifest(
     rootDir: string,

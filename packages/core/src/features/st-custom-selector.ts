@@ -1,15 +1,15 @@
-import { plugableRecord } from '../helpers/plugable-record';
-import { createFeature } from './feature';
+import { plugableRecord } from '../helpers/plugable-record.js';
+import { createFeature } from './feature.js';
 import {
     transformInlineCustomSelectorMap,
     transformInlineCustomSelectors,
     CustomSelectorMap,
-} from '../helpers/custom-selector';
-import { parseSelectorWithCache } from '../helpers/selector';
+} from '../helpers/custom-selector.js';
+import { parseSelectorWithCache } from '../helpers/selector.js';
 import * as postcss from 'postcss';
 import { SelectorList, stringifySelectorAst } from '@tokey/css-selector-parser';
-import type { StylableMeta } from '../stylable-meta';
-import { createDiagnosticReporter, Diagnostics } from '../diagnostics';
+import type { StylableMeta } from '../stylable-meta.js';
+import { createDiagnosticReporter, Diagnostics } from '../diagnostics.js';
 
 export const diagnostics = {
     UNKNOWN_CUSTOM_SELECTOR: createDiagnosticReporter(

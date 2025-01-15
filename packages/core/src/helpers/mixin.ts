@@ -1,6 +1,6 @@
-import { createDiagnosticReporter, DiagnosticBase, Diagnostics } from '../diagnostics';
-import { strategies, valueDiagnostics } from './value';
-import type { MixinValue } from '../features';
+import { createDiagnosticReporter, DiagnosticBase, Diagnostics } from '../diagnostics.js';
+import { strategies, valueDiagnostics } from './value.js';
+import type { MixinValue } from '../features/index.js';
 import type * as postcss from 'postcss';
 import postcssValueParser from 'postcss-value-parser';
 

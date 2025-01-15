@@ -1,8 +1,12 @@
 #!/usr/bin/env node
 import { nodeFs as fs } from '@file-services/node';
-import { buildStylable } from './build-stylable';
-import { createDefaultOptions, getCliArguments, resolveCliOptions } from './config/resolve-options';
-import { createLogger } from './logger';
+import { buildStylable } from './build-stylable.js';
+import {
+    createDefaultOptions,
+    getCliArguments,
+    resolveCliOptions,
+} from './config/resolve-options.js';
+import { createLogger } from './logger.js';
 
 const argv = getCliArguments();
 const { resolve } = fs;

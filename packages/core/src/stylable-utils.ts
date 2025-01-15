@@ -1,9 +1,9 @@
 import { isAbsolute } from 'path';
 import * as postcss from 'postcss';
-import { createDiagnosticReporter, Diagnostics } from './diagnostics';
-import type { ImportSymbol, StylableSymbol } from './features';
-import { isChildOfAtRule, stMixinMarker, isStMixinMarker } from './helpers/rule';
-import { scopeNestedSelector, parseSelectorWithCache } from './helpers/selector';
+import { createDiagnosticReporter, Diagnostics } from './diagnostics.js';
+import type { ImportSymbol, StylableSymbol } from './features/index.js';
+import { isChildOfAtRule, stMixinMarker, isStMixinMarker } from './helpers/rule.js';
+import { scopeNestedSelector, parseSelectorWithCache } from './helpers/selector.js';
 
 export function isValidDeclaration(decl: postcss.Declaration) {
     return typeof decl.value === 'string';

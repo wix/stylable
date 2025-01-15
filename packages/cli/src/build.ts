@@ -1,20 +1,20 @@
 import { fixRelativeUrls, tryCollectImportsDeep } from '@stylable/core/dist/index-internal';
-import type { BuildContext, BuildOptions, ModuleFormats } from './types';
-import { IndexGenerator as BaseIndexGenerator } from './base-generator';
-import { generateManifest } from './generate-manifest';
-import { handleAssets } from './handle-assets';
-import { buildSingleFile, removeBuildProducts } from './build-single-file';
-import { DirectoryProcessService } from './directory-process-service/directory-process-service';
-import { DiagnosticsManager } from './diagnostics-manager';
-import type { CLIDiagnostic } from './report-diagnostics';
-import { tryRun } from './build-tools';
-import { errorMessages, buildMessages } from './messages';
+import type { BuildContext, BuildOptions, ModuleFormats } from './types.js';
+import { IndexGenerator as BaseIndexGenerator } from './base-generator.js';
+import { generateManifest } from './generate-manifest.js';
+import { handleAssets } from './handle-assets.js';
+import { buildSingleFile, removeBuildProducts } from './build-single-file.js';
+import { DirectoryProcessService } from './directory-process-service/directory-process-service.js';
+import { DiagnosticsManager } from './diagnostics-manager.js';
+import type { CLIDiagnostic } from './report-diagnostics.js';
+import { tryRun } from './build-tools.js';
+import { errorMessages, buildMessages } from './messages.js';
 import postcss from 'postcss';
 import { sortModulesByDepth } from '@stylable/build-tools';
 import { StylableOptimizer } from '@stylable/optimizer';
 import type { Stylable } from '@stylable/core';
 import type { IFileSystem } from '@file-services/types';
-import { createWatchService } from './watch-service';
+import { createWatchService } from './watch-service.js';
 
 export function build(
     {

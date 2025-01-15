@@ -1,21 +1,21 @@
-import { createFeature, FeatureContext, FeatureTransformContext } from './feature';
-import { generalDiagnostics } from './diagnostics';
-import * as STSymbol from './st-symbol';
-import { plugableRecord } from '../helpers/plugable-record';
+import { createFeature, FeatureContext, FeatureTransformContext } from './feature.js';
+import { generalDiagnostics } from './diagnostics.js';
+import * as STSymbol from './st-symbol.js';
+import { plugableRecord } from '../helpers/plugable-record.js';
 import {
     parseStImport,
     parsePseudoImport,
     parseImportMessages,
     tryCollectImportsDeep,
-} from '../helpers/import';
-import { validateCustomPropertyName } from '../helpers/css-custom-property';
-import type { StylableMeta } from '../stylable-meta';
+} from '../helpers/import.js';
+import { validateCustomPropertyName } from '../helpers/css-custom-property.js';
+import type { StylableMeta } from '../stylable-meta.js';
 import path from 'path';
 import type { ImmutablePseudoClass, PseudoClass } from '@tokey/css-selector-parser';
 import type * as postcss from 'postcss';
-import { createDiagnosticReporter } from '../diagnostics';
-import type { Stylable } from '../stylable';
-import type { CachedModuleEntity } from '../stylable-resolver';
+import { createDiagnosticReporter } from '../diagnostics.js';
+import type { Stylable } from '../stylable.js';
+import type { CachedModuleEntity } from '../stylable-resolver.js';
 
 export interface ImportSymbol {
     _kind: 'import';

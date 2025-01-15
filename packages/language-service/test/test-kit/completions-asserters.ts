@@ -1,9 +1,9 @@
 import path from 'path';
-import fs from '@file-services/node';
+import { nodeFs as fs } from '@file-services/node';
 import { expect } from 'chai';
 import type { ProviderRange } from '@stylable/language-service/dist/lib/completion-providers';
 import { Completion, Snippet } from '@stylable/language-service/dist/lib/completion-types';
-import { CASES_PATH, stylableLSP } from './stylable-fixtures-lsp';
+import { CASES_PATH, stylableLSP } from './stylable-fixtures-lsp.js';
 import { LangServiceContext } from '@stylable/language-service/dist/lib-new/lang-service-context';
 
 function assertPresent(

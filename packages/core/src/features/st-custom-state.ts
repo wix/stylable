@@ -1,4 +1,4 @@
-import { createFeature } from './feature';
+import { createFeature } from './feature.js';
 import {
     stateDiagnostics,
     parsePseudoStates,
@@ -14,7 +14,7 @@ import {
     resolveStateParam,
     isTemplateState,
     MappedStates,
-} from '../helpers/custom-state';
+} from '../helpers/custom-state.js';
 
 export interface HasStates {
     '-st-states': MappedStates;

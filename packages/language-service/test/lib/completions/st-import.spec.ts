@@ -1,7 +1,7 @@
 import { expect } from 'chai';
 import { createRange } from '@stylable/language-service/dist/lib/completion-providers';
-import * as asserters from '../../test-kit/completions-asserters';
-import { getFormattingEdits } from '../../../test/test-kit/asserters';
+import * as asserters from '../../test-kit/completions-asserters.js';
+import { getFormattingEdits } from '../../../test/test-kit/asserters.js';
 
 describe('@st-import Directive', () => {
     it('should not complete :global inside @st-import (default)', () => {

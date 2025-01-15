@@ -1,17 +1,17 @@
 import { nodeFs } from '@file-services/node';
-import { buildStylable } from './build-stylable';
-import { DiagnosticsManager } from './diagnostics-manager';
-import { createLogger, Log } from './logger';
+import { buildStylable } from './build-stylable.js';
+import { DiagnosticsManager } from './diagnostics-manager.js';
+import { createLogger, Log } from './logger.js';
 import type { IFileSystem } from '@file-services/types';
-import type { DiagnosticMessages } from './report-diagnostics';
-import type { STCProjects } from './types';
-import type { WatchHandler } from './watch-handler';
+import type { DiagnosticMessages } from './report-diagnostics.js';
+import type { STCProjects } from './types.js';
+import type { WatchHandler } from './watch-handler.js';
 import {
     DiagnosticsMode,
     EmitDiagnosticsContext,
     reportDiagnostic,
 } from '@stylable/core/dist/index-internal';
-import { createWatchEvent } from './watch-service';
+import { createWatchEvent } from './watch-service.js';
 
 export type STCBuilderFileSystem = Pick<IFileSystem, 'existsSync' | 'realpathSync' | 'join'>;
 

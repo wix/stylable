@@ -1,6 +1,6 @@
 import { Diagnostic, Diagnostics } from '@stylable/core';
 import postcss, { parse, CssSyntaxError } from 'postcss';
-import type { CodeMod, ApplyCodeModsResult } from './types';
+import type { CodeMod, ApplyCodeModsResult } from './types.js';
 
 export function applyCodeMods(
     filePath: string,

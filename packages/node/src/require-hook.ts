@@ -1,9 +1,9 @@
 import type { StylableConfig } from '@stylable/core';
 import { validateDefaultConfig } from '@stylable/core/dist/index-internal';
 import { stylableModuleFactory } from '@stylable/module-utils';
-import fs from '@file-services/node';
-import { defaultStylableMatcher } from './common';
-import { resolveNamespace } from './resolve-namespace';
+import { nodeFs as fs } from '@file-services/node';
+import { defaultStylableMatcher } from './common.js';
+import { resolveNamespace } from './resolve-namespace.js';
 
 export interface Options {
     matcher: (filename: string) => boolean;

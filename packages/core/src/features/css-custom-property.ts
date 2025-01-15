@@ -1,23 +1,23 @@
-import { createFeature, FeatureContext, FeatureTransformContext } from './feature';
-import * as STSymbol from './st-symbol';
-import type { ImportSymbol } from './st-import';
+import { createFeature, FeatureContext, FeatureTransformContext } from './feature.js';
+import * as STSymbol from './st-symbol.js';
+import type { ImportSymbol } from './st-import.js';
 import {
     validateAtProperty,
     validateCustomPropertyName,
     generateScopedCSSVar,
     atPropertyValidationWarnings,
-} from '../helpers/css-custom-property';
-import type { Stylable } from '../stylable';
-import { validateAllowedNodesUntil, stringifyFunction } from '../helpers/value';
-import { globalValue, GLOBAL_FUNC } from '../helpers/global';
-import { plugableRecord } from '../helpers/plugable-record';
-import { createDiagnosticReporter, Diagnostics } from '../diagnostics';
-import type { StylableMeta } from '../stylable-meta';
+} from '../helpers/css-custom-property.js';
+import type { Stylable } from '../stylable.js';
+import { validateAllowedNodesUntil, stringifyFunction } from '../helpers/value.js';
+import { globalValue, GLOBAL_FUNC } from '../helpers/global.js';
+import { plugableRecord } from '../helpers/plugable-record.js';
+import { createDiagnosticReporter, Diagnostics } from '../diagnostics.js';
+import type { StylableMeta } from '../stylable-meta.js';
 import {
     type StylableResolver,
     type CSSResolve,
     createSymbolResolverWithCache,
-} from '../stylable-resolver';
+} from '../stylable-resolver.js';
 import type * as postcss from 'postcss';
 // ToDo: refactor out - parse once and pass to hooks
 import postcssValueParser, { WordNode } from 'postcss-value-parser';

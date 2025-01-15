@@ -35,8 +35,8 @@ import {
     isDependencyOf,
     normalizeNamespaceCollisionOption,
     getWebpackBuildMeta,
-} from './plugin-utils';
-import { injectCssModules } from './mini-css-support';
+} from './plugin-utils.js';
+import { injectCssModules } from './mini-css-support.js';
 import type {
     BuildData,
     EntryPoint,
@@ -45,11 +45,11 @@ import type {
     ResolveOptionsWebpackOptions,
     StylableBuildMeta,
     StylableLoaderContext,
-} from './types';
+} from './types.js';
 import { parse } from 'postcss';
-import { getWebpackEntities, StylableWebpackEntities } from './webpack-entities';
+import { getWebpackEntities, StylableWebpackEntities } from './webpack-entities.js';
 import { resolveConfig as resolveStcConfig, STCBuilder } from '@stylable/cli';
-import { createWebpackResolver } from './legacy-module-resolver';
+import { createWebpackResolver } from './legacy-module-resolver.js';
 
 type OptimizeOptions = OptimizeConfig & {
     minify?: boolean;

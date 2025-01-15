@@ -1,6 +1,6 @@
-import type { StylableMeta } from './stylable-meta';
-import type { Imported } from './features';
-import type { StylableResolver } from './stylable-resolver';
+import type { StylableMeta } from './stylable-meta.js';
+import type { Imported } from './features/index.js';
+import type { StylableResolver } from './stylable-resolver.js';
 
 export interface CSSDependency {
     kind: 'css';

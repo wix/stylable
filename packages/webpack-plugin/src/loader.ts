@@ -1,5 +1,5 @@
-import { getImports, getReplacementToken as rt } from './loader-utils';
-import type { StylableLoaderContext } from './types';
+import { getImports, getReplacementToken as rt } from './loader-utils.js';
+import type { StylableLoaderContext } from './types.js';
 import { emitDiagnostics } from '@stylable/core/dist/index-internal';
 import { generateStylableJSModuleSource } from '@stylable/core';
 

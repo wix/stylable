@@ -1,5 +1,5 @@
 import type { IFileSystem } from '@file-services/types';
-import { ensureDirectory } from './build-tools';
+import { ensureDirectory } from './build-tools.js';
 
 export function handleAssets(
     assets: Set<string>,

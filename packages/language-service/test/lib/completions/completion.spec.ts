@@ -1,8 +1,8 @@
 import { createRange } from '@stylable/language-service/dist/lib/completion-providers';
-import * as asserters from '../../test-kit/completions-asserters';
+import * as asserters from '../../test-kit/completions-asserters.js';
 import { expect } from 'chai';
-import { getCaretOffsetAndCleanContent } from '../../test-kit/asserters';
-import { getInMemoryLSP } from '../../test-kit/stylable-in-memory-lsp';
+import { getCaretOffsetAndCleanContent } from '../../test-kit/asserters.js';
+import { getInMemoryLSP } from '../../test-kit/stylable-in-memory-lsp.js';
 
 describe('Completions - file system fixtures', () => {
     describe('Stylesheet Top Level', () => {

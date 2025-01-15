@@ -1,6 +1,6 @@
 import { expect } from 'chai';
-import { rollupRunner } from './test-kit/rollup-runner';
-import { getProjectPath } from './test-kit/test-helpers';
+import { rollupRunner } from './test-kit/rollup-runner.js';
+import { getProjectPath } from './test-kit/test-helpers.js';
 import { deindent } from '@stylable/core-test-kit';
 
 describe('StylableRollupPlugin - include all stylesheets with side-effects', function () {

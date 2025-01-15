@@ -1,4 +1,4 @@
-import { matchDiagnostic } from './diagnostics';
+import { matchDiagnostic } from './diagnostics.js';
 import type { Diagnostic, StylableMeta } from '@stylable/core';
 import type * as postcss from 'postcss';
 

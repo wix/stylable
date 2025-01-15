@@ -1,7 +1,7 @@
-import type { ParsedValue } from '../types';
+import type { ParsedValue } from '../types.js';
 import postcssValueParser from 'postcss-value-parser';
 import type { Node as ValueNode } from 'postcss-value-parser';
-import { createDiagnosticReporter, DiagnosticBase } from '../diagnostics';
+import { createDiagnosticReporter, DiagnosticBase } from '../diagnostics.js';
 
 export type ReportWarning = (diagnostic: DiagnosticBase, options?: { word: string }) => void;
 

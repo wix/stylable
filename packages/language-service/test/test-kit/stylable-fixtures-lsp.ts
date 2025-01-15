@@ -1,4 +1,4 @@
-import fs from '@file-services/node';
+import { nodeFs as fs } from '@file-services/node';
 import path from 'path';
 import { Stylable } from '@stylable/core';
 import { safeParse } from '@stylable/core/dist/index-internal';

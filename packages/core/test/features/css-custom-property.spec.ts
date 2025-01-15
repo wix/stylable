@@ -8,7 +8,7 @@ import {
 } from '@stylable/core-test-kit';
 import chai, { expect } from 'chai';
 import chaiSubset from 'chai-subset';
-import type { StylableMeta } from '../../src';
+import type { StylableMeta } from '@stylable/core';
 
 chai.use(chaiSubset);
 

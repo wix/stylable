@@ -1,16 +1,16 @@
 import isVendorPrefixed from 'is-vendor-prefixed';
 import * as postcss from 'postcss';
-import type { FileProcessor } from './cached-process-file';
-import { createDiagnosticReporter, Diagnostics } from './diagnostics';
-import { StylableEvaluator } from './functions';
-import { nativePseudoElements } from './native-reserved-lists';
+import type { FileProcessor } from './cached-process-file.js';
+import { createDiagnosticReporter, Diagnostics } from './diagnostics.js';
+import { StylableEvaluator } from './functions.js';
+import { nativePseudoElements } from './native-reserved-lists.js';
 import {
     cloneSelector,
     createCombinatorSelector,
     parseSelectorWithCache,
     stringifySelector,
-} from './helpers/selector';
-import { isEqual } from './helpers/eql';
+} from './helpers/selector.js';
+import { isEqual } from './helpers/eql.js';
 import {
     SelectorNode,
     Selector,
@@ -20,8 +20,8 @@ import {
     splitCompoundSelectors,
     ImmutableSelectorNode,
 } from '@tokey/css-selector-parser';
-import { isChildOfAtRule } from './helpers/rule';
-import { getOriginDefinition } from './helpers/resolve';
+import { isChildOfAtRule } from './helpers/rule.js';
+import { getOriginDefinition } from './helpers/resolve.js';
 import {
     ClassSymbol,
     CSSContains,
@@ -42,18 +42,18 @@ import {
     CSSKeyframes,
     CSSLayer,
     CSSCustomProperty,
-} from './features';
-import type { StylableMeta } from './stylable-meta';
+} from './features/index.js';
+import type { StylableMeta } from './stylable-meta.js';
 import {
     CSSResolve,
     StylableResolverCache,
     StylableResolver,
     createSymbolResolverWithCache,
-} from './stylable-resolver';
-import { validateCustomPropertyName } from './helpers/css-custom-property';
-import type { ModuleResolver } from './types';
-import { getRuleScopeSelector } from './deprecated/postcss-ast-extension';
-import type { MappedStates } from './helpers/custom-state';
+} from './stylable-resolver.js';
+import { validateCustomPropertyName } from './helpers/css-custom-property.js';
+import type { ModuleResolver } from './types.js';
+import { getRuleScopeSelector } from './deprecated/postcss-ast-extension.js';
+import type { MappedStates } from './helpers/custom-state.js';
 
 export interface ResolvedElement {
     name: string;

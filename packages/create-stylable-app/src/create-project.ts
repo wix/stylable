@@ -3,7 +3,7 @@ import { promises } from 'node:fs';
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
 import validatePackageName from 'validate-npm-package-name';
-import { directoryDeepChildren, executeWithProgress, spawnSafe, statSafe } from './helpers';
+import { directoryDeepChildren, executeWithProgress, spawnSafe, statSafe } from './helpers.js';
 
 const templateDefinitionFileName = 'template.js';
 

@@ -1,9 +1,9 @@
 import type * as postcss from 'postcss';
-import { Diagnostics } from './diagnostics';
-import { knownPseudoClassesWithNestedSelectors } from './native-reserved-lists';
-import { StylableMeta } from './stylable-meta';
-import { CSSCustomProperty, STVar, STCustomSelector } from './features';
-import { generalDiagnostics } from './features/diagnostics';
+import { Diagnostics } from './diagnostics.js';
+import { knownPseudoClassesWithNestedSelectors } from './native-reserved-lists.js';
+import { StylableMeta } from './stylable-meta.js';
+import { CSSCustomProperty, STVar, STCustomSelector } from './features/index.js';
+import { generalDiagnostics } from './features/diagnostics.js';
 import {
     FeatureContext,
     STSymbol,
@@ -17,16 +17,16 @@ import {
     CSSLayer,
     CSSContains,
     STStructure,
-} from './features';
-import { processDeclarationFunctions } from './process-declaration-functions';
+} from './features/index.js';
+import { processDeclarationFunctions } from './process-declaration-functions.js';
 import {
     walkSelector,
     isInPseudoClassContext,
     parseSelectorWithCache,
     stringifySelector,
-} from './helpers/selector';
-import { isChildOfAtRule } from './helpers/rule';
-import { defaultFeatureFlags, type FeatureFlags } from './features/feature';
+} from './helpers/selector.js';
+import { isChildOfAtRule } from './helpers/rule.js';
+import { defaultFeatureFlags, type FeatureFlags } from './features/feature.js';
 
 export class StylableProcessor implements FeatureContext {
     public meta!: StylableMeta;

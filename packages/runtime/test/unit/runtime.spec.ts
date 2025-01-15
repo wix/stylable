@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-implied-eval */
 import { expect } from 'chai';
 import { injectCSS } from '@stylable/runtime';
-import { MicroDocument } from './micro-document';
+import { MicroDocument } from './micro-document.js';
 
 const testInjectCSS = new Function(
     'document',
