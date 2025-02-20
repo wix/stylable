@@ -25,22 +25,22 @@ describe(`(${project})`, () => {
 
         expect(chunkByName.Button).to.eql(
             [
-                'test-components/button.st.css',
-                'src/button.st.css',
                 'test-components/button.js',
+                'test-components/button.st.css',
                 'src/button.js',
+                'src/button.st.css',
             ],
             'Button',
         );
         expect(chunkByName.Gallery).to.eql(
             [
-                'test-components/label.st.css',
-                'src/gallery.st.css',
                 'test-components/label.js',
+                'test-components/label.st.css',
                 'src/gallery.js',
+                'src/gallery.st.css',
             ],
             'Gallery',
         );
-        expect(chunkByName.main).to.eql(['src/index.js', 'dist/index.mjs'], 'main');
+        expect(chunkByName.main).to.eql(['dist/index.mjs', 'src/index.js'], 'main');
     });
 });

@@ -25,24 +25,24 @@ describe(`(${project})`, () => {
 
         expect(chunkByName.entryA).to.eql(
             [
-                'test-components/badge.st.css',
-                'test-components/badge.js',
-                'src/index-a.js',
                 'dist/index.mjs',
+                'test-components/badge.js',
+                'test-components/badge.st.css',
+                'src/index-a.js',
             ],
             'entryA',
         );
         expect(chunkByName.entryB).to.eql(
             [
-                'test-components/badge.st.css',
-                'test-components/badge.js',
-                'src/index-b.js',
                 'dist/index.mjs',
+                'test-components/badge.js',
+                'test-components/badge.st.css',
+                'src/index-b.js',
             ],
             'entryB',
         );
         expect(chunkByName.dynamicSplit).to.eql(
-            ['test-components/text.st.css', 'test-components/text.js'],
+            ['test-components/text.js', 'test-components/text.st.css'],
             'dynamicSplit',
         );
     });
