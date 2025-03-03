@@ -14,8 +14,8 @@
   "dependencies": {
     "@file-services/node": "^9.4.1",
     "@stylable/core": "^6.1.1",
-    "@typescript-eslint/scope-manager": "^8.24.1",
-    "@typescript-eslint/utils": "^8.24.1",
+    "@typescript-eslint/scope-manager": "^8.26.0",
+    "@typescript-eslint/utils": "^8.26.0",
     "postcss-safe-parser": "^7.0.1"
   },
   "keywords": [
