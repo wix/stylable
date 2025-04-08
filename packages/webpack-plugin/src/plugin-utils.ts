@@ -385,7 +385,7 @@ export function findIfStylableModuleUsed(
     return isInUse;
 }
 
-export function getFileName(filename: string, data: Record<string, string | undefined>) {
+export function getFileName(filename: string, data: Record<string, string | undefined | null>) {
     return filename.replace(/\[(.*?)]/g, (fullMatch, inner) => {
         const [type, len] = inner.split(':');
         const value = data[type];

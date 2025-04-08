@@ -84,7 +84,7 @@ describe('Colors', () => {
 
             const res = getDocColorPresentation('colors/color-presentation.st.css', color, range);
 
-            expect(res.length).to.equal(4);
+            expect(res.length).to.equal(6);
             expect(res.filter((cp) => cp.label === 'rgba(0, 255, 0, 0.8)').length).to.equal(1);
         });
 
@@ -99,7 +99,7 @@ describe('Colors', () => {
 
             const res = getDocColorPresentation('colors/color-presentation.st.css', color, range);
 
-            expect(res.length).to.equal(4);
+            expect(res.length).to.equal(6);
             expect(res.filter((cp) => cp.label === 'rgba(0, 255, 0, 0.8)').length).to.equal(1);
         });
 
@@ -118,7 +118,7 @@ describe('Colors', () => {
                 range,
             );
 
-            expect(res.length).to.equal(4);
+            expect(res.length).to.equal(6);
             expect(res.filter((cp) => cp.label === 'rgba(0, 255, 0, 0.8)').length).to.equal(1);
         });
     });
