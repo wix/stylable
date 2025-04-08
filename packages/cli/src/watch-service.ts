@@ -1,5 +1,10 @@
-import type { IFileSystem, IWatchEvent } from '@file-services/types';
+import type { IFileSystem, IFileSystemStats } from '@file-services/types';
 import { watchDebounced, type DebouncedWatcher } from './watch-debounced.js';
+
+export interface IWatchEvent {
+    path: string;
+    stats: IFileSystemStats | null;
+}
 
 export interface WatchService {
     watchPath(path: string): void;

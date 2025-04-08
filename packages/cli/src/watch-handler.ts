@@ -1,4 +1,4 @@
-import type { IFileSystem, IWatchEvent } from '@file-services/types';
+import type { IFileSystem } from '@file-services/types';
 import type { Stylable } from '@stylable/core';
 import type { StylableResolverCache } from '@stylable/core/dist/index-internal';
 import type { BuildContext } from './types.js';
@@ -7,7 +7,7 @@ import { DirectoryProcessService } from './directory-process-service/directory-p
 import { createDefaultLogger, levels, Log } from './logger.js';
 import { buildMessages } from './messages.js';
 import { DiagnosticsManager } from './diagnostics-manager.js';
-import { createWatchEvent, type WatchService } from './watch-service.js';
+import { createWatchEvent, type WatchService, type IWatchEvent } from './watch-service.js';
 
 export interface WatchHandlerOptions {
     log?: Log;

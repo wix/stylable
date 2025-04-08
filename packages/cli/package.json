@@ -12,8 +12,8 @@
     "test": "mocha \"./dist/test/**/*.spec.js\""
   },
   "dependencies": {
-    "@file-services/node": "^9.4.1",
-    "@file-services/types": "^9.4.1",
+    "@file-services/node": "^10.0.1",
+    "@file-services/types": "^10.0.1",
     "@stylable/build-tools": "^6.1.1",
     "@stylable/code-formatter": "^6.1.1",
     "@stylable/core": "^6.1.1",
